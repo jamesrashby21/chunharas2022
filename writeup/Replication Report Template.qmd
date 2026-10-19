@@ -18,44 +18,48 @@ For this replication, I will need to reproduce the 2-AFC color wheel VWM task fr
 
 The first task I coded was much simpler than this, and was concerned mainly with precision of recording input, not precision with displaying stimuli, so working with changing stimuli on a screen will be new. In my original experiment, I also received a substantial amount of help with the code structure, debugging, and most of the work in HTML and CSS.
 
-Here is a link to the code and data from the paper: https://osf.io/qp6xk/?view_only=0559769c587c4c8294288451e8af239e
+I hope to improve my coding skills, and refresh my knowledge on these 4 languages I will be using. While this task is slightly different from my existing research, I wanted to use this new task to develop a work flow from start to finish. I would like to learn the proper pipeline for carrying out a project, including preregistering, coding organization, data collection, data formatting, analysis, and paper drafting. 
 
-Link to Repository: https://github.com/jamesrashby21/brady2022
+Here is a link to the data from the paper: https://osf.io/qp6xk/files/r2pgq?view_only=0559769c587c4c8294288451e8af239e
+
+Link to Replication Repository: https://github.com/jamesrashby21/chunharas2022
 
 Link to Replication Paper: https://dx.doi.org/10.1037/xlm0001014
 
 -------------------------------------------------------------------------------
 
-[No abstract is needed.]  Each replication project will have a straightforward, no frills report of the study and results.  These reports will be publicly available as supplementary material for the aggregate report(s) of the project as a whole.  Also, to maximize project integrity, the intro and methods will be written and critiqued in advance of data collection.  Introductions can be just 1-2 paragraphs clarifying the main idea of the original study, the target finding for replication, and any other essential information. You will likely contact the authors of the original study, so this should be professional and forward facing. It will NOT have a literature review -- that is in the original publication. You can write both the introduction and the methods in past tense.  
-
 
 ## Methods
 
+Link to original code: https://osf.io/qp6xk/?view_only=0559769c587c4c8294288451e8af239e
+
+Task will be coded in Javascript, HTML, and CSS, adapted to the SONA online platform. Data analysis and visualization will be done in R.
+
 ### Power Analysis
 
-Original effect size, power analysis for samples to achieve 80%, 90%, 95% power to detect that effect size.  Considerations of feasibility for selecting planned sample size.
+Effect size is not displayed in the original paper, but can be extrapolated from data and figures later. Power analysis needed to confirm viability of sample size.
 
 ### Planned Sample
 
-Planned sample size and/or termination rule, sampling frame, known demographics if any, preselection rules if any.
+The sample will consist of UC San Diego undergraduates, recruited via the SONA platform and compensated with class credit for their participation. The anticipated sample will be pre-screened to ensure they have normal or corrected-to-normal vision without color-blindness. The estimated size of the sample will be 50 people, which is only slightly more than the original population. The larger sample population is due to extraneous noise that can sometimes occur during online experiments among a student population. 
 
 ### Materials
 
-All materials - can quote directly from original article - just put the text in quotations and note that this was followed precisely.  Or, quote directly and just point out exceptions to what was described in the original article.
+All materials consist of the code for the task and the online SONA platform. There are exact directions on how to display the visual stimuli for the experiment.
 
 ### Procedure	
 
-Can quote directly from original article - just put the text in quotations and note that this was followed precisely.  Or, quote directly and just point out exceptions to what was described in the original article.
+Experimental procedure pulled from Chunharas, 2022: "Participants were shown two memory items for 150ms at two randomly selected placeholders in the display (out of 12 possible placeholders), with the restriction that there were always at least 2 empty placeholders between the two memory items. After a 750ms delay, a location cue (arrow) indicated which of the items was the memory target, and two response options appeared in the placeholders directly to the left and right of fixation. One of the response options was always the correct color (i.e. identical to the color that was cued), while the other option was always a foil, and participants made a 2-AFC judgment between the two response options. The foil always differed from the correct color by 6o in color space, either in the direction towards (50% of trials) or away (50% of trials) from the non-target memory item. The positions (left or right of fixation) of the correct and foil response options were completely randomized. There were 60 trials per condition (a total of 120 trials per participant)."
 
 ### Analysis Plan
 
-Can also quote directly, though it is less often spelled out effectively for an analysis strategy section.  The key is to report an analysis strategy that is as close to the original - data cleaning rules, data exclusion rules, covariates, etc. - as possible.  
+Data analysis will consist of simply running a paired samples t-test comparing accuracy between the two foil conditions in the 2-AFC task. 
 
-**Clarify key analysis of interest here**  You can also pre-specify additional analyses you plan to do.
+I also plan to visualize the data myself, and see if I can plot new figures if reaction time was recorded.
 
 ### Differences from Original Study
 
-Explicitly describe known differences in sample, setting, procedure, and analysis plan from original study.  The goal, of course, is to minimize those differences, but differences will inevitably occur.  Also, note whether such differences are anticipated to make a difference based on claims in the original article or subsequent published research on the conditions for obtaining the effect.
+There will be slight variations to this sample, in that the original sample consisted of individuals recruited from Amazon Mechanical Turk. We will differ in that this will likely be a younger, WEIRD-er, university student sample. Since we are talking about fundamental processing systems that constitute visual memory, I do not expect any differences in the results or conclusions, but I will need to ensure proper pre-screening to rule out color-blind participants.
 
 ### Methods Addendum (Post Data Collection)
 
