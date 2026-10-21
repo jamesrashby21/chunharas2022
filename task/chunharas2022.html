@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+ <head>
+   <!-- this is where we can load packages and files that we will use to help us build the experiment -->
+   <title>rt experiment</title>
+   <script src="https://unpkg.com/jspsych@8.0.0"></script>
+   <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.0.0"></script>
+   <link href="https://unpkg.com/jspsych@8.0.0/css/jspsych.css" rel="stylesheet" type="text/css" />   
+ </head>
+ <body>
+ </body>
+ <script>
+
+    // Initialize JSPsych
+    var jsPsych = initJsPsych();
+
+    // Define timeline
+   var timeline = [];
+
+   // Welcome message
+    var welcome = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: "Welcome to the experiment! Please press any key to begin."
+      };
+
+    // Push welcome to timeline
+    timeline.push(welcome);
+
+    // Run experiment
+    jsPsych.run(timeline);
+
+    
+ </script>
+</html>
