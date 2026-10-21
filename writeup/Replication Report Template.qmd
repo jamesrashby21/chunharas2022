@@ -57,6 +57,21 @@ Data analysis will consist of simply running a paired samples t-test comparing a
 
 I also plan to visualize the data myself, and see if I can plot new figures if reaction time was recorded.
 
+```
+setwd("~/yourWorkingDirectory/.../data_codes/R") # <- please change this to your own path
+
+#### EXP1 ####
+dat = 'EXP1_subj_fdist_fdirec_val.csv'
+datcsv = read.csv(dat, header = FALSE)
+colnames(datcsv) = c('subj','fdist','fdirec','val')
+
+datcsv$subj = as.factor(datcsv$subj)
+datcsv$fdirec = as.factor(datcsv$fdirec)
+
+# t-test 
+t.test(datcsv[datcsv$fdirec==-1,'val']-datcsv[datcsv$fdirec==1,'val'])
+``` 
+
 ### Differences from Original Study
 
 There will be slight variations to this sample, in that the original sample consisted of individuals recruited from Amazon Mechanical Turk. We will differ in that this will likely be a younger, WEIRD-er, university student sample. Since we are talking about fundamental processing systems that constitute visual memory, I do not expect any differences in the results or conclusions, but I will need to ensure proper pre-screening to rule out color-blind participants.
