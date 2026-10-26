@@ -12,44 +12,41 @@ format:
 
 ## Introduction
 
-I am largely interested in the study of memory from a cognitive perspective, as there is still much to explore about the features and boundaries of working memory in all forms. I have previously focused on much more rudimentary motor skill learning tasks, which have introduced me to creating my own web experiment with JavaScript, HTML, and CSS. With the paper I chose being focused on visual working memory (VWM), I feel sufficiently challenged by coding a completely different kind of paradigm in a format I'm partially familiar with. The first experiment in the paper yielded a very strong confirmation of repulsion as a VWM phenomenon, as the results showed participants were "better at rejecting a foil color that was distorted toward the non-target memory item than rejecting a foil color that was distorted away from the non-target memory item" (Chunharas, 2022).
+This experiment will be a replication of Chunharas & Brady, 2022[1]. The original focus of the paper was to elucidate properties of visual working memory. The goal of experiment 1 was to demonstrate repulsion as a functional memory distortion, when remembering a small set of very similar, yet distinguishable items (colors). Repulsion serves to make the representations of each color more distinct from one another while held in visual working memory. The first experiment in Chunharas, 2022 consisted of a two-alternative forced choice task (2-AFC) using a color wheel. Experiment 1 yielded very strong evidence for repulsion bias as a feature  visual working memory. Their results demonstrated participants were "better at rejecting a foil color that was distorted toward the non-target memory item than rejecting a foil color that was distorted away from the non-target memory item" (Chunharas, 2022).
 
-For this replication, I will need to reproduce the 2-AFC color wheel VWM task from Experiment 1 in an online format, able to be conducted on SONA. The task involves a continuous color wheel, where I will have to display 3 color samples from the wheel: one target color, and two adjacent colors 6º in color space away from the target. The participant will then be asked to choose the correct target from two colors, one of which will be a foil. For this task, I will have to re-code it in Javascript, HTML, and CSS, since the original experiment used MATLAB and Psychophysics toolbox. Thankfully, the first experiment was also conducted online, so the format will be perceptually indistinguishable for the participant. I can foresee many hurdles when reproducing this task in a different language, however by utilizing the "Stimuli & Procedure" section under Experiment 1, I will be able to make sure the task is identical in presentation. The post-hoc data analysis I will be conducting will be a paired t-tests on accuracy. The original results showed toward vs. away gave t(44)=3.98, p<.001, toward vs. chance gave t(44)=3.73, p=.006, and away vs. chance gave t(44)=-1.76, p=.08.
+For this replication, the experiment will consist of the same 2-AFC color wheel VWM task from Experiment 1 of Chunharas, 2022, able to be conducted online through the SONA platform. The task involves a continuous color wheel, where there will be 2 color samples displayed from the wheel: one "correct" color and one non-target color, 45º apart in color space from each other. The participant will then be asked to choose the correct target from two colors, one of which will be a foil either 6º towards the non-target or 6º away from the non-target (in relation to the correct color). The experiment was a within-subjects design where each condition was equally balanced, 60 trials of each type. I will have to re-code it in Javascript, HTML, and CSS, since the original experiment used MATLAB and Psychophysics toolbox. Thankfully, all of the paper's code was registered via OSF, including the original code for the task, participant data, and analysis code. Following data collection, data analysis will consist of a paired t-tests on accuracy. The original results showed toward vs. away gave t(44)=3.98, p<.001, toward vs. chance gave t(44)=3.73, p=.006, and away vs. chance gave t(44)=-1.76, p=.08.
 
-The first task I coded was much simpler than this, and was concerned mainly with precision of recording input, not precision with displaying stimuli, so working with changing stimuli on a screen will be new. In my original experiment, I also received a substantial amount of help with the code structure, debugging, and most of the work in HTML and CSS.
 
-I hope to improve my coding skills, and refresh my knowledge on these 4 languages I will be using. While this task is slightly different from my existing research, I wanted to use this new task to develop a work flow from start to finish. I would like to learn the proper pipeline for carrying out a project, including preregistering, coding organization, data collection, data formatting, analysis, and paper drafting. 
+OSF Link: https://osf.io/qp6xk/files/osfstorage?view_only=0559769c587c4c8294288451e8af239e
 
-Here is a link to the data from the paper: https://osf.io/qp6xk/files/r2pgq?view_only=0559769c587c4c8294288451e8af239e
+Replication Repository: https://github.com/jamesrashby21/chunharas2022
 
-Link to Replication Repository: https://github.com/jamesrashby21/chunharas2022
-
-Link to Replication Paper: https://dx.doi.org/10.1037/xlm0001014
+Replication Paper: https://dx.doi.org/10.1037/xlm0001014
 
 -------------------------------------------------------------------------------
 
 
 ## Methods
 
-Link to original code: https://osf.io/qp6xk/?view_only=0559769c587c4c8294288451e8af239e
-
-Task will be coded in Javascript, HTML, and CSS, adapted to the SONA online platform. Data analysis and visualization will be done in R.
+Replication task will be coded in Javascript, HTML, and CSS, adapted to the SONA online platform. With the help of one of the researchers, Dr. Tim Brady, I have obtained newly made JSPsych plugins developed after the original experiment that should make coding the 2-AFC color wheel task much easier. Data analysis and visualization will be done in R, and documented with Quarto.
 
 ### Power Analysis
 
-Effect size is not displayed in the original paper, but can be extrapolated from data and figures later. Power analysis needed to confirm viability of sample size.
+Effect size not displayed in the original paper, but can be extrapolated from data and figures later. Power analysis needed to confirm viability of sample size in order to achieve 80%, 90%, 95% power to detect the original effect size.
 
 ### Planned Sample
 
-The sample will consist of UC San Diego undergraduates, recruited via the SONA platform and compensated with class credit for their participation. The anticipated sample will be pre-screened to ensure they have normal or corrected-to-normal vision without color-blindness. The estimated size of the sample will be 50 people, which is only slightly more than the original population. The larger sample population is due to extraneous noise that can sometimes occur during online experiments among a student population. 
+The sample will consist of UC San Diego undergraduates, recruited via the SONA platform and compensated with class credit for their participation. The anticipated sample will be pre-screened to ensure normal or corrected-to-normal vision without any color-blindness. The estimated size of the sample will be 50 people, which is only slightly more than the original population. The larger sample population is due to extraneous noise that can sometimes occur during online experiments among a busy student population. 
 
 ### Materials
 
-All materials consist of the code for the task and the online SONA platform. There are exact directions on how to display the visual stimuli for the experiment.
+All materials consist of the code needed to recreate the task, and access to the online SONA platform.
 
 ### Procedure	
 
-Experimental procedure pulled from Chunharas, 2022: "Participants were shown two memory items for 150ms at two randomly selected placeholders in the display (out of 12 possible placeholders), with the restriction that there were always at least 2 empty placeholders between the two memory items. After a 750ms delay, a location cue (arrow) indicated which of the items was the memory target, and two response options appeared in the placeholders directly to the left and right of fixation. One of the response options was always the correct color (i.e. identical to the color that was cued), while the other option was always a foil, and participants made a 2-AFC judgment between the two response options. The foil always differed from the correct color by 6o in color space, either in the direction towards (50% of trials) or away (50% of trials) from the non-target memory item. The positions (left or right of fixation) of the correct and foil response options were completely randomized. There were 60 trials per condition (a total of 120 trials per participant)."
+The task was coded in HTML, CSS, and Javascript, using JSPsych plugins made by the UCSD Vision and Memory lab. The task display will consist of a 500x500 pixel white background with a 1 pixel wide, with a fixation cross in the center, surrounded by 12 small circular placeholders each centered at a distance of 120 pixels. Each placeholder should have a radius of 20 pixels, and will be 62 pixels apart when measuring center-to-center. There will be 6 placeholders on the left side of the screen, and 6 on the right. There are also two empty placeholders on the left and right of the cross, 35 pixels from fixation. Finally, the location probe on screen is a small equilateral black triangle, 20 pixels wide and 20 pixels tall.
+
+The task consisted of showing participants two colors on the color wheel, one "correct" color, and one non-target color, which will always be 45º away in color space from the correct color. There were also 2 empty placeholders between each of the two memory items. Following a 750ms delay, a location cue appears on screen identifying the correct color. This was followed by the two placeholders next to the fixation cross presenting two response options. One response was always the correct color, while the other was always a foil, which differed either by 6º toward the non-target color, or 6º away totaling 120 trials (60 trials each, balanced across conditions). The position of the correct color on either the left or right of the fixation cross was randomized. The participants were asked to select one of the two color choices on screen on either the left (Z key) or on the right (M key), before advancing.
 
 ### Analysis Plan
 
