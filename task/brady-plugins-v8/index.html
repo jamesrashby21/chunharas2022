@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3GD5TKWZBK"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-3GD5TKWZBK');
+</script>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>jsPsych plugins — UCSD Vision and Memory Lab</title>
+  <meta name="description" content="jsPsych v8 visual working-memory and perception plugins from the UCSD Vision and Memory Lab." />
+  <link rel="icon" href="favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,400;0,700;0,900&display=swap" rel="stylesheet" />
+  <link href="fonts.css" rel="stylesheet" type="text/css" />
+  <link href="responsive.css" rel="stylesheet" type="text/css" />
+  <link href="plugins-site.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+  <div class="sidebar">
+    <a href="https://bradylab.ucsd.edu/"><img src="images/mosaic_small.png" id="logo" alt="Vision and Memory Lab" /></a>
+    <h1 id="name"><a href="https://bradylab.ucsd.edu/" id="nameLink">the vision<br />and memory lab</a></h1>
+    <h2 class="section">jsPsych plugins</h2>
+    <button class="navToggle" aria-expanded="false" aria-controls="sidebarLinks" aria-label="Menu">&#9776;</button>
+    <ul id="sidebarLinks">
+      <li><a href="index.html" class="active">Overview</a></li>
+      <li><a href="showcase.html">Showcase</a></li>
+      <li><a href="reference.html">Reference</a></li>
+      <li><a href="tutorial.html">Tutorial</a></li>
+      <li><a href="example-experiment.html">Example study</a></li>
+      <li class="lab-sep"><a href="https://bradylab.ucsd.edu/resources.html">&larr; Lab resources</a></li>
+    </ul>
+    <p class="copyright">&copy; 2015&ndash;2026</p>
+  </div>
+
+  <div class="content">
+    <div class="header">
+      <h2>jsPsych&nbsp;v8 plugins</h2>
+    </div>
+    <div class="mainText" style="max-width:880px">
+      <p class="lead">Visual working-memory and perception plugins for jsPsych v8:
+        change detection, continuous report, forced choice, recognition, recall,
+        similarity judgments, and more. They share one color wheel (which you can swap)
+        and one set of helpers. Every trial records what was on screen, the response,
+        its timing and how long the response was held.</p>
+
+      <div class="cta"><b>New here?</b> Read <a href="tutorial.html#s0">Tutorial sections 0&ndash;2</a>
+        (getting the files, running them, the five ideas), then copy the
+        <a href="example-experiment.html">example study</a>
+        (<a href="tutorial.html#example-code">view its code</a>).
+        <br /><a href="brady-plugins-v8.zip" download><b>Download all files (.zip)</b></a>
+        &mdash; the plugins, the example study, sounds, sample images and the docs.</div>
+
+      <div class="cards">
+        <a class="card" href="showcase.html">
+          <div class="icon">&#9654;</div>
+          <h3>Interactive showcase</h3>
+          <p>Run every plugin live. Each demo lists the options it uses.</p>
+        </a>
+        <a class="card" href="reference.html">
+          <div class="icon">&#128209;</div>
+          <h3>Parameter reference</h3>
+          <p>Per-plugin tables of every parameter and data field, each with a live demo.</p>
+        </a>
+        <a class="card" href="tutorial.html">
+          <div class="icon">&#128214;</div>
+          <h3>Tutorial &amp; code examples</h3>
+          <p>How to build an experiment, with a code example for each plugin.</p>
+        </a>
+        <a class="card" href="example-experiment.html">
+          <div class="icon">&#129514;</div>
+          <h3>Example experiment</h3>
+          <p>A color change-detection study you can run and copy: instructions, practice, main block, thank-you, data.</p>
+        </a>
+      </div>
+
+      <h3 class="sec">Quick start</h3>
+      <ol>
+        <li><a href="brady-plugins-v8.zip" download>Download the .zip</a> and unzip it.</li>
+        <li>Put your experiment's <code>.html</code> file in that folder.</li>
+        <li>Load jsPsych v8 from a CDN, then the one file <code>brady-plugins.bundle.js</code>,
+          and use the plugins in a normal jsPsych timeline. (Or load single files in the order
+          <code>brady-color-wheel.js</code> &rarr; <code>brady-plugin-utils.js</code> &rarr;
+          <code>jspsych-*.js</code>; the similarity plugins also need
+          <code>similarity-adaptive-utils.js</code> before them.)</li>
+        <li>Run it through a local web server, not by double-clicking:
+          <a href="tutorial.html#s0-3">step-by-step for Windows and Mac</a>.</li>
+      </ol>
+      <p class="muted">The <a href="tutorial.html#s1">tutorial</a> has the full page skeleton,
+        an example for each plugin, <a href="tutorial.html#s6">saving</a> and
+        <a href="tutorial.html#s6-1">reading your data</a>, and a
+        <a href="tutorial.html#s7">troubleshooting table</a>.</p>
+
+      <h3 class="sec">The plugins</h3>
+      <ul>
+        <li><b>change-detection</b> — same/different memory (keyboard / buttons / radio; binary / confidence / two-stage; mask; noise)</li>
+        <li><b>2afc-keyboard</b> — perceptual forced choice over colors / images / words</li>
+        <li><b>continuous-report</b> — delayed estimation of color and/or orientation; disks, lines, triangles, Gabors, or gratings</li>
+        <li><b>continuous-image-report</b> — report on an image-morph wheel (sprite)</li>
+        <li><b>continuous-object-report</b> / <b>color-rotated-object</b> — report the color of hue-rotated real-object photos (several at once, or one)</li>
+        <li><b>object-orientation-report</b> — real objects studied rotated, then report orientation by spinning the probe</li>
+        <li><b>wm-forced-choice</b> — working memory tested by picking the studied item from 2 or more options</li>
+        <li><b>wm-pairs</b> — concentric two-color objects</li>
+        <li><b>noise-dots</b> · <b>recognition</b> (old/new) · <b>recall</b> · <b>spatial-report</b> · <b>rsvp</b></li>
+        <li><b>similarity-triad</b> / <b>similarity-quad</b> / <b>similarity-likert</b> — similarity judgments, with fixed or adaptively chosen trials</li>
+      </ul>
+      <p class="muted">The multi-item working-memory tasks can also show their items
+        one at a time in their placeholders (<code>sequential</code>).</p>
+
+      <p class="muted">More: <a href="README.md">README</a> (overview, what gets recorded, data quality,
+        the adaptive engine) ·
+        <a href="API.md">API.md</a> (the JavaScript you can call: adaptive engine, color wheels, helpers) ·
+        <a href="CHANGELOG.md">CHANGELOG.md</a> (changes by <code>plugin_version</code>) ·
+        <a href="CONVENTIONS.md">CONVENTIONS.md</a> (authoring/extending plugins) ·
+        <a href="tutorial.html#s8">plain-language glossary</a>.
+        Serve this folder from a web server to use these pages; the demos don't run from <code>file://</code>.</p>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var b = document.querySelector('.navToggle'); if (!b) return;
+      b.addEventListener('click', function () {
+        var o = document.body.classList.toggle('nav-open');
+        b.setAttribute('aria-expanded', o ? 'true' : 'false');
+      });
+    })();
+  </script>
+</body>
+</html>

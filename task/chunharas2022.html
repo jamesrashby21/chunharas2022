@@ -1,34 +1,135 @@
 <!DOCTYPE html>
-<html>
- <head>
-   <!-- this is where we can load packages and files that we will use to help us build the experiment -->
-   <title>rt experiment</title>
-   <script src="https://unpkg.com/jspsych@8.0.0"></script>
-   <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.0.0"></script>
-   <link href="https://unpkg.com/jspsych@8.0.0/css/jspsych.css" rel="stylesheet" type="text/css" />   
- </head>
- <body>
- </body>
- <script>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Example: color change-detection experiment</title>
 
-    // Initialize JSPsych
-    var jsPsych = initJsPsych();
+  <!-- jsPsych v8 core -->
+  <link rel="stylesheet" href="https://unpkg.com/jspsych@8/css/jspsych.css" />
 
-    // Define timeline
-   var timeline = [];
+  <!-- Lab look: favicon + fonts (matches bradylab.ucsd.edu) -->
+  <link rel="icon" href="favicon.ico" />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;700;900&display=swap" rel="stylesheet" />
+  <link href="fonts.css" rel="stylesheet" type="text/css" />
+  <style>
+    body, .jspsych-content { font-family: proxima-nova, "Source Sans Pro", Helvetica, sans-serif; color: #4D4D4D; }
+    h1, h2, h3 { font-family: "Source Sans Pro", sans-serif; color: #2b2b2b; }
+    .jspsych-btn { font-family: proxima-nova, sans-serif; }
+    a { color: navy; } a:hover { color: blue; }
+  </style>
+  <script src="https://unpkg.com/jspsych@8/dist/index.browser.min.js"></script>
 
-   // Welcome message
-    var welcome = {
-      type: jsPsychHtmlKeyboardResponse,
-      stimulus: "Welcome to the experiment! Please press any key to begin."
-      };
+  <!-- standard jsPsych plugins for the wrapper screens -->
+  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2/dist/index.browser.min.js"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-instructions@2/dist/index.browser.min.js"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-fullscreen@2/dist/index.browser.min.js"></script>
 
-    // Push welcome to timeline
-    timeline.push(welcome);
+  <!-- optional confetti feedback -->
+  <script src="https://unpkg.com/canvas-confetti@1.9.3/dist/confetti.browser.js"></script>
 
-    // Run experiment
-    jsPsych.run(timeline);
+  <!-- Brady-lab plugins: the color wheel, the shared helpers, then the plugin used here.
+       Or load everything with one line instead:
+         <script src="brady-plugins.bundle.js"></script>
+       (the wheel, the helpers, and all 17 plugins; built by build-bundle.js) -->
+  <script src="brady-color-wheel.js"></script>
+  <script src="brady-plugin-utils.js"></script>
+  <script src="jspsych-change-detection.js"></script>
+</head>
+<body></body>
+<script>
+/*
+ * A minimal color change-detection experiment, built from CDN jsPsych v8 and
+ * jspsych-change-detection.js. Flow:
+ *   fullscreen -> instructions -> practice (with feedback) -> main block -> thank you.
+ * Copy it and change the conditions, trial counts, and saving.
+ */
+const jsPsych = jsPsychModule.initJsPsych({
+  show_progress_bar: true,   // the "Completion Progress" bar at the top of the page
+  on_finish: () => {
+    // Runs after the last screen. While developing, show the data on the page.
+    // In a real study, save it here instead (TUTORIAL.md §6), e.g. download a CSV:
+    //   jsPsych.data.get().localSave("csv", "data_" + subjectId + ".csv");
+    jsPsych.data.displayData();
+  },
+});
 
-    
- </script>
+// Add the subject ID and task name to every row of data.
+const subjectId = jsPsych.randomization.randomID(8);
+jsPsych.data.addProperties({ subject: subjectId, task: "color-change-detection" });
+
+const timeline = [];
+
+// 1) Fullscreen (click to enter).
+timeline.push({ type: jsPsychFullscreen, fullscreen_mode: true });
+
+// 2) Instructions.
+timeline.push({
+  type: jsPsychInstructions,
+  pages: [
+    "<h2>Color memory</h2><p>Remember the colors of the circles.</p>" +
+      "<p>After a short delay, one circle comes back. Decide whether its color is the " +
+      "<b>same</b> or <b>different</b>.</p>",
+    "<p>Press <b>S</b> for <b>same</b>, <b>D</b> for <b>different</b>.</p>" +
+      "<p>Click the <b>+</b> to start each trial. We'll do a few practice trials first.</p>",
+  ],
+  show_clickable_nav: true,
+});
+
+// A block of change-detection trials, balanced over set size x change.
+// `phase` is saved with each trial so practice and main trials can be told apart.
+function block(repetitions, feedback, phase) {
+  return {
+    timeline: [{
+      type: jsPsychChangeDetection,
+      set_size: jsPsych.timelineVariable("set_size"),
+      is_change: jsPsych.timelineVariable("is_change"),
+      change_amount: 60,
+      display_time: 250,
+      delay_time: 1000,
+      response_ui: "keyboard",   // press S = same, D = different
+      response_mode: "binary",
+      feedback: feedback,        // right/wrong message and sound, confetti when correct
+      auto_zoom: true,
+      data: { phase: phase },
+    }],
+    timeline_variables: [
+      { set_size: 2, is_change: true },  { set_size: 2, is_change: false },
+      { set_size: 6, is_change: true },  { set_size: 6, is_change: false },
+    ],
+    randomize_order: true,
+    repetitions: repetitions,
+  };
+}
+
+// 3) Practice (feedback on).
+timeline.push({
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: "<p>Practice first. You'll see and hear whether each answer was right. Press any key to begin.</p>",
+});
+timeline.push(block(2, true, "practice")); // 2 x 4 = 8 practice trials
+
+// 4) Main block (feedback off).
+timeline.push({
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: "<p>Practice done. The real trials start now, without feedback. Press any key.</p>",
+});
+timeline.push(block(8, false, "main")); // 8 x 4 = 32 main trials
+
+// 5) Thank-you screen.
+timeline.push({
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: () => {
+    // jsPsych doesn't store trial options such as `feedback` in the data, so
+    // filter on the `phase` tag added in block().
+    const main = jsPsych.data.get().filter({ trial_type: "change-detection", phase: "main" });
+    const acc = Math.round(100 * main.filter({ correct: true }).count() / main.count());
+    return `<h2>All done! Thank you for taking part.</h2>` +
+           `<p>Accuracy on the main block: <b>${acc}%</b>.</p>` +
+           `<p>Press any key to finish (this example then shows its data).</p>`;
+  },
+});
+
+jsPsych.run(timeline);
+</script>
 </html>
