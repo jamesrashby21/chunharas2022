@@ -8,6 +8,8 @@ format:
     toc_depth: 3
 ---
 
+
+
 <!-- Replication reports should all use this template to standardize reporting across projects.  These reports will be public supplementary materials that accompany the summary report(s) of the aggregate results. -->
 
 ## Introduction
@@ -33,6 +35,57 @@ Replication task will be coded in Javascript, HTML, and CSS, adapted to the SONA
 ### Power Analysis
 
 Effect size not displayed in the original paper, but can be extrapolated from data and figures later. Power analysis needed to confirm viability of sample size in order to achieve 80%, 90%, 95% power to detect the original effect size.
+
+```{r}
+library(pwr)
+
+dat <- read.csv("EXP1.csv") # Load Data
+
+acc <- tapply(dat$correct, list(dat$subjects, dat$condition), mean) # Accuracy, per participant, per condition
+
+toward <- acc[, "-6"]   # Assign conditions
+away   <- acc[, "6"]
+diffs <- toward - away    # Difference Score: toward accuracy - away accuracy
+n     <- length(diffs)    # n = 45
+cat("Mean difference (toward - away):", round(mean(diffs), 3), "\n")
+cat("SD of differences:", round(sd(diffs), 3), "\n")
+
+tt <- t.test(toward, away, paired = TRUE)
+tt
+```
+
+```{r}
+dz <- mean(diffs) / sd(diffs) # Cohen's dz
+cat("Cohen's dz:", round(dz, 3), "\n")
+
+t_obs <- mean(diffs) / (sd(diffs) / sqrt(n))   # Observed t
+df    <- n - 1
+cat("Observed t:", round(t_obs, 3), "\n")
+
+f_lo <- function(ncp) pt(t_obs, df, ncp) - 0.975
+f_hi <- function(ncp) pt(t_obs, df, ncp) - 0.025
+
+ncp_lo <- uniroot(f_lo, interval = c(t_obs - 5, t_obs + 5), tol = 1e-8)$root
+ncp_hi <- uniroot(f_hi, interval = c(t_obs - 5, t_obs + 5), tol = 1e-8)$root
+
+dz_ci <- c(ncp_lo, ncp_hi) / sqrt(n)
+cat("95% CI for dz: [", round(dz_ci[1], 3), ",", round(dz_ci[2], 3), "]\n")
+```
+
+```{r}
+d_orig <- abs(dz)
+sizes  <- c(original = 1, smaller25 = .75, smaller50 = .5)
+
+res <- data.frame(d = d_orig * sizes)
+
+res$n_exact <- sapply(res$d, function(d)
+  pwr.t.test(d = d, power = .90, sig.level = .05,
+             type = "paired", alternative = "two.sided")$n)
+
+res$n_needed <- ceiling(res$n_exact)
+res
+```
+
 
 ### Planned Sample
 
