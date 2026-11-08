@@ -1,0 +1,155 @@
+/* plugins-site.css — component styles for the jsPsych-plugins pages, layered on
+   top of the shared responsive.css shell so these pages match bradylab.ucsd.edu.
+   Palette: text #4D4D4D, headings #585C60, links navy, accent #FF7800,
+   borders #E2E2E2 / #cecece. Fonts come from fonts.css (proxima-nova,
+   ff-meta-web-pro) + Source Sans Pro, exactly as the lab pages. */
+
+/* These pages are content-heavy: let the WHOLE page scroll as one. The shared
+   responsive.css makes the sidebar 100vh + overflow-y:auto, which on short
+   windows shows a second (confusing) scrollbar and looks like the content is
+   cut off. Override so the sidebar grows with its content and just sticks. */
+.sidebar { height: auto; min-height: 100vh; overflow: visible; }
+
+/* ----- sidebar: plugin-section nav ----- */
+.sidebar h2.section { font-size: 1.05rem; font-weight: 700; color: #585C60; }
+#sidebarLinks li a.active { color: #000; border-color: #FF7800; }
+#sidebarLinks li.lab-sep { padding-top: 22px; }
+#sidebarLinks li.lab-sep a { border: 0; padding: 0; color: navy; }
+#sidebarLinks li.lab-sep a:hover { color: blue; border: 0; }
+
+/* ----- generic content helpers ----- */
+.header h2 { color: #2b2b2b; }
+.lead { color: #585C60; font-size: 1.05rem; margin: 0 0 4px; }
+.content code, .mainText code, .app code {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  background: #f1eef7; color: #3a3a3a; padding: 1px 5px; border-radius: 3px; font-size: 90%;
+}
+.muted { color: #777; font-size: .92rem; }
+
+/* primary action button (uses the lab accent) */
+.btn {
+  display: inline-block; cursor: pointer; border: 0; border-radius: 6px;
+  background: #FF7800; color: #fff; font-family: proxima-nova, sans-serif;
+  font-size: .98rem; padding: 8px 18px; text-decoration: none;
+}
+.btn:hover { background: #e36c00; color: #fff; }
+
+/* ----- index / landing cards ----- */
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 6px 0 26px; }
+.card {
+  display: block; text-decoration: none; color: inherit; background: #fff;
+  border: 1px solid #E2E2E2; border-radius: 10px; padding: 16px 18px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.card:hover { border-color: #FF7800; box-shadow: 0 2px 10px rgba(0,0,0,.07); }
+.card h3 { margin: 0 0 5px; font-family: 'Source Sans Pro', sans-serif; font-size: 1.15rem; color: #2b2b2b; }
+.card p { margin: 0; font-size: .92rem; color: #585C60; }
+.card .icon { font-size: 20px; }
+@media (max-width: 620px) { .cards { grid-template-columns: 1fr; } }
+
+h3.sec { font-family: 'Source Sans Pro', sans-serif; color: #585C60; font-size: 1.15rem; margin: 26px 0 8px; }
+
+/* ----- two-pane app layout (showcase, reference) inside .content ----- */
+.app { display: flex; align-items: flex-start; gap: 0; }
+.app-nav {
+  flex: 0 0 320px; max-width: 340px; padding: 18px 18px 40px 50px; box-sizing: border-box;
+}
+.app-main { flex: 1 1 auto; min-width: 0; padding: 18px 50px 80px 24px; }
+@media (max-width: 980px) {
+  .app { display: block; }
+  .app-nav { flex-basis: auto; max-width: none; padding: 16px 20px 0; }
+  .app-main { padding: 16px 20px 60px; }
+}
+
+/* ----- showcase: full-width top-bar layout (no sidebar, so the stage is wide
+   enough to see the plugins and auto_zoom can fill the window) ----- */
+body.fullwidth { display: block; }            /* override responsive.css flex shell */
+.topbar {
+  display: flex; align-items: center; gap: 20px 28px; flex-wrap: wrap;
+  border-bottom: 1px solid #E2E2E2; padding: 12px 28px;
+}
+.topbar .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.topbar .brand img { width: 46px; height: auto; }
+.topbar .brand span {
+  font-family: 'Source Sans Pro', sans-serif; font-weight: 900; font-size: 1.15rem; color: #000; line-height: 1.05;
+}
+.topnav { display: flex; gap: 10px; flex-wrap: wrap; }
+.topnav a {
+  color: #777; border: 3px solid #cecece; border-radius: 30px; padding: 5px 14px;
+  text-decoration: none; font-size: .92rem; white-space: nowrap;
+}
+.topnav a:hover { color: #000; border-color: #777; }
+.topnav a.active { color: #000; border-color: #FF7800; }
+.topnav a.lab-back { border: 0; padding: 5px 4px; color: navy; }
+.topnav a.lab-back:hover { color: blue; }
+.picker { padding: 16px 28px 0; font-size: 1rem; color: #4D4D4D; }
+.picker select {
+  font-family: proxima-nova, sans-serif; font-size: 1rem; padding: 6px 10px;
+  border: 1px solid #cecece; border-radius: 6px; max-width: 460px; margin-left: 6px;
+}
+#stage { padding: 18px 28px 80px; }
+
+/* ----- showcase: alternate menu styles ----- */
+#menu .group h2 {
+  font-family: 'Source Sans Pro', sans-serif; font-size: 1rem; font-weight: 700;
+  color: #585C60; margin: 18px 0 6px;
+}
+.demo {
+  border: 1px solid #E2E2E2; border-radius: 8px; padding: 9px 12px; margin: 8px 0;
+  cursor: pointer; background: #fff;
+}
+.demo:hover { background: #fafafa; border-color: #FF7800; }
+.demo b { display: block; font-size: .9rem; color: #333; font-weight: 600; }
+#explain {
+  background: #faf9fc; border: 1px solid #E2E2E2; border-left: 4px solid #FF7800;
+  border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: .95rem; color: #4D4D4D;
+}
+#jspsych-target { min-height: 520px; display: flex; align-items: center; justify-content: center; }
+#results, #demo-results {
+  display: none;  /* shown by JS (style.display = "block") once a trial records data */
+  white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; box-sizing: border-box;
+  max-width: 100%; font-family: ui-monospace, Consolas, monospace; font-size: 12px;
+  background: #1e1e1e; color: #d4d4d4; padding: 12px; border-radius: 8px; margin-top: 16px;
+  max-height: 260px; overflow-y: auto; overflow-x: hidden;
+}
+
+/* ----- reference ----- */
+.refhead { padding: 14px 28px 2px; }
+.refhead h2 { font-family: 'Source Sans Pro', sans-serif; font-size: 1.6rem; color: #2b2b2b; margin: 0; }
+.app-nav.refnav { flex: 0 0 240px; padding-top: 18px; }
+
+.app-nav.refnav { padding-top: 24px; }
+.app-nav.refnav a {
+  display: block; padding: 7px 14px; font-size: .9rem; color: navy; text-decoration: none;
+  cursor: pointer; border-left: 3px solid transparent; border-radius: 0 4px 4px 0;
+}
+.app-nav.refnav a:hover { background: #faf9fc; color: blue; }
+.app-nav.refnav a.active { background: #fdf1e6; border-left-color: #FF7800; color: #000; font-weight: 700; }
+#main h2.plugname { font-family: 'Source Sans Pro', sans-serif; font-size: 1.7rem; color: #2b2b2b; margin: 0 0 4px; }
+#main .global { font-family: ui-monospace, Consolas, monospace; color: #777; font-size: .8rem; margin-bottom: 10px; }
+#main .desc { background: #faf9fc; border: 1px solid #E2E2E2; border-radius: 8px; padding: 10px 14px; font-size: .95rem; margin-bottom: 18px; }
+#demo-area { margin-top: 8px; min-height: 60px; }
+#demo-target { display: flex; align-items: center; justify-content: center; min-height: 60px; }
+table.params { border-collapse: collapse; width: 100%; font-size: .85rem; }
+table.params th, table.params td { border: 1px solid #E2E2E2; padding: 6px 9px; text-align: left; vertical-align: top; }
+table.params th { background: #faf9fc; color: #585C60; }
+table.params td.nm { font-family: ui-monospace, Consolas, monospace; white-space: nowrap; font-weight: 700; color: navy; }
+table.params td.ty { font-family: ui-monospace, Consolas, monospace; white-space: nowrap; color: #585C60; }
+table.params td.df { font-family: ui-monospace, Consolas, monospace; white-space: nowrap; color: #a33; }
+
+/* ----- tutorial (rendered markdown) ----- */
+#content { max-width: 46rem; }
+#content h1 { font-family: 'Source Sans Pro', sans-serif; font-size: 2rem; color: #2b2b2b; border-bottom: 2px solid #FF7800; padding-bottom: 6px; margin: 0 0 6px; }
+#content h2 { font-family: 'Source Sans Pro', sans-serif; font-size: 1.5rem; color: #585C60; margin-top: 34px; border-bottom: 1px solid #E2E2E2; padding-bottom: 4px; }
+#content h3 { font-family: 'Source Sans Pro', sans-serif; font-size: 1.2rem; color: #585C60; margin-top: 26px; }
+#content pre { background: #1e1e1e; border-radius: 8px; padding: 14px 16px; overflow: auto; }
+#content pre code { background: none; color: #d4d4d4; padding: 0; font-size: 13px; }
+#content table { border-collapse: collapse; margin: 12px 0; font-size: .9rem; }
+#content td, #content th { border: 1px solid #E2E2E2; padding: 6px 10px; text-align: left; vertical-align: top; }
+#content th { background: #faf9fc; }
+#content blockquote { border-left: 5px solid #FF7800; padding-left: 20px; margin-left: 0; color: #585C60; }
+.cta {
+  background: #fdf1e6; border: 1px solid #f3d4b3; border-radius: 8px;
+  padding: 12px 16px; margin: 0 0 22px; font-size: .95rem;
+}
+.cta a { color: navy; font-weight: 700; }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Example: color change-detection experiment</title>
+  <title>Color memory task</title>
 
   <!-- jsPsych v8 core -->
   <link rel="stylesheet" href="https://unpkg.com/jspsych@8/css/jspsych.css" />
@@ -17,119 +17,796 @@
     h1, h2, h3 { font-family: "Source Sans Pro", sans-serif; color: #2b2b2b; }
     .jspsych-btn { font-family: proxima-nova, sans-serif; }
     a { color: navy; } a:hover { color: blue; }
+    .consent-box { height: 380px; overflow: auto; border: 1px solid #ccc; padding: 8px 16px;
+                   text-align: justify; font-size: 14px; max-width: 760px; margin: 0 auto 16px; }
+    .irb-banner { background: #b00020; color: #fff; padding: 8px 12px; margin: 0 auto 12px; max-width: 760px;
+                  font-weight: 700; font-size: 14px; }
+    .instr { max-width: 640px; margin: 0 auto; text-align: left; font-size: 18px; line-height: 1.45; }
   </style>
   <script src="https://unpkg.com/jspsych@8/dist/index.browser.min.js"></script>
 
   <!-- standard jsPsych plugins for the wrapper screens -->
   <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2/dist/index.browser.min.js"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-button-response@2/dist/index.browser.min.js"></script>
   <script src="https://unpkg.com/@jspsych/plugin-instructions@2/dist/index.browser.min.js"></script>
   <script src="https://unpkg.com/@jspsych/plugin-fullscreen@2/dist/index.browser.min.js"></script>
 
-  <!-- optional confetti feedback -->
+  <!-- optional confetti feedback (only used if N_PRACTICE > 0) -->
   <script src="https://unpkg.com/canvas-confetti@1.9.3/dist/confetti.browser.js"></script>
 
   <!-- Brady-lab plugins: the color wheel, the shared helpers, then the plugin used here.
-       Or load everything with one line instead:
-         <script src="brady-plugins.bundle.js"></script>
-       (the wheel, the helpers, and all 17 plugins; built by build-bundle.js) -->
+       These files must sit in the SAME folder as this page. -->
   <script src="brady-color-wheel.js"></script>
   <script src="brady-plugin-utils.js"></script>
-  <script src="jspsych-change-detection.js"></script>
+  <script src="jspsych-wm-forced-choice.js"></script>
 </head>
 <body></body>
 <script>
 /*
- * A minimal color change-detection experiment, built from CDN jsPsych v8 and
- * jspsych-change-detection.js. Flow:
- *   fullscreen -> instructions -> practice (with feedback) -> main block -> thank you.
- * Copy it and change the conditions, trial counts, and saving.
+ * ============================================================================
+ *  Study 26BR00 -- replication of Chunharas & Brady (2022), EXPERIMENT 1
+ *  "Memory distortion vs. response strategy": remember two colors that are
+ *  45 deg apart in color space, then pick the cued item's color in a 2-AFC.
+ *  The wrong option (foil) is 6 deg from the correct color, either TOWARD or
+ *  AWAY from the uncued (non-target) color. 60 trials per condition = 120.
+ *
+ *  Built on the Brady-lab jsPsych v8 plugin `wm-forced-choice`, from the
+ *  chunharas2022.html boilerplate. Original task code: original_WMbias_2AFC.html
+ *  (OSF qp6xk). That file is reproduced, commented out, in the APPENDIX at the
+ *  bottom of this script, with its bug marked.
+ *
+ *  Flow: consent -> fullscreen -> instructions -> [practice] -> 120 trials -> save.
+ *
+ *  URL parameters (SONA fills in the participant's survey code):
+ *     ?subjectId=XXXX   (also accepted: ?id=XXXX or ?code=XXXX)
+ *     &test=1           test run: 8 trials, saved to the folder 26BR00_test
+ *
+ * ----------------------------------------------------------------------------
+ *  DISCREPANCY LOG  (paper vs. original code vs. this version)
+ *  Where the paper (Exp 1 Methods) and the original code disagree, this version
+ *  follows the PAPER, except for the color space (item 2).
+ *  1. BUG FIXED. The original froze which member of each location pair is the
+ *     target (see APPENDIX A, "BUG"), so a participant's probed locations were
+ *     lopsided (on average ~3 of 12 locations were never probed). Here the
+ *     target and non-target locations are drawn fresh on every trial.
+ *  2. Color space. Paper text: CIE L*a*b* L=70, a=20, b=38, radius=60 (Zhang &
+ *     Luck wheel). Original code (vismemCC.js angle2HEX): L=65, a=9, b=9,
+ *     radius=50, Rec.709 gamma. This file uses what the CODE did (the stimuli
+ *     participants actually saw), NOT the paper's values: pushed through the
+ *     same conversion, the paper's values put 201 of 360 hues outside the RGB
+ *     gamut (code's values: 56, tiny overshoot), so the wheel would be heavily
+ *     desaturated. Switch with COLOR_SPACE below to look at it; ask Tim first.
+ *  3. Item separation. Paper: always exactly 45 deg. Code: 45 deg plus an
+ *     independent uniform +/-3 deg jitter on each item (separation 39-51 deg).
+ *     Here: exactly 45 (HUE_JITTER_DEG = 0); set it to 3 to reproduce the code.
+ *     The actual separation is still saved on every trial (item_separation).
+ *  4. Item locations. Paper: two randomly chosen placeholders (of 12) with "at
+ *     least 2 empty placeholders" between them, i.e. 3 to 6 slots apart; no
+ *     hemifield restriction. Code: 12 fixed pairs, always exactly 3 slots (90
+ *     deg) apart. Here: the paper's rule (MIN_SLOT_GAP = 3). The TARGET location
+ *     is balanced (each of the 12 slots is probed 10 times, 5 toward / 5 away);
+ *     the non-target is drawn at random from the 7 allowed slots.
+ *  4b. Response options. Paper: centered +/-35 px from fixation. Code: +/-30 px.
+ *     Here: 35 px (OPTION_OFFSET_PX).
+ *  4c. Canvas. Paper: 500 px canvas with a 1 px border. Code: 400 px. The plugin's
+ *     box is 2*radius + 2*item_size + 40 = 360 px and cannot be set directly.
+ *     Ring radius (120), item radius (20) and 12 placeholders agree with the paper.
+ *     Padding the box to 500 px with CSS (stimuli unchanged) is possible but NOT
+ *     applied in this version.
+ *  5. Not in the paper, but in the code: a 2000 ms fixation interval with empty
+ *     placeholders before every array. Kept (PRE_ARRAY_MS).
+ *  6. 180-deg catch trials in the code belong to the Experiment 2 control
+ *     replication, not Experiment 1. Not used here (120 trials, not 132).
+ *  7. Look of the display now comes from the plugin: "+" fixation, a black ring
+ *     (instead of a triangle) marks the probed location, thin gray placeholder
+ *     outlines, 360 px box (code: 400 px canvas). Revisit with the lab.
+ * ============================================================================
  */
+
+// ============================================================================
+//  CONFIG
+// ============================================================================
+//
+//  >>> SEARCH THIS FILE FOR  "REVIEW"  <<<  to find every setting that was changed to follow the paper,
+//  that still disagrees with the paper or the original code, or that is an open question:
+//   REVIEW 1  HUE_JITTER_DEG      paper: exactly 45 deg (0). Original code: +/-3 deg jitter.  Now 0.
+//   REVIEW 2  MIN_SLOT_GAP        paper's location rule (>= 2 empty placeholders between items). Original: 12 fixed pairs 3 apart.
+//   REVIEW 3  buildTrialList()    HOW the allowed locations are sampled is my choice (paper only says "randomly selected").
+//   REVIEW 4  OPTION_OFFSET_PX    paper: 35 px. Original code: 30 px.  Now 35.
+//   REVIEW 5  COLOR_SPACE         paper's L/a/b/radius vs the code's. Now the CODE's (paper's values are mostly out of gamut). OPEN QUESTION.
+//   REVIEW 6  PRE_ARRAY_MS        2000 ms fixation before each array: in the original code, not mentioned in the paper.
+//   REVIEW 7  N_PRACTICE          original had no practice trials.  Now 0.
+//   REVIEW 8  show_progress_bar   progress bar at the top: NOT in the original.  Now on.
+//   REVIEW 9  cue_test_location   probe cue is a black ring (plugin); paper/original used a small black triangle.
+//   REVIEW 10 canvas size         paper 500 px, original 400 px, plugin box 360 px (set by ring radius + item size). Stimuli unchanged.
+//   REVIEW 11 IRB_CONSENT_FINAL, the payment paragraph, SONA_EXPERIMENT_ID, SONA_CREDIT_TOKEN   still to be filled in.
+//   REVIEW 12 EXPERIMENTER, SAVE_URL, EXPERIMENT_NAME   check that the data path is the one you want on the server.
+//   REVIEW 13 N_REPS / the balancing of target locations   design choice (each of 12 locations is the target 10 times).
+
+// ---- Where the data go (see save.php) ---------------------------------------
+// REVIEW 12: data go to data/26BR00/{id}.txt next to save.php. save.php only accepts EXPERIMENT_NAME "26BR00" (and "26BR00_test").
+const EXPERIMENT_NAME = "26BR00";
+const EXPERIMENTER    = "";           // optional extra folder: data/{EXPERIMENTER}/26BR00/. "" = data/26BR00/
+const SAVE_URL        = "save.php";   // relative to this page; change if save.php lives elsewhere
+
+// ---- SONA completion (fill in from the SONA study settings) -----------------
+// REVIEW 11: fill these in from the SONA study settings, otherwise participants are not redirected to receive credit.
+const SONA_EXPERIMENT_ID = null;      // e.g. 1234   (null = no redirect, just a "you can close this tab" message)
+const SONA_CREDIT_TOKEN  = null;      // e.g. "805f6634..."
+const SONA_CREDIT_URL    = "https://ucsd.sona-systems.com/webstudy_credit.aspx";
+const CONTACT_EMAIL      = "timbrady@ucsd.edu";   // from the original consent text; shown only if saving fails
+
+// ---- Consent --------------------------------------------------------------
+// The consent text below is the ORIGINAL MTurk text. Its payment paragraph must be replaced with the
+// IRB-approved SONA wording. While this is false a red banner is shown on the consent screen.
+// REVIEW 11: replace the payment paragraph in CONSENT_HTML with the IRB-approved SONA wording, then set this to true.
+const IRB_CONSENT_FINAL = false;
+
+// ---- Design (Experiment 1) ------------------------------------------------
+// REVIEW 13: 5 reps x 12 target locations x 2 foil directions = 120 trials. Each location is the target exactly 10 times.
+const N_REPS           = 5;     // x 12 target locations x 2 foil directions = 120 trials (60 per direction)
+const FOIL_OFFSET_DEG  = 6;     // foil is 6 deg from the correct color
+const COLOR_DIST_DEG   = 45;    // the two memory colors are 45 deg apart
+// REVIEW 1: paper = 0 (exactly 45 deg apart). Original code = 3. Changed to follow the paper.
+const HUE_JITTER_DEG   = 0;     // paper: none (exactly 45). The original code added independent uniform +/-3 deg per item: set 3 to reproduce
+// REVIEW 7: original had no practice trials. Set to e.g. 3 for practice trials with feedback.
+const N_PRACTICE       = 0;     // original had no practice trials (only the demo screens). >0 adds feedback trials
+const N_TEST_TRIALS    = 8;     // length of a ?test=1 run
+
+// Item locations (paper): any two of the 12 placeholders with at least 2 empty placeholders between them,
+// i.e. at least 3 slots apart around the ring (3-6 slots = 90-180 deg). No hemifield restriction.
+// (The original code instead used 12 fixed pairs exactly 3 slots apart -- see APPENDIX A.)
+// REVIEW 2: paper's rule = 3 (>= 2 empty placeholders between the items, so 3-6 slots apart). Original code: pairs exactly 3 apart (set
+//           MIN_SLOT_GAP = 3 and restrict to gap 3 in validNontargetSlots() to reproduce that). 4 would drop the 90-deg separations.
+const MIN_SLOT_GAP = 3;
+
+// ---- Timing (ms) ----------------------------------------------------------
+const STIM_DUR_MS  = 150;       // memory array
+const DELAY_MS     = 750;       // blank retention interval
+// REVIEW 6: 2000 ms is from the original code (initTime). The paper does not mention a fixation interval before the array.
+const PRE_ARRAY_MS = 2000;      // empty placeholders + fixation before each array (code: initTime)
+
+// ---- Geometry (px) --------------------------------------------------------
+const NUM_PLACEHOLDERS      = 12;
+const RING_RADIUS_PX        = 120;   // code: objDist
+const ITEM_SIZE_PX          = 40;    // diameter (code: objSize = 20 radius)
+// REVIEW 4: paper = 35 px, original code = 30 px. Changed to follow the paper.
+const OPTION_OFFSET_PX      = 35;    // each response option sits this far left/right of fixation (paper: 35; original code tstDist: 30)
+const CIRC_ROT_RAD          = 5.5;   // the code rotates the ring by 5.5 rad; the plugin's equivalent is derived below
+// REVIEW 10: the plugin's box is 2*RING_RADIUS_PX + 2*ITEM_SIZE_PX + 40 = 360 px (paper 500 px, original code 400 px); ring radius and item size match the paper.
+const AUTO_ZOOM             = false; // false = true pixel sizes as in the original; true = scale the box to the window
+
+// ---- Color space ----------------------------------------------------------
+const COLOR_SPACES = {
+  code:  { name: "code-L65-a9-b9-r50",    L: 65, a0: 9,  b0: 9,  radius: 50 },   // what angle2HEX in vismemCC.js does
+  paper: { name: "paper-L70-a20-b38-r60", L: 70, a0: 20, b0: 38, radius: 60 },   // what the paper's Methods say
+};
+// REVIEW 5 (OPEN QUESTION): the code's wheel is used. The paper's values pushed through this conversion put 201 of 360 hues outside the RGB
+//           gamut (code's: 56, tiny overshoot). Switch to COLOR_SPACES.paper to look at it, but ask Tim which wheel participants saw.
+const COLOR_SPACE = COLOR_SPACES.code;
+
+// Keys: left / right option, by screen position.
+const KEY_LEFT = "z", KEY_RIGHT = "m";
+
+// ============================================================================
+//  Small helpers
+// ============================================================================
+const params     = new URLSearchParams(window.location.search);
+const TEST_MODE  = params.get("test") === "1";
+const SAVE_NAME  = TEST_MODE ? EXPERIMENT_NAME + "_test" : EXPERIMENT_NAME;   // save.php only accepts these two names
+
+const wrap360 = (x) => ((x % 360) + 360) % 360;
+const signedDiff = (a, b) => { const d = wrap360(a - b); return d > 180 ? d - 360 : d; };   // a - b in (-180, 180]
+
+// Fisher-Yates on a COPY. (The original shuffled arrays in place -- see APPENDIX A, BUG.)
+function shuffleCopy(arr, rng) {
+  rng = rng || Math.random;
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ============================================================================
+//  Color conversion: a line-by-line port of angle2HEX() in vismemCC.js
+//  hue angle (deg) -> a circle in CIE L*a*b* -> XYZ -> linear RGB (desaturate to
+//  fit the gamut instead of clipping) -> Rec.709 gamma -> "#rrggbb"
+// ============================================================================
+function hueToHex(angleDeg, cs) {
+  cs = cs || COLOR_SPACE;
+  const w = angleDeg * (Math.PI / 180);
+  const L = cs.L, a = cs.a0 + cs.radius * Math.cos(w), b = cs.b0 + cs.radius * Math.sin(w);
+  const white = [0.950456, 1, 1.088754];
+  const fY = (L + 16) / 116, fX = fY + a / 500, fZ = fY - b / 200;
+  const invf = (f) => { const Y = Math.pow(f, 3); return Y < 0.008856 ? (f - 4 / 29) * (108 / 841) : Y; };
+  const X = white[0] * invf(fX), Y = white[1] * invf(fY), Z = white[2] * invf(fZ);
+  let R =  3.240479 * X - 1.53715  * Y - 0.498535 * Z;
+  let G = -0.969256 * X + 1.875992 * Y + 0.041556 * Z;
+  let B =  0.055648 * X - 0.204043 * Y + 1.057311 * Z;
+  const addWhite = -Math.min(R, G, B, 0);
+  const scale = Math.max(Math.max(R, G, B) + addWhite, 1);
+  R = (R + addWhite) / scale; G = (G + addWhite) / scale; B = (B + addWhite) / scale;
+  const gamma = (c) => (c < 0.018 ? 4.5138 * c : 1.099 * Math.pow(c, 0.45) - 0.099);
+  const hex = (c) => {
+    const v = Math.min(255, Math.max(0, Math.round(255 * gamma(c))));
+    return (v < 16 ? "0" : "") + v.toString(16);
+  };
+  return "#" + hex(R) + hex(G) + hex(B);
+}
+
+// A named 360-entry wheel so the plugin records WHICH color space was used (color_wheel_name).
+// The stimuli themselves are passed as exact "#rrggbb" strings (the original used non-integer angles).
+const STUDY_WHEEL = (function () {
+  const colors = [];
+  for (let d = 0; d < 360; d++) {
+    const h = hueToHex(d);
+    colors.push([parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]);
+  }
+  return window.BradyColorWheel.make(colors, COLOR_SPACE.name);
+})();
+
+// ============================================================================
+//  Geometry: the plugin's slot i <-> the original code's position i
+//  Original: x = cx - R*cos(theta_i + rot), y = cy + R*sin(theta_i + rot), theta_i = 2*pi*i/12
+//  Plugin:   x = cx + R*sin(2*pi*i/12 + offset), y = cy + R*cos(2*pi*i/12 + offset)
+//  These agree when offset = rot - pi/2 (verified numerically in the test run).
+// ============================================================================
+const POSITION_ANGLE_OFFSET_RAD = CIRC_ROT_RAD - Math.PI / 2;
+const POSITION_ANGLE_OFFSET_DEG = POSITION_ANGLE_OFFSET_RAD * 180 / Math.PI;
+const slotSide = (slot) =>
+  (Math.sin(2 * Math.PI * slot / NUM_PLACEHOLDERS + POSITION_ANGLE_OFFSET_RAD) > 0 ? "right" : "left");
+
+// ============================================================================
+//  TRIAL LIST  (this is the FIXED version of the original trial generation)
+//
+//  One "cell" = (target location) x (foil direction) x (repetition): 12 x 2 x 5 = 120,
+//  so every one of the 12 locations is probed exactly 10 times (5 toward, 5 away).
+//  Cells are shuffled into a random order. For each trial:
+//    - the NON-target location is drawn at random from the slots that leave at least
+//      2 empty placeholders between the items (MIN_SLOT_GAP; 7 of the other 11 slots)
+//    - target color = random hue; non-target = +/-45 deg from it (+ jitter, 0 by default)
+//    - foil = target color shifted 6 deg toward or away from the non-target
+//  Compare APPENDIX A (original), where the target/non-target assignment of
+//  each location pair never changed within a session.
+// ============================================================================
+const slotGap = (a, b) => { const d = Math.abs(a - b) % NUM_PLACEHOLDERS; return Math.min(d, NUM_PLACEHOLDERS - d); };   // 0-6 around the ring
+const validNontargetSlots = (target) => {
+  const out = [];
+  for (let s = 0; s < NUM_PLACEHOLDERS; s++) if (slotGap(target, s) >= MIN_SLOT_GAP) out.push(s);
+  return out;
+};
+
+// REVIEW 3: the paper only says the two placeholders were "randomly selected" with >= 2 empty between them. Here the target location is balanced
+// (10 times each) and the non-target is uniform among the 7 allowed slots. Fully random target locations is the other reading of the paper.
+function buildTrialList(nPerCell, rng) {
+  rng = rng || Math.random;
+  const cells = [];
+  for (let rep = 0; rep < nPerCell; rep++)
+    for (const foilDir of ["toward", "away"])
+      for (let s = 0; s < NUM_PLACEHOLDERS; s++) cells.push({ targetSlot: s, foilDir: foilDir });
+
+  const jitter = () => (rng() * 2 - 1) * HUE_JITTER_DEG;   // uniform in [-J, +J]; 0 if J = 0
+  return shuffleCopy(cells, rng).map((cell, i) => {
+    const targetSlot = cell.targetSlot;
+    const allowed = validNontargetSlots(targetSlot);
+    const nontargetSlot = allowed[Math.floor(rng() * allowed.length)];   // fresh draw every trial (the fix)
+
+    const base = rng() * 360;                                  // random position on the color circle
+    const offs = shuffleCopy([0, COLOR_DIST_DEG], rng);        // which item is the "+45" one is random
+    const T = wrap360(base + offs[0] + jitter());
+    const N = wrap360(base + offs[1] + jitter());
+    const separation = signedDiff(N, T);                       // non-target minus target, ~ +/-45
+    const toward = Math.sign(separation);                      // +1 if the non-target is "ahead" of the target
+    const foilOffset = (cell.foilDir === "toward" ? 1 : -1) * toward * FOIL_OFFSET_DEG;
+    const F = wrap360(T + foilOffset);
+
+    return {
+      trial_num: i + 1, foil_direction: cell.foilDir,
+      target_slot: targetSlot, nontarget_slot: nontargetSlot,
+      slot_gap: slotGap(targetSlot, nontargetSlot),
+      target_side: slotSide(targetSlot), nontarget_side: slotSide(nontargetSlot),
+      same_hemifield: slotSide(targetSlot) === slotSide(nontargetSlot),
+      target_hue: T, nontarget_hue: N, foil_hue: F,
+      item_separation: separation, foil_offset: foilOffset,
+      target_hex: hueToHex(T), nontarget_hex: hueToHex(N), foil_hex: hueToHex(F),
+    };
+  });
+}
+
+// Sanity checks on the generated list (console only).
+function checkTrialList(list, nPerCell) {
+  const n = {};
+  list.forEach((t) => { const k = t.target_slot + "|" + t.foil_direction; n[k] = (n[k] || 0) + 1; });
+  const balanced = Object.keys(n).length === NUM_PLACEHOLDERS * 2 && Object.values(n).every((v) => v === nPerCell);
+  const gapsOk = list.every((t) => t.nontarget_slot !== t.target_slot && slotGap(t.target_slot, t.nontarget_slot) >= MIN_SLOT_GAP);
+  if (!balanced) console.error("Trial list is not balanced:", n);
+  if (!gapsOk) console.error("Trial list has items closer than MIN_SLOT_GAP");
+  return balanced && gapsOk;
+}
+
+// ============================================================================
+//  jsPsych setup
+// ============================================================================
+let consentDeclined = false;
+
 const jsPsych = jsPsychModule.initJsPsych({
+  // REVIEW 8: the original had no progress bar. Set to false to match it.
   show_progress_bar: true,   // the "Completion Progress" bar at the top of the page
-  on_finish: () => {
-    // Runs after the last screen. While developing, show the data on the page.
-    // In a real study, save it here instead (TUTORIAL.md §6), e.g. download a CSV:
-    //   jsPsych.data.get().localSave("csv", "data_" + subjectId + ".csv");
-    jsPsych.data.displayData();
-  },
+  on_finish: () => (consentDeclined ? undefined : saveAndFinish()),
 });
 
-// Add the subject ID and task name to every row of data.
-const subjectId = jsPsych.randomization.randomID(8);
-jsPsych.data.addProperties({ subject: subjectId, task: "color-change-detection" });
+// Participant ID from the URL (SONA survey code); random fallback so a test run still saves.
+const urlId = params.get("subjectId") || params.get("id") || params.get("code");
+const subjectId = (urlId || ("NOID_" + jsPsych.randomization.randomID(8))).replace(/[^A-Za-z0-9_-]/g, "_").slice(0, 64);
+const sonaCode  = params.get("code") || params.get("subjectId") || params.get("id");
 
-const timeline = [];
+jsPsych.data.addProperties({
+  subject: subjectId,
+  experiment: SAVE_NAME,
+  task: "chunharas2022_exp1_2AFC_replication",
+  color_space: COLOR_SPACE.name,
+  test_mode: TEST_MODE,
+  screen_w: window.screen.width, screen_h: window.screen.height,
+  pixel_ratio: window.devicePixelRatio,
+  user_agent: navigator.userAgent,
+  start_time: new Date().toISOString(),
+});
 
-// 1) Fullscreen (click to enter).
-timeline.push({ type: jsPsychFullscreen, fullscreen_mode: true });
+// ============================================================================
+//  Screens
+// ============================================================================
 
-// 2) Instructions.
-timeline.push({
+// ---- 1) Consent. ORIGINAL text; the PAYMENT paragraph is a placeholder to be replaced (IRB). ----
+const CONSENT_HTML = `<p align="center"><b>UNIVERSITY OF CALIFORNIA, SAN DIEGO
+<br>CONSENT TO ACT AS A RESEARCH SUBJECT</b>
+<p>
+<br> Timothy Brady, Ph.D., is conducting a research study to find out more about attention, memory and vision.  You have been asked to participate because you are a healthy young adult.  There will be approximately 1600 participants in this study this year. The expected duration of the study is 5 years, though your participation will last only between 3 minutes and 45 minutes, with the exact expected timing listed in the HIT description.</p>
+<p>
+<br><b>PROCEDURES.</b> If you agree to participate in this study by accepting this HIT and continuing in the task, the following will happen to you:
+<br> &emsp; 1. You will be shown displays of letters, words, or pictures, right here in your web browser. 
+<br> &emsp; 2. You will try to perceive and remember these stimuli, and respond by pressing keys or moving and clicking the mouse in a manner that we will describe to you.</p>
+<p>
+<br> <b>RISKS.</b> You will be required only to continue to interact with your web browser and make responses for a short duration. Thus, no potential risks or discomforts are anticipated except for the possibility that some tasks may be slightly boring. However, there may be risks that are currently unforeseeable.</p>
+<p><br><b>PAYMENT/REMUNERATION.</b> [[PLACEHOLDER: replace this paragraph with the IRB-approved SONA course-credit wording. The original MTurk payment text was removed.]]</p>
+<p>
+<br><b>RIGHTS.</b> You may call the UCSD Human Research Protection Program at 858-657-5100 to ask about your rights as a research subject or to report research-related problems.</p>
+<p>
+<br><b>BENEFITS.</b>  There will be no direct benefit to you from these procedures.  However, the investigator may learn more about basic questions pertaining to attention, memory and vision.   This knowledge may have benefits to society in fields ranging from improving education to visual design, but these benefits will be indirect.</p>
+<p>
+<br><b>EXPLANATION.</b>  The researcher has explained this study to you and answered your questions.  If you have questions about the research or research-related problems, including any adverse events, you may reach Dr. Timothy Brady at timbrady@ucsd.edu or 858-822-4530.</p>
+<p>
+<br><b>VOLUNTARY NATURE OF PARTICIPATION.</b>  Participation in research is entirely voluntary.  You may refuse to participate or withdraw at any time without penalty. The alternative to participation is to choose not to participate.</p>
+<p>
+<br><b>CONFIDENTIALITY.</b>  Research records will be kept confidential to the extent allowed by law.  As with all research, there is also the possibility of loss of confidentiality.  Information from participants such as yourself will be identified by a subject number, which is not associated with your identity, by the researchers, to minimize the potential loss of confidentiality.</p> 
+<p>
+<br>By clicking “I agree”, you are indicating that you are at least 18 years old, have read this consent form and agree to participate in this research study. Please print a copy of this page for your records.</p>
+</p>`;
+
+const consentTrial = {
+  type: jsPsychHtmlButtonResponse,
+  stimulus:
+    "<h2>Consent to act as a research subject</h2>" +
+    (IRB_CONSENT_FINAL ? "" :
+      "<div class='irb-banner'>TEST VERSION: this consent text has not been updated for SONA / this protocol. " +
+      "Do not collect real data until the IRB-approved text is in place (set IRB_CONSENT_FINAL = true).</div>") +
+    "<div class='consent-box'>" + CONSENT_HTML + "</div>",
+  choices: ["I agree", "I do not agree"],
+  data: { phase: "consent" },
+  on_finish: (data) => {
+    if (data.response === 1) {
+      consentDeclined = true;
+      jsPsych.abortExperiment("<p>You chose not to participate. You may close this window.</p>");
+    }
+  },
+};
+
+// ---- 2) Fullscreen ----
+const fullscreenTrial = {
+  type: jsPsychFullscreen,
+  fullscreen_mode: true,
+  message: "<p>This task runs in full screen.<br>Click the button to continue.</p>",
+  button_label: "Go full screen",
+  data: { phase: "fullscreen" },
+};
+
+// ---- 3) Instructions (adapted from the original task's screens; MTurk wording removed) ----
+const instructionsTrial = {
   type: jsPsychInstructions,
   pages: [
-    "<h2>Color memory</h2><p>Remember the colors of the circles.</p>" +
-      "<p>After a short delay, one circle comes back. Decide whether its color is the " +
-      "<b>same</b> or <b>different</b>.</p>",
-    "<p>Press <b>S</b> for <b>same</b>, <b>D</b> for <b>different</b>.</p>" +
-      "<p>Click the <b>+</b> to start each trial. We'll do a few practice trials first.</p>",
-  ],
-  show_clickable_nav: true,
-});
+    "<div class='instr'><h2>Color memory task</h2>" +
+      "<p>In this task you will remember pairs of colors and report one of them by choosing between two options.</p>" +
+      "<p>There are 120 trials, and the task takes about 8-10 minutes. Each trial lasts about 3-5 seconds.</p>" +
+      "<p>Please do not participate if you have any form of color blindness or do not have normal or " +
+      "corrected-to-normal vision (wearing glasses or contacts is fine). Please do this task only once.</p>" +
+      "<p>Press the <b>space bar</b> to continue.</p></div>",
 
-// A block of change-detection trials, balanced over set size x change.
-// `phase` is saved with each trial so practice and main trials can be told apart.
-function block(repetitions, feedback, phase) {
+    "<div class='instr'><p>On each trial you will see two colors and need to remember their hues as accurately as possible.</p>" +
+      "<p>We encourage you to use visual memory (remember as if you are taking a photograph of them).</p>" +
+      "<p>Please keep your eyes on the crosshair in the middle.</p>" +
+      "<p>Press the <b>space bar</b> to continue.</p></div>",
+
+    "<div class='instr'><p>The two colors will appear briefly (less than a second) at 2 of 12 locations that form a ring around the crosshair.</p>" +
+      "<p>You might find it a little challenging sometimes. Don't worry, just try your best.</p>" +
+      "<p>Then the colors will disappear for a short period (less than a second).</p>" +
+      "<p>Press the <b>space bar</b> to continue.</p></div>",
+
+    "<div class='instr'><p>Then a <b>black ring</b> will mark the location of one of the two colors, and two <b>very similar</b> " +
+      "color choices will appear on each side of the crosshair. You have to report the color that was shown at the marked location.</p>" +
+      "<p>Press <b>\"" + KEY_LEFT.toUpperCase() + "\"</b> to choose the left circle or <b>\"" + KEY_RIGHT.toUpperCase() +
+      "\"</b> to choose the right circle.</p>" +
+      "<p>Press the <b>space bar</b> to continue.</p></div>",
+
+    "<div class='instr'><p>The next trial starts after you make a response.</p>" +
+      "<p>The sequence is always the same: two colors appear and disappear, then you make a response, and repeat.</p>" +
+      "<p>Are you ready?</p>" +
+      "<p>Press the <b>space bar</b> to begin.</p></div>",
+  ],
+  key_forward: " ",
+  key_backward: "ArrowLeft",
+  allow_keys: true,
+  show_clickable_nav: true,
+  data: { phase: "instructions" },
+};
+
+// ---- 4) The trial itself ----------------------------------------------------
+function makeTrial(t, phase, feedback) {
   return {
-    timeline: [{
-      type: jsPsychChangeDetection,
-      set_size: jsPsych.timelineVariable("set_size"),
-      is_change: jsPsych.timelineVariable("is_change"),
-      change_amount: 60,
-      display_time: 250,
-      delay_time: 1000,
-      response_ui: "keyboard",   // press S = same, D = different
-      response_mode: "binary",
-      feedback: feedback,        // right/wrong message and sound, confetti when correct
-      auto_zoom: true,
-      data: { phase: phase },
-    }],
-    timeline_variables: [
-      { set_size: 2, is_change: true },  { set_size: 2, is_change: false },
-      { set_size: 6, is_change: true },  { set_size: 6, is_change: false },
-    ],
-    randomize_order: true,
-    repetitions: repetitions,
+    type: jsPsychWmForcedChoice,
+
+    // Memory array: item 0 = TARGET, item 1 = non-target. which_test = 0 probes the target.
+    // Exact colors are passed as "#rrggbb" strings (the original used non-integer hue angles).
+    stimuli: [t.target_hex, t.nontarget_hex],
+    item_type: "color",
+    color_wheel: STUDY_WHEEL,                         // only so color_wheel_name is recorded correctly
+    which_test: 0,
+    // NOTE: the plugin prints "DESIGN: item_positions and which_test ... are both set" in the browser console on every
+    // trial. It is a generic reminder that a FIXED probe location can be learned; here the probed slot is drawn
+    // fresh each trial in buildTrialList(), so it does not apply. The slots are saved as target_slot / nontarget_slot.
+    item_positions: [t.target_slot, t.nontarget_slot],
+    num_placeholders: NUM_PLACEHOLDERS,
+    radius: RING_RADIUS_PX,
+    item_size: ITEM_SIZE_PX,
+    position_angle_offset: POSITION_ANGLE_OFFSET_DEG, // keeps the original's ring orientation
+
+    // Timing (original: 2000 ms fixation, 150 ms array, 750 ms delay, no click-to-start)
+    click_to_start: false,
+    delay_start: PRE_ARRAY_MS,
+    display_time: STIM_DUR_MS,
+    delay_time: DELAY_MS,
+
+    // Two options on either side of fixation: [correct, foil]; display left/right is randomized.
+    test_options: [t.target_hex, t.foil_hex],
+    correct_option: 0,
+    option_layout: "center",
+    option_gap: 2 * OPTION_OFFSET_PX - ITEM_SIZE_PX,  // options' centers end up +/-OPTION_OFFSET_PX from fixation
+    shuffle_options: true,
+    // REVIEW 9: plugin draws a black ring around the probed item; the paper/original used a small black triangle (not available in the plugin).
+    cue_test_location: true,                          // black ring around the probed location
+
+    // Response: Z = left option, M = right option
+    response_ui: "keyboard",
+    choice_keys: [KEY_LEFT, KEY_RIGHT],
+    prompt: "<p>Press <b>" + KEY_LEFT.toUpperCase() + "</b> for the left circle, <b>" + KEY_RIGHT.toUpperCase() + "</b> for the right circle.</p>",
+
+    background_color: "#ffffff",                      // original: white canvas
+    feedback: feedback,
+    auto_zoom: AUTO_ZOOM,
+
+    data: Object.assign({ phase: phase }, t),
+    on_finish: (d) => { d.window_w = window.innerWidth; d.window_h = window.innerHeight; },
   };
 }
 
-// 3) Practice (feedback on).
-timeline.push({
-  type: jsPsychHtmlKeyboardResponse,
-  stimulus: "<p>Practice first. You'll see and hear whether each answer was right. Press any key to begin.</p>",
-});
-timeline.push(block(2, true, "practice")); // 2 x 4 = 8 practice trials
+// ============================================================================
+//  Assemble the timeline
+// ============================================================================
+let mainList = buildTrialList(N_REPS);
+if (!checkTrialList(mainList, N_REPS)) console.error("Check the trial list before running participants.");
+if (TEST_MODE) mainList = mainList.slice(0, N_TEST_TRIALS);
 
-// 4) Main block (feedback off).
-timeline.push({
-  type: jsPsychHtmlKeyboardResponse,
-  stimulus: "<p>Practice done. The real trials start now, without feedback. Press any key.</p>",
-});
-timeline.push(block(8, false, "main")); // 8 x 4 = 32 main trials
+const timeline = [consentTrial, fullscreenTrial, instructionsTrial];
 
-// 5) Thank-you screen.
-timeline.push({
-  type: jsPsychHtmlKeyboardResponse,
-  stimulus: () => {
-    // jsPsych doesn't store trial options such as `feedback` in the data, so
-    // filter on the `phase` tag added in block().
-    const main = jsPsych.data.get().filter({ trial_type: "change-detection", phase: "main" });
-    const acc = Math.round(100 * main.filter({ correct: true }).count() / main.count());
-    return `<h2>All done! Thank you for taking part.</h2>` +
-           `<p>Accuracy on the main block: <b>${acc}%</b>.</p>` +
-           `<p>Press any key to finish (this example then shows its data).</p>`;
-  },
-});
+if (N_PRACTICE > 0) {
+  timeline.push({
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: "<p>Let's start with " + N_PRACTICE + " practice trials. You will see and hear whether each answer was right.</p><p>Press any key to begin.</p>",
+    data: { phase: "practice_intro" },
+  });
+  buildTrialList(N_REPS).slice(0, N_PRACTICE).forEach((t) => timeline.push(makeTrial(t, "practice", true)));
+  timeline.push({
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: "<p>Practice is over. The real trials start now, without feedback.</p><p>Press any key to begin.</p>",
+    data: { phase: "practice_outro" },
+  });
+}
+
+mainList.forEach((t) => timeline.push(makeTrial(t, "main", false)));
 
 jsPsych.run(timeline);
+
+// ============================================================================
+//  Saving (replaces the original $.post to save.php). Retries, then falls back to a download.
+// ============================================================================
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function postData(json) {
+  const body = new URLSearchParams();             // form-encoded, so PHP receives it in $_POST like the old $.post
+  body.set("id", subjectId);
+  body.set("experimenter", EXPERIMENTER);
+  body.set("experimentName", SAVE_NAME);
+  body.set("curData", json);
+  const resp = await fetch(SAVE_URL, { method: "POST", body: body });
+  const text = await resp.text();
+  if (!resp.ok || text.indexOf("Success") < 0) throw new Error("save.php said: HTTP " + resp.status + " " + text.slice(0, 200));
+  return true;
+}
+
+function creditUrl() {
+  if (!SONA_EXPERIMENT_ID || !SONA_CREDIT_TOKEN || !sonaCode) return null;
+  return SONA_CREDIT_URL + "?experiment_id=" + encodeURIComponent(SONA_EXPERIMENT_ID) +
+         "&credit_token=" + encodeURIComponent(SONA_CREDIT_TOKEN) + "&survey_code=" + encodeURIComponent(sonaCode);
+}
+
+async function saveAndFinish() {
+  const el = jsPsych.getDisplayElement();
+  el.innerHTML = "<p>Saving your data. Please do not close this window...</p>";
+  try { if (document.fullscreenElement) await document.exitFullscreen(); } catch (e) { /* ignore */ }
+
+  const json = jsPsych.data.get().json();
+  let saved = false;
+  for (let attempt = 1; attempt <= 3 && !saved; attempt++) {
+    try { saved = await postData(json); }
+    catch (e) { console.warn("Save attempt " + attempt + " failed:", e); await sleep(1500 * attempt); }
+  }
+
+  const url = creditUrl();
+  if (saved) {
+    console.log("Saved!");
+    el.innerHTML = "<h2>All done, thank you!</h2><p>Your data have been saved.</p>" +
+      (url ? "<p>You will now be taken back to SONA to receive your credit. <a href='" + url + "'>Click here if nothing happens.</a></p>"
+           : "<p>You can close this tab.</p>");
+    if (url) setTimeout(() => { window.location.href = url; }, 2500);
+  } else {
+    // Do not lose the data and do not cost the participant their credit.
+    el.innerHTML = "<h2>All done, thank you!</h2>" +
+      "<p>We could not save your data to our server. Please click the button to download your data file and " +
+      "email it to <b>" + CONTACT_EMAIL + "</b>.</p><p><button id='dl' class='jspsych-btn'>Download my data</button></p>" +
+      (url ? "<p><a href='" + url + "'>Continue to SONA to receive your credit</a></p>" : "");
+    document.getElementById("dl").addEventListener("click", () => {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([json], { type: "application/json" }));
+      a.download = SAVE_NAME + "_" + subjectId + ".json";
+      a.click();
+    });
+  }
+}
+
+/*
+ * ============================================================================
+ *  APPENDIX -- ORIGINAL CODE, kept for reference (original_WMbias_2AFC.html).
+ *  Lines starting  //|  are verbatim from the original file.
+ *  Lines starting  // >>>  are annotations added here, not part of the original.
+ * ============================================================================
+ */
+
+// ---- APPENDIX A: original trial generation (the part with the bug) ----------
+//|         var stimdur = 150;
+//|         var delay = 750;
+//|         var colordist = 45;
+//|         var trlrep = 5;
+//|         var colortstdist = [-6,6]
+//|         // counter balancing hemifield positions
+//|         var pairpos = [[0,3],[1,4],[2,5],[6,9],[7,10],[8,11],[3,6],[4,7],[5,8],[9,0],[10,1],[11,2]]
+// >>> Exp 1 has no catch trials: 2 foil directions x 12 pairs x 5 reps = 120. The '+ pairpos.length' below adds the
+// >>> 12 catch trials of the Exp 2 control replication (132 total). Not used in this version.
+//|         var nTrials = colortstdist.length*pairpos.length*trlrep + pairpos.length;
+//|
+//|         var postemp = []
+//|         var tsttemp = [];
+//|
+//|         var isTestkey=false;
+//|
+//|         for (var irep = 0; irep < trlrep; irep++){
+//|             for (var itst = 0; itst < colortstdist.length; itst++){
+//|                 for (ipair = 0 ; ipair < pairpos.length; ipair++){
+//|
+// >>> BUG: shuffle() (defined below) shuffles IN PLACE and returns the SAME array object. So every trial that uses
+// >>> this pair pushes a reference to one shared array, and the target/non-target order within each pair is
+// >>> frozen for the whole session (all 10 trials + the catch trial of a pair see the same final order).
+// >>> Consequence: each participant has 12 fixed target slots (one per pair). In simulation ~3 of the 12 locations
+// >>> are never probed and others are probed 20 times. Intended behavior: a fresh target/non-target draw per trial.
+// >>> Fix in this file: buildTrialList() draws the non-target location fresh on every trial (and balances the target
+// >>> location); it follows the paper's rule (>= 2 empty placeholders between the items) instead of fixed 90-deg pairs.
+//|                     postemp.push(shuffle(pairpos[ipair]))
+//|                     tsttemp.push(shuffle([colortstdist[itst],0]))
+//|
+//|                 }
+//|             }
+//|         }
+//|         //
+//|
+//|
+//|         for (ipair = 0 ; ipair < pairpos.length; ipair++){
+//|
+// >>> BUG: shuffle() (defined below) shuffles IN PLACE and returns the SAME array object. So every trial that uses
+// >>> this pair pushes a reference to one shared array, and the target/non-target order within each pair is
+// >>> frozen for the whole session (all 10 trials + the catch trial of a pair see the same final order).
+// >>> Consequence: each participant has 12 fixed target slots (one per pair). In simulation ~3 of the 12 locations
+// >>> are never probed and others are probed 20 times. Intended behavior: a fresh target/non-target draw per trial.
+// >>> Fix in this file: buildTrialList() draws the non-target location fresh on every trial (and balances the target
+// >>> location); it follows the paper's rule (>= 2 empty placeholders between the items) instead of fixed 90-deg pairs.
+//|                     postemp.push(shuffle(pairpos[ipair]))
+// >>> 180-deg catch trials: Exp 2 control replication only. Dropped here.
+//|                     tsttemp.push(shuffle([180,0]))
+//|
+//|                 }
+//|
+//|         var tempcol = [0,colordist];
+//|
+//|         // Shuffle them!
+//|         var alltrlseq = [];
+//|         var alltrlrot = [];
+//|         var alltstpos = [];
+//|         var alltstcol = [];
+//|         var alltstcode = [];
+//|         var alltarcode =[];
+//|         var tempseq = [];
+//|         var alltstord = 0;
+//|
+//|         for (var itst=0; itst < colortstdist.length; itst++) {
+//|             for($iall=0;$iall < nTrials/colortstdist.length;$iall++){
+//|
+//|                 var icol = Math.round(Math.random(1)*360);
+//|                 var sumcol = [];
+//|                 for(var imem=0; imem < tempcol.length; imem++) {
+//|                     var thiscol = tempcol[imem]+icol;
+//|                     if (thiscol/360>1){
+//|                         thiscol = thiscol-360
+//|                     }
+//|                     sumcol.push(thiscol);
+//|                 }
+//|
+//|                 tempseq.push(shufflecolor(sumcol));
+//|                 alltrlrot.push((Math.round(Math.random()*1000)/1000)*360)
+//|             }
+//|         }
+//|
+//|         var thishuff =[]; for (itrl = 0; itrl<nTrials;itrl++){ thishuff.push(itrl)}
+//|         var trialOrder = [];for (itrl = 0; itrl<nTrials;itrl++){trialOrder.push(itrl)}
+//|         var trialStruct = [];
+//|         shuffle(thishuff);
+//|         for (var itrl = 0; itrl < nTrials; itrl++){
+//|             thistrlpos = (postemp[thishuff[itrl]]);
+//|             alltstpos.push(thistrlpos)
+//|
+//|             testcol = [];
+//|             thiststtemp=[];
+//|             memdirec = wrapTo180(tempseq[itrl][0]-tempseq[itrl][1])<0;
+//|
+//|             if (memdirec){
+//|                     thiststtemp = tsttemp[thishuff[itrl]];
+//|             }else {
+//|
+//|                 for (var itemp =0; itemp < tsttemp[thishuff[itrl]].length; itemp++){
+//|                     thiststtemp[itemp] = tsttemp[thishuff[itrl]][itemp]*-1;
+//|                 }
+//|             }
+//|
+//|             for (var intst =0; intst<thiststtemp.length; intst++){
+//|
+//|
+//|                 var thiststcol = thiststtemp[intst]+tempseq[itrl][0];
+//|                     if (thiststcol/360>1){
+//|                         thiststcol = thiststcol-360
+//|                     }
+//|                     if (thiststcol<=0){
+//|                         thiststcol = thiststcol+360
+//|                     }
+//|                     testcol.push(thiststcol);
+//|             }
+//|
+//|             alltstcol.push(testcol);
+//|             alltstcode.push(paintcolor(alltstcol[itrl]));
+//|             var allcol =[]; for(var item = 0; item < numDots; item++){allcol[item]= 99999}
+//|             for (var icol = 0; icol < alltstpos[itrl].length; icol++){
+//|                 allcol[thistrlpos[icol]] = tempseq[itrl][icol]
+//|             }
+//|             alltrlseq.push(allcol);
+//|             alltarcode.push(paintcolor(allcol));
+//|
+//|         }
+//|
+//|         // var nTrials = alltrlseq.length;
+//|         function wrapTo180(lon){
+//|             if (lon<0){
+//|                 lon = lon+360;
+//|             }
+//|             if (lon > 180){
+//|                 lon_wrap = wrapTo360(lon + 180) - 180;
+//|             }else {
+//|                 lon_wrap = lon;
+//|             }
+//|
+//|             return lon_wrap
+//|         }
+//|
+//|         function wrapTo360(lon){
+//|
+//|             lonMod = lon % 360;
+//|             if (lonMod==0 & lon>0){
+//|                 lonMod = 360;
+//|             }
+//|
+//|             return lonMod
+//|         }
+//|
+//|         function shufflecolor(thisseq){
+//|             thisgroup = shuffle(thisseq)
+//|             for($ishuff=0;$ishuff < numDots;$ishuff++){
+//|                 var ini = (Math.round(Math.random()*1000)/1000)*360 ;
+//|                 var currAng = addarray_withnoise(thisgroup,ini)
+//|             }
+//|             return currAng
+//|         }
+//|
+//|         function addarray_withnoise(a,b) {
+//|             var c = [];
+//|             for($iadd=0;$iadd< a.length;$iadd++){
+// >>> Independent uniform +/-3 deg jitter on every item (the paper says the items differ by exactly 45 deg).
+// >>> Not used in this version (the paper says exactly 45): HUE_JITTER_DEG = 0. Set it to 3 to reproduce the code.
+//|                 c.push( (a[$iadd]+ b + ((Math.random()-0.5)/0.5)*3 )%360 ); // add 3 degree noise
+//|             }
+//|             return c;
+//|         }
+//|
+//|         function shuffle(array) {
+//|           var currentIndex = array.length, temporaryValue, randomIndex;
+//|
+//|           // While there remain elements to shuffle...
+//|           while (0 !== currentIndex) {
+//|
+//|             // Pick a remaining element...
+//|             randomIndex = Math.floor(Math.random() * currentIndex);
+//|             currentIndex -= 1;
+//|
+//|             // And swap it with the current element.
+//|             temporaryValue = array[currentIndex];
+//|             array[currentIndex] = array[randomIndex];
+//|             array[randomIndex] = temporaryValue;
+//|           }
+//|
+//|           return array;
+//|         }
+
+// ---- APPENDIX B: original placeholder positions (what POSITION_ANGLE_OFFSET reproduces) ----
+// >>> circRot = 5.5 (rad), objDist = 120. Slot i is at x = cx - R cos(2*pi*i/12 + 5.5), y = cy + R sin(2*pi*i/12 + 5.5).
+// >>> The plugin's slot i is at x = cx + R sin(2*pi*i/12 + offset), y = cy + R cos(2*pi*i/12 + offset); they match
+// >>> when offset = 5.5 - pi/2 (= 225.1 deg) -- POSITION_ANGLE_OFFSET_DEG above.
+//|         // Object positions
+//|
+//|         // Define positions before rotation
+//|         xTemp=[];
+//|         yTemp=[];
+//|
+//|         for(i=0;i<numDots;i++){
+//|             xTemp.push(objDist*Math.cos((2*Math.PI/numDots)*i));
+//|             yTemp.push(objDist*Math.sin((2*Math.PI/numDots)*i))
+//|         }
+//|
+//|         // Rotate positions
+//|         xPos=[];
+//|         yPos=[];
+//|
+//|         for(i=0;i<numDots;i++){
+//|             xPos.push(centerX-(Math.cos(circRot)*xTemp[i])+(Math.sin(circRot)*yTemp[i]));
+//|             yPos.push(centerY+(Math.sin(circRot)*xTemp[i])+(Math.cos(circRot)*yTemp[i]))
+//|         }
+
+// ---- APPENDIX C: original scoring of a response -------------------------------
+// >>> 'Correct' was decided by floating-point equality of the chosen color's angle with the target's angle.
+// >>> Here the correct option is simply option 0 (correct_option: 0), so `correct` comes from the plugin.
+//|                             respTFs.push(alltstcol[curTrial][respLR] == alltrlseq[curTrial][alltstpos[curTrial][0]]);
 </script>
 </html>

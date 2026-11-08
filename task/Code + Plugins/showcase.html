@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3GD5TKWZBK"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-3GD5TKWZBK');
+</script>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Plugin showcase · Brady lab jsPsych v8</title>
+
+  <!-- jsPsych v8 core, from CDN. Exposes global `jsPsychModule`. -->
+  <link rel="stylesheet" href="https://unpkg.com/jspsych@8/css/jspsych.css" />
+  <script src="https://unpkg.com/jspsych@8/dist/index.browser.min.js"></script>
+  <!-- Optional: the global confetti() that BradyUtils fires on correct feedback -->
+  <script src="https://unpkg.com/canvas-confetti@1.9.3/dist/confetti.browser.js"></script>
+
+  <!-- Color wheel, shared helpers, then the plugins, in this order. -->
+  <script src="brady-color-wheel.js"></script>
+  <script src="brady-plugin-utils.js"></script>
+  <script src="jspsych-change-detection.js"></script>
+  <script src="jspsych-2afc-keyboard.js"></script>
+  <script src="jspsych-continuous-report.js"></script>
+  <script src="jspsych-continuous-image-report.js"></script>
+  <script src="jspsych-continuous-object-report.js"></script>
+  <script src="jspsych-wm-forced-choice.js"></script>
+  <script src="jspsych-wm-pairs.js"></script>
+  <script src="jspsych-color-rotated-object.js"></script>
+  <script src="jspsych-noise-dots.js"></script>
+  <script src="jspsych-recognition.js"></script>
+  <script src="jspsych-recall.js"></script>
+  <script src="jspsych-spatial-report.js"></script>
+  <script src="jspsych-rsvp.js"></script>
+  <script src="jspsych-object-orientation-report.js"></script>
+  <script src="similarity-adaptive-utils.js"></script>
+  <script src="jspsych-similarity-triad.js"></script>
+  <script src="jspsych-similarity-quad.js"></script>
+  <script src="jspsych-similarity-likert.js"></script>
+
+  <link rel="icon" href="favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,400;0,700;0,900&display=swap" rel="stylesheet" />
+  <link href="fonts.css" rel="stylesheet" type="text/css" />
+  <link href="responsive.css" rel="stylesheet" type="text/css" />
+  <link href="plugins-site.css" rel="stylesheet" type="text/css" />
+</head>
+<body class="fullwidth">
+  <header class="topbar">
+    <a href="https://bradylab.ucsd.edu/" class="brand">
+      <img src="images/mosaic_small.png" alt="Vision and Memory Lab" />
+      <span>the vision and memory lab</span>
+    </a>
+    <nav class="topnav">
+      <a href="index.html">Overview</a>
+      <a href="showcase.html" class="active">Showcase</a>
+      <a href="reference.html">Reference</a>
+      <a href="tutorial.html">Tutorial</a>
+      <a href="example-experiment.html">Example study</a>
+      <a class="lab-back" href="https://bradylab.ucsd.edu/resources.html">&larr; Lab resources</a>
+    </nav>
+  </header>
+
+  <div class="picker">
+    <label for="demoSelect"><b>Demo:</b></label>
+    <select id="demoSelect"><option value="">Select a plugin demo&hellip;</option></select>
+  </div>
+
+  <div id="stage">
+    <div id="explain">Pick a demo above. Each one runs 3 trials with the options described here, then shows the data recorded.</div>
+    <div id="jspsych-target"></div>
+    <div id="results" style="display:none"></div>
+  </div>
+
+  <script>
+  // Use the namespaced initJsPsych from jsPsych v8's browser build.
+  const makeJsPsych = jsPsychModule.initJsPsych;
+
+  // Object photos for the real-object demos
+  const OBJ_CLOCK = "stimuli/obj-clock.jpg";
+  const OBJ_SET = ["stimuli/obj-clock.jpg", "stimuli/obj-mug.jpg", "stimuli/obj-pot.jpg"];
+
+  // The face-identity morph wheel used by the continuous-image-report demo.
+  const FACE_MORPH = "stimuli/face-morph.png", FACE_FRAMES = 60;
+
+  // Simple shape images (data URIs) for the RSVP image demo.
+  function demoShapeImg(kind, color) {
+    const c = document.createElement("canvas"); c.width = c.height = 100;
+    const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, 100, 100); x.fillStyle = color;
+    if (kind === "circle") { x.beginPath(); x.arc(50, 50, 38, 0, 7); x.fill(); }
+    else if (kind === "square") { x.fillRect(15, 15, 70, 70); }
+    else { x.beginPath(); x.moveTo(50, 12); x.lineTo(88, 86); x.lineTo(12, 86); x.closePath(); x.fill(); }
+    return c.toDataURL();
+  }
+  const SHAPES = [demoShapeImg("circle", "#c0392b"), demoShapeImg("square", "#2980b9"), demoShapeImg("triangle", "#27ae60")];
+
+  // ---- Demo catalog: each entry has a title, explanation HTML, and a trial object ----
+  const TRIALS_PER_DEMO = 3;  // run this many trials of each demo in a row
+  const DEMOS = [
+    { group: "Change detection", title: "Colors · same/different (click or key)",
+      explain: `Classic color change detection. <code>stimuli:[]</code> (the default) makes random wheel colors. ` +
+               `<code>set_size:4</code>, <code>response_mode:"binary"</code>; the default <code>response_ui:"both"</code> ` +
+               `lets you click a button or press S/D. <code>is_change:true</code>, <code>change_amount:70</code>°.`,
+      trial: { type: jsPsychChangeDetection, set_size: 4, is_change: true, change_amount: 70 } },
+
+    { group: "Change detection", title: "Colors · 6-point confidence (click or type)",
+      explain: `<code>response_mode:"confidence6"</code> (1 = sure same … 6 = sure different). With the default ` +
+               `<code>response_ui:"both"</code> you can click a button or type 1-6. No change on these trials.`,
+      trial: { type: jsPsychChangeDetection, set_size: 3, response_mode: "confidence6", is_change: false } },
+
+    { group: "Change detection", title: "Colors · radio · two-stage · mask · noise",
+      explain: `Several options at once: <code>response_ui:"radio"</code>, ` +
+               `<code>response_mode:"two_stage"</code> (same/different, then confidence), a <code>mask_time:300</code> ms ` +
+               `mask right after the array (before the delay), and <code>noise_level:0.25</code> noise over the study disks.`,
+      trial: { type: jsPsychChangeDetection, set_size: 3, response_ui: "radio", response_mode: "two_stage",
+               mask_time: 300, noise_level: 0.25, is_change: true } },
+
+    { group: "Change detection", title: "Words · same/different",
+      explain: `Items can be text: <code>stimuli:["cat","dog","sun","key"]</code>, <code>item_type:"text"</code>. ` +
+               `The plugin can only change colors on its own, so the changed probe is given explicitly: ` +
+               `<code>test_stimulus:"owl"</code> for item 0 (<code>which_test:0</code>).`,
+      trial: { type: jsPsychChangeDetection, stimuli: ["cat", "dog", "sun", "key"], item_type: "text",
+               which_test: 0, test_stimulus: "owl" } },
+
+    { group: "Change detection", title: "Colors · auto-zoom (fills the window)",
+      explain: `<code>auto_zoom:true</code> scales the whole task box to fill the browser window, so the ` +
+               `display is a usable size on any monitor. It is meant for a page that holds only the experiment, ideally fullscreen.`,
+      trial: { type: jsPsychChangeDetection, set_size: 4, is_change: true, auto_zoom: true } },
+
+    { group: "Change detection", title: "Colors · sequential encoding",
+      explain: `Items appear one at a time in their placeholders instead of all at once: ` +
+               `<code>sequential:true</code>, <code>sequential_item_time:400</code>, <code>sequential_gap_time:250</code>. ` +
+               `Add <code>sequential_cumulative:true</code> to leave each item up as the array builds.`,
+      trial: { type: jsPsychChangeDetection, set_size: 4, sequential: true, sequential_item_time: 400,
+               sequential_gap_time: 250, is_change: true } },
+
+    { group: "Forced choice (2afc-keyboard)", title: "Color choice · F / J",
+      explain: `Two color options given as wheel degrees: <code>stimuli:[40,210]</code>. Press <b>F</b> (left) or ` +
+               `<b>J</b> (right), set by <code>choice_keys:["f","j"]</code>. <code>correct_option:1</code> (an index into ` +
+               `<code>stimuli</code>) and <code>feedback:true</code> highlight the answer.`,
+      trial: { type: jsPsych2afcKeyboard, stimuli: [40, 210], choice_keys: ["f", "j"], correct_option: 1, feedback: true,
+               prompt: "<p>Press <b>F</b> for the left color, <b>J</b> for the right.</p>" } },
+
+    { group: "Forced choice (2afc-keyboard)", title: "Word choice · F / J",
+      explain: `Options can be words: <code>stimuli:["A","B"]</code>. The F/J keys map to screen ` +
+               `position (F = whatever is on the left), and the left/right order is shuffled each trial ` +
+               `by default (<code>shuffle_options:true</code>); <code>option_order</code> in the data records it.`,
+      trial: { type: jsPsych2afcKeyboard, stimuli: ["A", "B"], choice_keys: ["f", "j"],
+               prompt: "<p>Press <b>F</b> for the left word, <b>J</b> for the right word.</p>" } },
+
+    { group: "Forced choice (2afc-keyboard)", title: "Image choice · hue-rotated · grayscale preview",
+      explain: `The same object photo twice, one copy hue-rotated in CIELAB (<code>color_rotation_deg:[0,120]</code>), ` +
+               `after a <code>preview_duration:700</code> ms grayscale preview during which the keys are not live. “Which is more orange?”`,
+      trial: { type: jsPsych2afcKeyboard, stimuli: [OBJ_CLOCK, OBJ_CLOCK], item_type: "image", color_rotation_deg: [0, 120],
+               preview_duration: 700, choice_keys: ["f", "j"], prompt: "<p>Which looks more orange? (F = left, J = right)</p>" } },
+
+    { group: "Continuous report", title: "Continuous color wheel",
+      explain: `Delayed estimation on the full 360° wheel. <code>set_size:3</code>; hover over the wheel to preview the color on the ` +
+               `probed disk, click to report. <code>feedback:true</code> shows the true color and your error.`,
+      trial: { type: jsPsychContinuousReport, set_size: 3, feedback: true } },
+
+    { group: "Continuous report", title: "Color wheel · mouse tracking (records the cursor path)",
+      explain: `<code>record_mouse:true</code> logs the cursor path for the whole trial. Move from the centre out to the ` +
+               `wheel and click. The data below show <code>mouse_trajectory</code> as rows of ` +
+               `<code>[t, x, y, value]</code> (t = ms from the start, x/y = px from the box centre, value = the ` +
+               `hovered hue once the wheel is up, else null), plus <code>mouse_phase_onsets</code> and ` +
+               `<code>mouse_response_start_index</code>. Sampling is set by <code>mouse_min_interval</code> / ` +
+               `<code>mouse_response_min_interval</code>. The trajectory is shortened below for display; the data keep all of it.`,
+      trial: { type: jsPsychContinuousReport, set_size: 3, record_mouse: true, feedback: false } },
+
+    { group: "Continuous report", title: "Sequential encoding (one at a time)",
+      explain: `The <code>sequential</code> options work on every multi-item memory task. Here, continuous color ` +
+               `report with items shown one at a time: <code>sequential:true</code>, <code>sequential_item_time:400</code>.`,
+      trial: { type: jsPsychContinuousReport, set_size: 4, sequential: true, sequential_item_time: 400,
+               sequential_gap_time: 250, feedback: true } },
+
+    { group: "Continuous report", title: "Quantized wheel (12 options) · spun",
+      explain: `<code>num_choices:12</code> turns the continuous wheel into 12 options, placed so the correct color is always one of them, and ` +
+               `<code>spin_wheel:true</code> rotates the wheel by a random amount each trial.`,
+      trial: { type: jsPsychContinuousReport, set_size: 3, num_choices: 12, spin_wheel: true, feedback: true } },
+
+    { group: "Continuous report", title: "Ensemble (report the average)",
+      explain: `<code>which_test:-1</code> asks for the <b>average</b> color of the set. The colors are confined to a ` +
+               `90° arc (<code>color_span:90</code>) so the average is well defined; error is scored against the ` +
+               `circular mean.`,
+      trial: { type: jsPsychContinuousReport, set_size: 5, which_test: -1, color_span: 90 } },
+
+    { group: "Continuous report", title: "Image-morph wheel (sprite)",
+      explain: `Report on a face-identity morph wheel, a 60-frame sprite strip (frame 0 at the left): <code>image_sprite</code> + <code>num_frames:60</code>. ` +
+               `Hover over the wheel to preview, click to report; error is in degrees around the morph circle.`,
+      trial: { type: jsPsychContinuousImageReport, image_sprite: FACE_MORPH, num_frames: FACE_FRAMES, set_size: 3,
+               num_placeholders: 3, radius: 120, item_size: 110, num_previews: 16, feedback: true } },
+
+    { group: "Continuous report", title: "Perception (no memory delay)",
+      explain: `A no-memory matching baseline with <code>mode:"perception"</code>: a colored <b>reference</b> disk and a gray <b>match</b> disk stay on screen. ` +
+               `Move the mouse around the wheel to recolor the match disk until it matches the reference, then click.`,
+      trial: { type: jsPsychContinuousReport, mode: "perception", feedback: true,
+               prompt: "<p>Recolor the gray circle to match the other color, then click.</p>" } },
+
+    { group: "Continuous report", title: "Oriented lines · report color",
+      explain: `Items are colored lines (<code>item_shape:"line"</code>) at random orientations; ` +
+               `report the probed line's color on the wheel (<code>report:"color"</code>).`,
+      trial: { type: jsPsychContinuousReport, item_shape: "line", report: "color", set_size: 3, feedback: true } },
+
+    { group: "Continuous report", title: "Triangles · report orientation",
+      explain: `Colored triangles (<code>item_shape:"triangle"</code>); report the probed triangle's orientation. ` +
+               `The shape turns to follow your mouse; click to set it. <code>report:"orientation"</code> (360&deg; period).`,
+      trial: { type: jsPsychContinuousReport, item_shape: "triangle", report: "orientation", set_size: 3, feedback: true } },
+
+    { group: "Continuous report", title: "Triangles · report both (color first)",
+      explain: `Report the probed triangle's color (wheel), then its orientation (shape follows the mouse). ` +
+               `<code>report:"both"</code>, <code>report_order:"color_first"</code> (the default).`,
+      trial: { type: jsPsychContinuousReport, item_shape: "triangle", report: "both", report_order: "color_first", set_size: 3, feedback: true } },
+
+    { group: "Continuous report", title: "Triangles · report both (orientation first)",
+      explain: `The same, with orientation reported first: <code>report_order:"orientation_first"</code>.`,
+      trial: { type: jsPsychContinuousReport, item_shape: "triangle", report: "both", report_order: "orientation_first", set_size: 3, feedback: true } },
+
+    { group: "Continuous report", title: "All-black lines · orientation",
+      explain: `One value in <code>stimuli</code> colors every item the same (<code>stimuli:["black"]</code>). ` +
+               `Report each line's orientation (lines repeat every 180&deg;).`,
+      trial: { type: jsPsychContinuousReport, item_shape: "line", report: "orientation", stimuli: ["black"], set_size: 4, feedback: true } },
+
+    { group: "Continuous report", title: "Gabor patches · orientation",
+      explain: `Gray Gabor patches (<code>item_shape:"gabor"</code>): a sinusoidal grating under a Gaussian fade, ` +
+               `on a mid-gray box so their mean gray matches it (<code>grating_options.mean:"background"</code>, the default). ` +
+               `Report the probed Gabor's orientation; like lines, Gabors repeat every 180&deg;. ` +
+               `<code>grating_options</code> sets <code>cycles</code>, <code>contrast</code>, <code>sigma</code> and <code>phase</code> ` +
+               `(here a random phase per item, saved in <code>stimuli_shown</code>).`,
+      trial: { type: jsPsychContinuousReport, item_shape: "gabor", report: "orientation", background_color: "#808080",
+               grating_options: { cycles: 5, phase: "random" }, set_size: 3, feedback: true } },
+
+    { group: "Continuous report", title: "Real objects · color (study, then probe a location)",
+      explain: `Several real objects (a clock, a mug, a pot), each hue-rotated by its own amount, ` +
+               `appear at different locations. After a delay one location is probed; move the mouse around the gray wheel ` +
+               `to recolor that object to its remembered color, then click. <code>stimuli</code> + <code>set_size</code>.`,
+      trial: { type: jsPsychContinuousObjectReport, stimuli: OBJ_SET, set_size: 3, background_color: "#ffffff", placeholder_border: "2px solid #cccccc", feedback: true } },
+
+    { group: "Continuous report", title: "Real objects · orientation (spin to report)",
+      explain: `Real objects shown at locations, each rotated by a random angle (set them with <code>orientations</code>). ` +
+               `After a delay one location is probed and you spin that object back to its remembered orientation, then click. ` +
+               `The probe appears in the centre by default (<code>report_location:"center"</code>; <code>"in_place"</code> spins it in its own box).`,
+      trial: { type: jsPsychObjectOrientationReport, stimuli: OBJ_SET, set_size: 3, background_color: "#ffffff",
+               placeholder_border: "2px solid #cccccc", feedback: true } },
+
+    { group: "Forced choice (working memory)", title: "Color 4-AFC · click",
+      explain: `Study colors, delay, then pick which color was at the probed location from K options. ` +
+               `<code>choices_per_test:4</code>, <code>response_ui:"mouse"</code>; the foils are generated from the wheel.`,
+      trial: { type: jsPsychWmForcedChoice, set_size: 3, choices_per_test: 4, response_ui: "mouse", feedback: true } },
+
+    { group: "Forced choice (working memory)", title: "Color 2-AFC · arrow keys",
+      explain: `Two options, answered by keyboard: <code>response_ui:"keyboard"</code>, <code>choice_keys:["ArrowLeft","ArrowRight"]</code>. ` +
+               `Keys map to options by screen position in reading order (top row first, then left to right).`,
+      trial: { type: jsPsychWmForcedChoice, set_size: 3, choices_per_test: 2, response_ui: "keyboard", choice_keys: ["ArrowLeft", "ArrowRight"], feedback: true } },
+
+    { group: "Other paradigms", title: "WM pairs (two-color objects)",
+      explain: `Each item is a ring with an inner disk in a second color. One feature of one item is probed and you pick its color ` +
+               `(<code>probe_feature:"inner"</code>). The points total at the top carries over between trials.`,
+      trial: { type: jsPsychWmPairs, set_size: 3, probe_feature: "inner", feedback: true } },
+
+    { group: "Other paradigms", title: "Noise dots (same / different)",
+      explain: `Two disks made of colored dots; judge whether they are the same color by keyboard (<b>S</b> = same, <b>D</b> = different). ` +
+               `<code>colors:[40]</code> is the target and <code>test_color:210</code> the test disk, so these trials are "different". ` +
+               `<code>noise_level:0.4</code> = 40% of the dots are random-color noise. <code>response_mode:"binary"</code>.`,
+      trial: { type: jsPsychNoiseDots, colors: [40], test_color: 210, noise_level: 0.4, response_mode: "binary", feedback: true } },
+
+    { group: "Other paradigms", title: "Recognition (old / new)",
+      explain: `A single probe (here wheel degree 120) judged old or new. <code>response_mode:"binary"</code>, <code>response_ui:"buttons"</code>, ` +
+               `<code>is_old:true</code> (the truth, for scoring).`,
+      trial: { type: jsPsychRecognition, stimulus: 120, is_old: true, response_ui: "buttons", feedback: true } },
+
+    { group: "Other paradigms", title: "Recognition · 6-point confidence",
+      explain: `Old/new on a 6-point scale instead of a single choice: ` +
+               `<code>response_mode:"confidence6"</code> (1 = sure new … 6 = sure old; <code>said_old</code> is 1 for ratings 4-6).`,
+      trial: { type: jsPsychRecognition, stimulus: 120, is_old: true, response_mode: "confidence6", response_ui: "buttons", feedback: true } },
+
+    { group: "Other paradigms", title: "Recall (type the item)",
+      explain: `Study items, delay, one location is probed, type what was there. Here the items are digits (<code>item_type:"text"</code>). ` +
+               `Scoring ignores case and spaces at the ends, and compares numbers as numbers.`,
+      trial: { type: jsPsychRecall, stimuli: ["7", "3", "9", "2"], item_type: "text", which_test: 0 } },
+
+    { group: "Other paradigms", title: "Spatial report (click location)",
+      explain: `Report where the probed item was by clicking anywhere in the field: <code>response_mode:"click"</code> ` +
+               `(the default is <code>"box"</code>, click a placeholder; <code>"drag"</code> drags the probe).`,
+      trial: { type: jsPsychSpatialReport, set_size: 3, response_mode: "click", feedback: true } },
+
+    { group: "Other paradigms", title: "Real object · single-item color report",
+      explain: `One object shown with a CIELAB hue rotation (<code>color_rotation_deg:90</code>, the answer). Move the mouse around the ring to recolor it, ` +
+               `click to report. <code>mode:"report"</code>.`,
+      trial: { type: jsPsychColorRotatedObject, stimulus: OBJ_CLOCK, stimulus_width: 200, stimulus_height: 200, color_rotation_deg: 90, mode: "report" } },
+
+    { group: "Other paradigms", title: "RSVP · colors (wheel degrees)",
+      explain: `RSVP takes the same <code>stimuli</code>/<code>item_type</code> as the other plugins. ` +
+               `Here a stream of color-wheel degrees: <code>stimuli:[0,72,144,216,288]</code>, 300 ms each with a 150 ms gap.`,
+      trial: { type: jsPsychRsvp, stimuli: [0, 72, 144, 216, 288], item_type: "color", item_duration: 300, isi: 150 } },
+
+    { group: "Other paradigms", title: "RSVP · colors (rgb) & images",
+      explain: `A stream mixing CSS rgb colors and images, each type detected automatically: ` +
+               `<code>["rgb(220,40,40)", "circle.png", "rgb(40,120,220)", …]</code>.`,
+      trial: { type: jsPsychRsvp, stimuli: ["rgb(220,40,40)", SHAPES[0], "rgb(40,120,220)", SHAPES[1], SHAPES[2]], item_duration: 350, isi: 150 } },
+
+    { group: "Other paradigms", title: "RSVP · words (per-item timing)",
+      explain: `A stream of words at one location. <code>item_duration</code> and <code>isi</code> take one value for every item ` +
+               `or one per item: here <code>item_duration:[300,300,300,700,300,300]</code> holds the fourth word longer. ` +
+               `The data record the measured timing (<code>actual_stim_timing</code>).`,
+      trial: { type: jsPsychRsvp, stimuli: ["dog", "cat", "sun", "key", "cup", "owl"], item_type: "text",
+               item_duration: [300, 300, 300, 700, 300, 300], isi: 150 } },
+
+    { group: "Similarity scaling", title: "Triad · reference on top (pick the more different)",
+      explain: `The default triad: a <b>reference</b> item on top and two below; click whichever bottom item is <b>more different</b> from the reference. ` +
+               `Fixed <code>stimuli:[20,60,210]</code> (wheel degrees). Confidence is asked on every trial by default; it is off here to keep the demo quick. ` +
+               `<code>layout:"triangle"</code> gives the classic odd-one-out.`,
+      trial: { type: jsPsychSimilarityTriad, stimuli: [20, 60, 210], collect_confidence: false } },
+
+    { group: "Similarity scaling", title: "Triad · odd-one-out (triangle layout)",
+      explain: `<code>layout:"triangle"</code> puts three items at the corners of a triangle; click the one <b>most different</b> from the other two, ` +
+               `which marks the other two as the most similar pair. <code>stimuli:[20,40,210]</code>.`,
+      trial: { type: jsPsychSimilarityTriad, layout: "triangle", stimuli: [20, 40, 210], collect_confidence: false } },
+
+    { group: "Similarity scaling", title: "Quad · pick the more different pair",
+      explain: `Two pairs side by side; click the pair whose two items differ more. ` +
+               `<code>stimuli:[20,40,200,300]</code>: pair 1 (20, 40) is close, pair 2 (200, 300) far apart.`,
+      trial: { type: jsPsychSimilarityQuad, stimuli: [20, 40, 200, 300], collect_confidence: false } },
+
+    { group: "Similarity scaling", title: "Likert · rate similarity (grayscale scale)",
+      explain: `Rate how similar two items are on an R-point grayscale scale (dark = different, white = similar), with words at the ends only. ` +
+               `<code>stimuli:[40,120]</code>, <code>rating_points:7</code>.`,
+      trial: { type: jsPsychSimilarityLikert, stimuli: [40, 120], rating_points: 7, collect_confidence: false } },
+
+    { group: "Similarity scaling", title: "Triad · orientation items (non-color)",
+      explain: `<code>item_shape:"line"</code> draws each number as an orientation ` +
+               `(a bar in <code>item_color</code>) instead of a hue. Same reference-on-top task with orientations <code>stimuli:[0,30,90]</code>°.`,
+      trial: { type: jsPsychSimilarityTriad, stimuli: [0, 30, 90], item_shape: "line", item_color: "#444444", collect_confidence: false } },
+
+    // The adaptive demos build a fresh engine each time the demo runs (the getter), and the
+    // demo's trials share it, as an experiment's timeline would.
+    { group: "Similarity scaling", title: "Triad · adaptive (seeded engine picks each trial)",
+      explain: `Leave <code>stimuli</code> empty and pass an <code>engine</code>: ` +
+               `<code>BradySimilarity.createEngine({rng: BradySimilarity.seededRng(42)})</code>, one instance shared by every trial. ` +
+               `Each trial asks the engine for the most informative triad (or, with probability <code>epsilon</code>, a coverage draw) ` +
+               `and updates it with your answer. The seeded rng makes the trial sequence and layout reproducible. ` +
+               `The data record <code>is_coverage_trial</code> and <code>model_score</code>; save <code>engine.exportState()</code> at the end.`,
+      get trial() {
+        return { type: jsPsychSimilarityTriad, engine: BradySimilarity.createEngine({ rng: BradySimilarity.seededRng(42) }), collect_confidence: false };
+      } },
+
+    { group: "Similarity scaling", title: "Triad · Gabor patches (adaptive, period-180 engine)",
+      explain: `<code>item_shape:"gabor"</code> shows each degree as a Gabor orientation. Orientations repeat every 180&deg;, ` +
+               `so the engine is created with <code>{period: 180}</code> (the plugin warns if the periods disagree) and the data ` +
+               `record degrees in [0, 180) and <code>period: 180</code>. A mid-gray box gives the Gabors full contrast.`,
+      get trial() {
+        return { type: jsPsychSimilarityTriad, item_shape: "gabor", background_color: "#808080",
+                 engine: BradySimilarity.createEngine({ period: 180, rng: BradySimilarity.seededRng(7) }), collect_confidence: false };
+      } },
+  ];
+
+  // ---- Build the demo dropdown ----
+  const demoSelect = document.getElementById("demoSelect");
+  let lastGroup = null, optgroup = null;
+  DEMOS.forEach((d, i) => {
+    if (d.group !== lastGroup) {
+      optgroup = document.createElement("optgroup");
+      optgroup.label = d.group;
+      demoSelect.appendChild(optgroup);
+      lastGroup = d.group;
+    }
+    const o = document.createElement("option");
+    o.value = i;
+    o.textContent = d.title;
+    optgroup.appendChild(o);
+  });
+  demoSelect.addEventListener("change", () => { if (demoSelect.value !== "") runDemo(+demoSelect.value); });
+
+  // ---- Run one demo (TRIALS_PER_DEMO trials) in a fresh jsPsych instance ----
+  function runDemo(i) {
+    const d = DEMOS[i];
+    const _sel = document.getElementById('demoSelect'); if (_sel) _sel.value = i;
+    document.getElementById("explain").innerHTML = `<b>${d.title}</b><br>${d.explain}`;
+
+    // Clear the previous demo's display, results, and Run-again button.
+    document.getElementById("jspsych-target").innerHTML = "";
+    const results = document.getElementById("results");
+    results.style.display = "none";
+    results.textContent = "";
+    const oldBtn = document.getElementById("run-again");
+    if (oldBtn) oldBtn.style.display = "none";
+
+    const jsPsych = makeJsPsych({
+      display_element: "jspsych-target",
+      on_finish: () => {
+        const data = jsPsych.data.get().values();
+        // jsPsych clears the display at the end; leave a placeholder panel so the
+        // stage keeps its height between runs.
+        document.getElementById("jspsych-target").innerHTML =
+          `<div style="min-height:300px;display:flex;align-items:center;justify-content:center;` +
+          `color:#999;border:1px dashed #ccc;border-radius:8px">${TRIALS_PER_DEMO} trials complete. The data are below; press “Run again” to repeat.</div>`;
+        results.style.display = "block";
+        // Shorten long strings (data-URI images) and long arrays (mouse_trajectory)
+        // so the data panel stays readable.
+        const trunc = (k, v) => {
+          if (typeof v === "string" && v.length > 80) return v.slice(0, 60) + "…[" + v.length + " chars]";
+          if (Array.isArray(v) && v.length > 12) return [...v.slice(0, 6), "…(" + v.length + " rows total)…", ...v.slice(-2)];
+          return v;
+        };
+        results.textContent = "Recorded data:\n" + JSON.stringify(data, trunc, 2);
+        // A single Run-again button, reused across demos.
+        let btn = document.getElementById("run-again");
+        if (!btn) {
+          btn = document.createElement("button");
+          btn.id = "run-again";
+          btn.className = "btn";
+          btn.textContent = "↻ Run again";
+          document.getElementById("stage").insertBefore(btn, results);
+        }
+        btn.style.display = "inline-block";
+        btn.onclick = () => runDemo(i);
+      },
+    });
+    const base = d.trial; // read once: an adaptive demo's getter builds a fresh engine for this run
+    jsPsych.run(Array.from({ length: TRIALS_PER_DEMO }, () => Object.assign({}, base)));
+  }
+  </script>
+  <script>
+    (function () {
+      var b = document.querySelector('.navToggle'); if (!b) return;
+      b.addEventListener('click', function () {
+        var o = document.body.classList.toggle('nav-open');
+        b.setAttribute('aria-expanded', o ? 'true' : 'false');
+      });
+    })();
+  </script>
+</body>
+</html>
