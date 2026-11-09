@@ -1,48 +1,229 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Color memory task</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Color memory task</title>
 
-  <link rel="stylesheet" href="https://unpkg.com/jspsych@8/css/jspsych.css" />
+    <!-- jsPsych: only runs the trials. Consent, fullscreen and instructions are plain HTML below (same as the Fixed GLT task) -->
+    <link rel="stylesheet" href="https://unpkg.com/jspsych@8/css/jspsych.css" />
+    <script src="https://unpkg.com/jspsych@8/dist/index.browser.min.js"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2/dist/index.browser.min.js"></script>
 
-  <link rel="icon" href="favicon.ico" />
-  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;700;900&display=swap" rel="stylesheet" />
-  <link href="fonts.css" rel="stylesheet" type="text/css" />
-  <style>
-    body, .jspsych-content { font-family: proxima-nova, "Source Sans Pro", Helvetica, sans-serif; color: #4D4D4D; }
-    h1, h2, h3 { font-family: "Source Sans Pro", sans-serif; color: #2b2b2b; }
-    .jspsych-btn { font-family: proxima-nova, sans-serif; }
-    a { color: navy; } a:hover { color: blue; }
-    .consent-box { height: 380px; overflow: auto; border: 1px solid #ccc; padding: 8px 16px;
-                   text-align: justify; font-size: 14px; max-width: 760px; margin: 0 auto 16px; }
-    .irb-banner { background: #b00020; color: #fff; padding: 8px 12px; margin: 0 auto 12px; max-width: 760px;
-                  font-weight: 700; font-size: 14px; }
-    .instr { max-width: 640px; margin: 0 auto; text-align: left; font-size: 18px; line-height: 1.45; }
-  </style>
-  <script src="https://unpkg.com/jspsych@8/dist/index.browser.min.js"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2/dist/index.browser.min.js"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-html-button-response@2/dist/index.browser.min.js"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-instructions@2/dist/index.browser.min.js"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-fullscreen@2/dist/index.browser.min.js"></script>
+    <!-- Confetti feedback (only used if N_PRACTICE > 0) -->
+    <script src="https://unpkg.com/canvas-confetti@1.9.3/dist/confetti.browser.js"></script>
 
-  <!-- Cconfetti feedback (only used if N_PRACTICE > 0) -->
-  <script src="https://unpkg.com/canvas-confetti@1.9.3/dist/confetti.browser.js"></script>
+    <!-- Brady Lab plugins (these 3 files must sit in the same folder as this page) -->
+    <script src="brady-color-wheel.js"></script>
+    <script src="brady-plugin-utils.js"></script>
+    <script src="jspsych-wm-forced-choice.js"></script>
 
-  <!-- Brady Lab plugins -->
-  <script src="brady-color-wheel.js"></script>
-  <script src="brady-plugin-utils.js"></script>
-  <script src="jspsych-wm-forced-choice.js"></script>
+    <style>
+        /* Page background: the Fixed GLT gray, on every screen including during the trials */
+        html { background-color: rgb(175, 175, 175); }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        /* Make the hidden attribute always win */
+        [hidden] { display: none !important; }
+
+        /* Every screen is a direct child of <body>. Scoped like this so jsPsych's own divs keep their layout */
+        body > div, .nav-buttons { margin: 20px; text-align: center; }
+        body > div > p { max-width: 760px; margin-left: auto; margin-right: auto; }
+        .button-next { font-size: 20px; padding: 10px; font-weight: bold; }
+        .button-back { font-size: 20px; padding: 10px; font-weight: bold; width: 46px; height: 46px; cursor: pointer; }
+        .nav-buttons { display: flex; justify-content: center; align-items: center; gap: 10px; }
+        /* Startup screen */
+        #startupScreen {
+            display: flex; /* Visible on load */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        /* Consent Form (text copied from the Rickard GLT): long, so it scrolls inside a fixed-height box */
+        .consent-box {
+            height: 60vh;
+            overflow: auto;
+            border: 1px solid #666;
+            padding: 8px 16px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: normal;
+            width: min(1000px, 92vw);
+            margin: 0 auto 16px;
+        }
+        /* jsPsych draws only inside this div */
+        #jspsych-target { margin: 0; width: 100%; height: 100vh; }
+    </style>
 </head>
-<body></body>
-<script>
+<body>
+    <!-- Fullscreen Startup Screen -->
+    <div id="startupScreen">
+        <p>Please start the experiment in fullscreen for the best experience.</p>
+        <button class="button-next">Start Fullscreen</button>
+    </div>
+
+    <!-- Consent & Instructions -->
+    <div id="consent" hidden>
+        <!-- Consent text copied unchanged from the Rickard GLT task -->
+        <div class="consent-box">
+            <p>
+            Dr. Timothy Rickard is conducting a research study to gain more knowledge
+            about human learning and skill acquisition. <br />You have been asked to participate
+            in this study because you are a UCSD student and because you have been selected
+            randomly from the psychology subject pool to participate. <br />There will be
+            approximately 50 participants in this study. <br /><br />
+
+            The purpose of this study is to learn more about how people learn and acquire new cognitive skills.
+            If you agree to be in this study, you will perform memory tasks <br />and (or) solve
+            problems at a computer terminal or using paper and pencil. You will receive one-hour
+            of experimental credit for each hour of participation. <br />Each session will last no more than 1 hour.
+            You will be involved in no more than three sessions. <br /><br />
+
+            Participation in this study may involve some risks or discomforts. These include the following: <br />
+            1. A potential for the loss of confidentiality. The risk is very low, however. No identifying
+            information is included in the data that will be used in analyses. <br />All copies of consent forms will be
+            stored in a secure location. <br />Research records will be kept confidential to the extent allowed by law.
+            Research records may be reviewed by the UCSD Institutional Review Board. <br />
+            2. There is potential for minor fatigue. The maximum one-hour duration of each session
+            minimizes this risk. <br /><br />
+
+            Because this is a research study, there may also be some unknown risks that are currently unforeseeable. <br />
+            You will be told if any important new information is found during the course of this study that
+            may affect your wanting to continue. <br /><br />
+
+            Participation in research is entirely voluntary. You may refuse to participate, withdraw or
+            refuse to answer specific <br />questions at any time without penalty or loss of the benefits in
+            which you are entitled to.<br /> If you decide that you no longer wish to continue this study,
+            you are required to inform the experimenter as soon as your decision is made. <br /><br />
+
+            If you decide not to participate, you will have the opportunity to receive equivalent course
+            credit by completing an assignment related to <br />one of the psychology courses in which you are
+            currently enrolled. Should you choose that alternative, contact your instructor for guidance. <br /><br />
+
+            There may or may not be any direct benefit to you from participating in this study. The investigator, however, <br />
+            may learn more about human learning and skill acquisition, and society may benefit from this knowledge. <br /><br />
+
+            The PI may remove you from the study without your consent if the PI feels that is in your best interest
+            or the best interest of the study. <br />For example, you may be withdrawn from the study if you do not
+            follow the instructions given to you by the study personnel. <br /><br />
+
+            You will not receive monetary compensation for participating in this research. You will receive one-hour
+            of course credit for each completed experimental session. <br /><br />
+
+            There will be no cost to you for participating in this study. <br /><br />
+
+            If you are injured as a direct result of participation in this research, the University of California will
+            provide any medical care you need to treat those injuries. <br />You may call the Human Research Protections Program
+            office at (858-246-HRPP (858-246-4777)) for more information about this, <br />to inquire about your
+            rights as a research subject, or to report research-related problems. <br /><br />
+
+            Timothy Rickard, James Ashby, or Kiara Lizarraga have explained this study to you and answered your questions. <br />
+            If you have other questions or research-related problems,you may reach Timothy Rickard at 858-822-0122. <br /><br />
+
+            If you agree to participate, please click the button below.
+
+            </p>
+        </div>
+        <div class="nav-buttons">
+            <button class="button-back" onclick="document.getElementById('consent').hidden=true; document.getElementById('startupScreen').hidden=false;">&#8592;</button>
+            <button class="button-next">By clicking here, I consent to participate in this study.</button>
+        </div>
+    </div>
+
+    <div id="instructions1" hidden>
+        <p>
+            In this task you will remember pairs of colors and report one of them by choosing between two options. <br /><br />
+            There are 120 trials, and the task takes about 8-10 minutes. Each trial lasts about 3-5 seconds. <br /><br />
+            Please do not participate if you have any form of color blindness or do not have normal or
+            corrected-to-normal vision (wearing glasses or contacts is fine). Please do this task only once.
+        </p>
+        <div class="nav-buttons">
+            <button class="button-back" onclick="document.getElementById('instructions1').hidden=true; document.getElementById('consent').hidden=false;">&#8592;</button>
+            <button class="button-next">Click here when you are ready to proceed.</button>
+        </div>
+    </div>
+
+    <div id="instructions2" hidden>
+        <p>
+            On each trial you will see two colors and need to remember their hues as accurately as possible. <br /><br />
+            We encourage you to use visual memory (remember as if you are taking a photograph of them). <br /><br />
+            Please keep your eyes on the crosshair in the middle.
+        </p>
+        <div class="nav-buttons">
+            <button class="button-back" onclick="document.getElementById('instructions2').hidden=true; document.getElementById('instructions1').hidden=false;">&#8592;</button>
+            <button class="button-next">Click here when you are ready to proceed.</button>
+        </div>
+    </div>
+
+    <div id="instructions3" hidden>
+        <p>
+            The two colors will appear briefly (less than a second) at 2 of 12 locations that form a ring around the crosshair. <br /><br />
+            You might find it a little challenging sometimes. Don't worry, just try your best. <br /><br />
+            Then the colors will disappear for a short period (less than a second).
+        </p>
+        <div class="nav-buttons">
+            <button class="button-back" onclick="document.getElementById('instructions3').hidden=true; document.getElementById('instructions2').hidden=false;">&#8592;</button>
+            <button class="button-next">Click here when you are ready to proceed.</button>
+        </div>
+    </div>
+
+    <div id="instructions4" hidden>
+        <p>
+            Then a <b>black ring</b> will mark the location of one of the two colors, and two <b>very similar</b>
+            color choices will appear on each side of the crosshair. You have to report the color that was shown at the marked location. <br /><br />
+            Press <b>"<span class="keyLeft"></span>"</b> to choose the left circle or <b>"<span class="keyRight"></span>"</b> to choose the right circle.
+        </p>
+        <div class="nav-buttons">
+            <button class="button-back" onclick="document.getElementById('instructions4').hidden=true; document.getElementById('instructions3').hidden=false;">&#8592;</button>
+            <button class="button-next">Click here when you are ready to proceed.</button>
+        </div>
+    </div>
+
+    <div id="instructions5" hidden>
+        <p>
+            The next trial starts after you make a response. <br /><br />
+            The sequence is always the same: two colors appear and disappear, then you make a response, and repeat. <br /><br />
+            Are you ready?
+        </p>
+        <div class="nav-buttons">
+            <button class="button-back" onclick="document.getElementById('instructions5').hidden=true; document.getElementById('instructions4').hidden=false;">&#8592;</button>
+            <button class="button-next">Click here when you are ready to proceed.</button>
+        </div>
+    </div>
+
+    <!-- Task Area (hidden until the trials begin; jsPsych draws only in here) -->
+    <div id="jspsych-target" hidden></div>
+
+    <!-- Wrong device (phones and tablets; see BLOCK_MOBILE_DEVICES) -->
+    <div id="device-screen" hidden>
+        <p>
+            Sorry, this task cannot be done on a phone or tablet. <br /><br />
+            Please open this link again on a desktop or laptop computer with a keyboard. You can close this window.
+        </p>
+    </div>
+
+    <!-- Done Screen (no debriefing form in this task; the text is filled in by saveAndFinish) -->
+    <div id="done-screen" hidden></div>
+
+    <script>
+"use strict";
 //
-//  Timeline Flow: Consent -> Fullscreen -> Instructions -> Practice -> Full Task (120 trials) -> Save/Export Data
+//  Color memory task (Chunharas et al. 2022, Experiment 1, 2AFC replication)
+//  The screens around the task (startup, consent, instructions, done screen, data export)
+//  follow the Fixed GLT task. jsPsych + the Brady plugin only run the trials.
 //
 //  URL parameters (SONA fills in the participant's survey code):
 //    ?subjectId=XXXX   (also accepted: ?id=XXXX or ?code=XXXX)
-//    &test=1           test run: 8 trials, saved to the folder 26BR00_test
+//    &test=1           test run: allConfig.debug (8 trials), saved to the folder 26BR00_test
 //
 //  CONFIG
 //
@@ -56,28 +237,29 @@
 //   8  show_progress_bar   progress bar at the top: NOT in the original.  Now on.
 //   9  cue_test_location   probe cue is a black ring (plugin); paper/original used a small black triangle.
 //   10 canvas size         paper 500 px, original 400 px, plugin box 360 px (set by ring radius + item size). Stimuli unchanged.
-//   11 IRB_CONSENT_FINAL, the payment paragraph, SONA_EXPERIMENT_ID, SONA_CREDIT_TOKEN   still to be filled in.
-//   12 EXPERIMENTER, SAVE_URL, EXPERIMENT_NAME   check that the data path is the one you want on the server.
+//   11 SONA_EXPERIMENT_ID, SONA_CREDIT_TOKEN   still to be filled in from the SONA study page (without them participants are not sent back to SONA for credit).
+//      The consent text is the Rickard GLT text, copied unchanged.
+//   12 EXPERIMENTER, SAVE_URL, EXPERIMENT_NAME   now the Fixed GLT's values. Check that the save.php at SAVE_URL accepts 26BR00 and 26BR00_test.
 //   13 N_REPS / the balancing of target locations   design choice (each of 12 locations is the target 10 times).
+//   14 SAVE_SUCCESS_TEXT   the text save.php prints when it saved the file ("Success" in the Brady-lab version). "" = only check the HTTP status.
+//   15 page background     GLT gray on every screen, including during the trials. The original color task ran on a white page; the plugin's own 360 px canvas is still white.
+//   16 allConfig           ?test=1 uses .debug, a real run uses .group1 (same idea as the GLT's allConfig).
+//   17 BLOCK_MOBILE_DEVICES   phones and tablets get a "use a computer" screen instead of the task (the GLT was a tablet task; this one needs a keyboard).
 
-// Constants for data export using save.php
+// Constants for data export using save.php (same endpoint and fields as the Fixed GLT task)
 
-const EXPERIMENT_NAME = "26BR00";
-const EXPERIMENTER    = "";           // optional extra folder: data/{EXPERIMENTER}/26BR00/. "" = data/26BR00/
-const SAVE_URL        = "save.php";   // relative path
+const EXPERIMENT_NAME = "26TR04";
+const EXPERIMENTER    = "JamesAshby";   // folder on the server: {EXPERIMENTER}/26BR00/   ("" = no extra folder)
+const SAVE_URL        = "https://ccnlab.ucsd.edu/jaashby/save.php";   // absolute URL, copied from the GLT. Use "save.php" if this page sits next to save.php
+// REVIEW 14: the Brady-lab save.php prints "Success" after saving. If the ccnlab one prints something else, set this to "" (or to its text).
+const SAVE_SUCCESS_TEXT = "Success";
 
 // ---- SONA completion (fill in from the SONA study settings) -----------------
 // REVIEW 11: fill these in from the SONA study settings, otherwise participants are not redirected to receive credit.
 const SONA_EXPERIMENT_ID = null;      // e.g. 1234   (null = no redirect, just a "you can close this tab" message)
 const SONA_CREDIT_TOKEN  = null;      // e.g. "805f6634..."
 const SONA_CREDIT_URL    = "https://ucsd.sona-systems.com/webstudy_credit.aspx";
-const CONTACT_EMAIL      = "timbrady@ucsd.edu";   // from the original consent text; shown only if saving fails
-
-// ---- Consent --------------------------------------------------------------
-// The consent text below is the ORIGINAL MTurk text. Its payment paragraph must be replaced with the
-// IRB-approved SONA wording. While this is false a red banner is shown on the consent screen.
-// REVIEW 11: replace the payment paragraph in CONSENT_HTML with the IRB-approved SONA wording, then set this to true.
-const IRB_CONSENT_FINAL = false;
+const CONTACT_EMAIL      = "timbrady@ucsd.edu";   // CHECK: participants are told to email their data file here if saving fails (carried over from the Brady version)
 
 // ---- Design (Experiment 1) ------------------------------------------------
 // REVIEW 13: 5 reps x 12 target locations x 2 foil directions = 120 trials. Each location is the target exactly 10 times.
@@ -88,7 +270,6 @@ const COLOR_DIST_DEG   = 45;    // the two memory colors are 45 deg apart
 const HUE_JITTER_DEG   = 0;     // paper: none (exactly 45). The original code added independent uniform +/-3 deg per item: set 3 to reproduce
 // REVIEW 7: original had no practice trials. Set to e.g. 3 for practice trials with feedback.
 const N_PRACTICE       = 0;     // original had no practice trials (only the demo screens). >0 adds feedback trials
-const N_TEST_TRIALS    = 8;     // length of a ?test=1 run
 
 // Item locations (paper): any two of the 12 placeholders with at least 2 empty placeholders between them,
 // i.e. at least 3 slots apart around the ring (3-6 slots = 90-180 deg). No hemifield restriction.
@@ -126,11 +307,44 @@ const COLOR_SPACE = COLOR_SPACES.code;
 const KEY_LEFT = "z", KEY_RIGHT = "m";
 
 // ============================================================================
+//  Device check (this task needs a computer keyboard, so phones and tablets are turned away)
+// ============================================================================
+// REVIEW 17: set to false to allow every device. Nothing is saved for a blocked device.
+const BLOCK_MOBILE_DEVICES = true;
+
+function isPhoneOrTablet() {
+  const ua = navigator.userAgent || "";
+  // Chrome / Edge on Android say so directly
+  const uaMobile = !!(navigator.userAgentData && navigator.userAgentData.mobile === true);
+  // Phone / tablet names in the browser's user-agent string (an Android browser in "desktop site" mode hides these)
+  const uaNames = /Android|iPhone|iPad|iPod|Mobile|Tablet|Silk|Kindle|BlackBerry|IEMobile|Opera Mini|webOS/i.test(ua);
+  // iPadOS Safari pretends to be a Mac, but a Mac has no touch screen
+  const iPadAsMac = /Macintosh/.test(ua) && navigator.maxTouchPoints > 1;
+  // Main input is a finger and there is no mouse / trackpad at all (a touch-screen laptop still has a trackpad)
+  const fingerOnly = !!window.matchMedia && matchMedia("(pointer: coarse)").matches && !matchMedia("(any-pointer: fine)").matches;
+  return uaMobile || uaNames || iPadAsMac || fingerOnly;
+}
+
+// Blocked: hide the startup screen so there is no way to start the task
+if (BLOCK_MOBILE_DEVICES && isPhoneOrTablet()) {
+  document.getElementById("startupScreen").hidden = true;
+  document.getElementById("device-screen").hidden = false;
+}
+
+// ============================================================================
 //  Small helpers
 // ============================================================================
 const params     = new URLSearchParams(window.location.search);
 const TEST_MODE  = params.get("test") === "1";
-const SAVE_NAME  = TEST_MODE ? EXPERIMENT_NAME + "_test" : EXPERIMENT_NAME;   // save.php only accepts these two names
+const SAVE_NAME  = TEST_MODE ? EXPERIMENT_NAME + "_test" : EXPERIMENT_NAME;   // test runs are saved to their own folder
+
+// Experiment Config (same idea as the GLT's allConfig: ?test=1 picks "debug", a real run picks "group1")
+// REVIEW 16
+const allConfig = {
+    debug:  { maxTrials: 8 },      // test run: only the first 8 trials
+    group1: { maxTrials: null },   // real run: every trial (N_REPS x 24)
+};
+const config = TEST_MODE ? allConfig.debug : allConfig.group1;
 
 const wrap360 = (x) => ((x % 360) + 360) % 360;
 const signedDiff = (a, b) => { const d = wrap360(a - b); return d > 180 ? d - 360 : d; };   // a - b in (-180, 180]
@@ -266,12 +480,14 @@ function checkTrialList(list, nPerCell) {
 // ============================================================================
 //  jsPsych setup
 // ============================================================================
-let consentDeclined = false;
+const taskEl     = document.getElementById("jspsych-target");
+const doneScreen = document.getElementById("done-screen");
 
 const jsPsych = jsPsychModule.initJsPsych({
+  display_element: taskEl,   // jsPsych only draws inside this div; everything else is the plain HTML screens above
   // REVIEW 8: the original had no progress bar. Set to false to match it.
   show_progress_bar: true,   // the "Completion Progress" bar at the top of the page
-  on_finish: () => (consentDeclined ? undefined : saveAndFinish()),
+  on_finish: () => saveAndFinish(),
 });
 
 // Participant ID from the URL (SONA survey code); random fallback so a test run still saves.
@@ -292,102 +508,8 @@ jsPsych.data.addProperties({
 });
 
 // ============================================================================
-//  Screens
+//  The trial itself
 // ============================================================================
-
-// ---- 1) Consent. ORIGINAL text; the PAYMENT paragraph is a placeholder to be replaced (IRB). ----
-const CONSENT_HTML = `<p align="center"><b>UNIVERSITY OF CALIFORNIA, SAN DIEGO
-<br>CONSENT TO ACT AS A RESEARCH SUBJECT</b>
-<p>
-<br> Timothy Brady, Ph.D., is conducting a research study to find out more about attention, memory and vision.  You have been asked to participate because you are a healthy young adult.  There will be approximately 1600 participants in this study this year. The expected duration of the study is 5 years, though your participation will last only between 3 minutes and 45 minutes, with the exact expected timing listed in the HIT description.</p>
-<p>
-<br><b>PROCEDURES.</b> If you agree to participate in this study by accepting this HIT and continuing in the task, the following will happen to you:
-<br> &emsp; 1. You will be shown displays of letters, words, or pictures, right here in your web browser. 
-<br> &emsp; 2. You will try to perceive and remember these stimuli, and respond by pressing keys or moving and clicking the mouse in a manner that we will describe to you.</p>
-<p>
-<br> <b>RISKS.</b> You will be required only to continue to interact with your web browser and make responses for a short duration. Thus, no potential risks or discomforts are anticipated except for the possibility that some tasks may be slightly boring. However, there may be risks that are currently unforeseeable.</p>
-<p><br><b>PAYMENT/REMUNERATION.</b> [[PLACEHOLDER: replace this paragraph with the IRB-approved SONA course-credit wording. The original MTurk payment text was removed.]]</p>
-<p>
-<br><b>RIGHTS.</b> You may call the UCSD Human Research Protection Program at 858-657-5100 to ask about your rights as a research subject or to report research-related problems.</p>
-<p>
-<br><b>BENEFITS.</b>  There will be no direct benefit to you from these procedures.  However, the investigator may learn more about basic questions pertaining to attention, memory and vision.   This knowledge may have benefits to society in fields ranging from improving education to visual design, but these benefits will be indirect.</p>
-<p>
-<br><b>EXPLANATION.</b>  The researcher has explained this study to you and answered your questions.  If you have questions about the research or research-related problems, including any adverse events, you may reach Dr. Timothy Brady at timbrady@ucsd.edu or 858-822-4530.</p>
-<p>
-<br><b>VOLUNTARY NATURE OF PARTICIPATION.</b>  Participation in research is entirely voluntary.  You may refuse to participate or withdraw at any time without penalty. The alternative to participation is to choose not to participate.</p>
-<p>
-<br><b>CONFIDENTIALITY.</b>  Research records will be kept confidential to the extent allowed by law.  As with all research, there is also the possibility of loss of confidentiality.  Information from participants such as yourself will be identified by a subject number, which is not associated with your identity, by the researchers, to minimize the potential loss of confidentiality.</p> 
-<p>
-<br>By clicking “I agree”, you are indicating that you are at least 18 years old, have read this consent form and agree to participate in this research study. Please print a copy of this page for your records.</p>
-</p>`;
-
-const consentTrial = {
-  type: jsPsychHtmlButtonResponse,
-  stimulus:
-    "<h2>Consent to act as a research subject</h2>" +
-    (IRB_CONSENT_FINAL ? "" :
-      "<div class='irb-banner'>TEST VERSION: this consent text has not been updated for SONA / this protocol. " +
-      "Do not collect real data until the IRB-approved text is in place (set IRB_CONSENT_FINAL = true).</div>") +
-    "<div class='consent-box'>" + CONSENT_HTML + "</div>",
-  choices: ["I agree", "I do not agree"],
-  data: { phase: "consent" },
-  on_finish: (data) => {
-    if (data.response === 1) {
-      consentDeclined = true;
-      jsPsych.abortExperiment("<p>You chose not to participate. You may close this window.</p>");
-    }
-  },
-};
-
-// ---- 2) Fullscreen ----
-const fullscreenTrial = {
-  type: jsPsychFullscreen,
-  fullscreen_mode: true,
-  message: "<p>This task runs in full screen.<br>Click the button to continue.</p>",
-  button_label: "Go full screen",
-  data: { phase: "fullscreen" },
-};
-
-// ---- 3) Instructions (adapted from the original task's screens; MTurk wording removed) ----
-const instructionsTrial = {
-  type: jsPsychInstructions,
-  pages: [
-    "<div class='instr'><h2>Color memory task</h2>" +
-      "<p>In this task you will remember pairs of colors and report one of them by choosing between two options.</p>" +
-      "<p>There are 120 trials, and the task takes about 8-10 minutes. Each trial lasts about 3-5 seconds.</p>" +
-      "<p>Please do not participate if you have any form of color blindness or do not have normal or " +
-      "corrected-to-normal vision (wearing glasses or contacts is fine). Please do this task only once.</p>" +
-      "<p>Press the <b>space bar</b> to continue.</p></div>",
-
-    "<div class='instr'><p>On each trial you will see two colors and need to remember their hues as accurately as possible.</p>" +
-      "<p>We encourage you to use visual memory (remember as if you are taking a photograph of them).</p>" +
-      "<p>Please keep your eyes on the crosshair in the middle.</p>" +
-      "<p>Press the <b>space bar</b> to continue.</p></div>",
-
-    "<div class='instr'><p>The two colors will appear briefly (less than a second) at 2 of 12 locations that form a ring around the crosshair.</p>" +
-      "<p>You might find it a little challenging sometimes. Don't worry, just try your best.</p>" +
-      "<p>Then the colors will disappear for a short period (less than a second).</p>" +
-      "<p>Press the <b>space bar</b> to continue.</p></div>",
-
-    "<div class='instr'><p>Then a <b>black ring</b> will mark the location of one of the two colors, and two <b>very similar</b> " +
-      "color choices will appear on each side of the crosshair. You have to report the color that was shown at the marked location.</p>" +
-      "<p>Press <b>\"" + KEY_LEFT.toUpperCase() + "\"</b> to choose the left circle or <b>\"" + KEY_RIGHT.toUpperCase() +
-      "\"</b> to choose the right circle.</p>" +
-      "<p>Press the <b>space bar</b> to continue.</p></div>",
-
-    "<div class='instr'><p>The next trial starts after you make a response.</p>" +
-      "<p>The sequence is always the same: two colors appear and disappear, then you make a response, and repeat.</p>" +
-      "<p>Are you ready?</p>" +
-      "<p>Press the <b>space bar</b> to begin.</p></div>",
-  ],
-  key_forward: " ",
-  key_backward: "ArrowLeft",
-  allow_keys: true,
-  show_clickable_nav: true,
-  data: { phase: "instructions" },
-};
-
-// ---- 4) The trial itself ----------------------------------------------------
 function makeTrial(t, phase, feedback) {
   return {
     type: jsPsychWmForcedChoice,
@@ -437,13 +559,13 @@ function makeTrial(t, phase, feedback) {
 }
 
 // ============================================================================
-//  Assemble the timeline
+//  Assemble the timeline (trials only; the screens before them are the plain HTML above)
 // ============================================================================
 let mainList = buildTrialList(N_REPS);
 if (!checkTrialList(mainList, N_REPS)) console.error("Check the trial list before running participants.");
-if (TEST_MODE) mainList = mainList.slice(0, N_TEST_TRIALS);
+if (config.maxTrials) mainList = mainList.slice(0, config.maxTrials);
 
-const timeline = [consentTrial, fullscreenTrial, instructionsTrial];
+const timeline = [];
 
 if (N_PRACTICE > 0) {
   timeline.push({
@@ -461,22 +583,82 @@ if (N_PRACTICE > 0) {
 
 mainList.forEach((t) => timeline.push(makeTrial(t, "main", false)));
 
-jsPsych.run(timeline);
+// ============================================================================
+//  Navigation Helpers (copied from the Fixed GLT task)
+// ============================================================================
+function linkNextScreen(first, next, fn) {
+    const btn = document.querySelector(first + " .button-next");
+    if (!btn) return;
+    btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        // 1) Hide current screen immediately
+        const firstEl = document.querySelector(first);
+        if (firstEl) firstEl.hidden = true;
+        // 2) Show next screen (if any)
+        if (next) {
+            const nextEl = document.querySelector(next);
+            if (nextEl) nextEl.hidden = false;
+        }
+        // 3) Fire any follow-up logic without awaiting
+        if (fn) {
+            try { fn(); } catch (err) { console.error(err); }
+        }
+    });
+}
+
+// Response keys shown on the instruction pages (so they always match KEY_LEFT / KEY_RIGHT)
+document.querySelectorAll(".keyLeft").forEach(el => el.textContent = KEY_LEFT.toUpperCase());
+document.querySelectorAll(".keyRight").forEach(el => el.textContent = KEY_RIGHT.toUpperCase());
+
+// Startup → Consent (request fullscreen here ONLY)
+linkNextScreen("#startupScreen", "#consent", () => {
+    const el = document.documentElement;
+    try {
+        const p =
+            (el.requestFullscreen && el.requestFullscreen()) ||
+            (el.webkitRequestFullscreen && el.webkitRequestFullscreen()) ||
+            (el.msRequestFullscreen && el.msRequestFullscreen());
+        // If a promise is returned, catch rejections so we don't throw
+        if (p && typeof p.catch === "function") p.catch(err => console.warn("Fullscreen request failed:", err));
+    } catch (err) {
+        console.warn("Fullscreen request threw:", err);
+    }
+});
+// Consent → Instructions chain (no fullscreen here)
+linkNextScreen("#consent", "#instructions1");
+linkNextScreen("#instructions1", "#instructions2");
+linkNextScreen("#instructions2", "#instructions3");
+linkNextScreen("#instructions3", "#instructions4");
+linkNextScreen("#instructions4", "#instructions5");
+// Last instruction page → trials
+linkNextScreen("#instructions5", null, () => beginOrdeal());
 
 // ============================================================================
-//  Saving (replaces the original $.post to save.php). Retries, then falls back to a download.
+//  Main Flow
+// ============================================================================
+function beginOrdeal() {
+    // Show the task div and run the trials (jsPsych draws only inside it)
+    taskEl.hidden = false;
+    taskEl.focus();   // jsPsych listens for the Z / M keys on this div
+    jsPsych.run(timeline);
+}
+
+// ============================================================================
+//  Saving (like the GLT's $.post to save.php, same four fields). Retries, then falls back to a download.
 // ============================================================================
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function postData(json) {
-  const body = new URLSearchParams();             // form-encoded, so PHP receives it in $_POST like the old $.post
-  body.set("id", subjectId);
-  body.set("experimenter", EXPERIMENTER);
-  body.set("experimentName", SAVE_NAME);
-  body.set("curData", json);
-  const resp = await fetch(SAVE_URL, { method: "POST", body: body });
+  // Same fields as the GLT: id / experimenter / experimentName / curData
+  const dataToServer = {
+    id: subjectId,
+    experimenter: EXPERIMENTER,
+    experimentName: SAVE_NAME,
+    curData: json,
+  };
+  const resp = await fetch(SAVE_URL, { method: "POST", body: new URLSearchParams(dataToServer) });   // form-encoded, so PHP receives it in $_POST like $.post
   const text = await resp.text();
-  if (!resp.ok || text.indexOf("Success") < 0) throw new Error("save.php said: HTTP " + resp.status + " " + text.slice(0, 200));
+  if (!resp.ok || (SAVE_SUCCESS_TEXT && text.indexOf(SAVE_SUCCESS_TEXT) < 0)) throw new Error("save.php said: HTTP " + resp.status + " " + text.slice(0, 200));
   return true;
 }
 
@@ -487,8 +669,10 @@ function creditUrl() {
 }
 
 async function saveAndFinish() {
-  const el = jsPsych.getDisplayElement();
-  el.innerHTML = "<p>Saving your data. Please do not close this window...</p>";
+  // Swap the task screen for the done screen while saving
+  taskEl.hidden = true;
+  doneScreen.hidden = false;
+  doneScreen.innerHTML = "<p>Saving your data. Please do not close this window...</p>";
   try { if (document.fullscreenElement) await document.exitFullscreen(); } catch (e) { /* ignore */ }
 
   const json = jsPsych.data.get().json();
@@ -501,15 +685,15 @@ async function saveAndFinish() {
   const url = creditUrl();
   if (saved) {
     console.log("Saved!");
-    el.innerHTML = "<h2>All done, thank you!</h2><p>Your data have been saved.</p>" +
+    doneScreen.innerHTML = "<p>Thank you for participating, we appreciate your time and effort!</p><p>Your data have been saved.</p>" +
       (url ? "<p>You will now be taken back to SONA to receive your credit. <a href='" + url + "'>Click here if nothing happens.</a></p>"
            : "<p>You can close this tab.</p>");
     if (url) setTimeout(() => { window.location.href = url; }, 2500);
   } else {
     // Do not lose the data and do not cost the participant their credit.
-    el.innerHTML = "<h2>All done, thank you!</h2>" +
+    doneScreen.innerHTML = "<p>Thank you for participating, we appreciate your time and effort!</p>" +
       "<p>We could not save your data to our server. Please click the button to download your data file and " +
-      "email it to <b>" + CONTACT_EMAIL + "</b>.</p><p><button id='dl' class='jspsych-btn'>Download my data</button></p>" +
+      "email it to <b>" + CONTACT_EMAIL + "</b>.</p><p><button id='dl' class='button-next'>Download my data</button></p>" +
       (url ? "<p><a href='" + url + "'>Continue to SONA to receive your credit</a></p>" : "");
     document.getElementById("dl").addEventListener("click", () => {
       const a = document.createElement("a");
@@ -519,5 +703,6 @@ async function saveAndFinish() {
     });
   }
 }
-</script>
+    </script>
+</body>
 </html>
