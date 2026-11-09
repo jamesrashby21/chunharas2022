@@ -19,7 +19,9 @@ This experiment will be a replication of Chunharas & Brady, 2022[1]. The origina
 For this replication, the experiment will consist of the same 2-AFC color wheel VWM task from Experiment 1 of Chunharas, 2022, able to be conducted online through the SONA platform. The task involves a continuous color wheel, where there will be 2 color samples displayed from the wheel: one "correct" color and one non-target color, 45º apart in color space from each other. The participant will then be asked to choose the correct target from two colors, one of which will be a foil either 6º towards the non-target or 6º away from the non-target (in relation to the correct color). The experiment was a within-subjects design where each condition was equally balanced, 60 trials of each type. I will have to re-code it in Javascript, HTML, and CSS, since the original experiment used MATLAB and Psychophysics toolbox. Thankfully, all of the paper's code was registered via OSF, including the original code for the task, participant data, and analysis code. Following data collection, data analysis will consist of a paired t-tests on accuracy. The original results showed toward vs. away gave t(44)=3.98, p<.001, toward vs. chance gave t(44)=3.73, p=.006, and away vs. chance gave t(44)=-1.76, p=.08.
 
 
-Link to Paradigm: https://ccnlab.ucsd.edu/jaashby/26TR04/chunharas2022.html
+Link to Paradigm: https://ccnlab.ucsd.edu/jaashby/26TR04/chunharas2022.html?subjectId=ME
+Link for SONA Participants: https://ccnlab.ucsd.edu/jaashby/26TR04/chunharas2022.html?subjectId=%SURVEY_CODE%
+Link for Test Paradigm: https://ccnlab.ucsd.edu/jaashby/26TR04/chunharas2022.html?test=1&subjectId=ME
 
 OSF Link: https://osf.io/qp6xk/files/osfstorage?view_only=0559769c587c4c8294288451e8af239e
 
