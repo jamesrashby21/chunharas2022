@@ -5,10 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Color memory task</title>
 
-  <!-- jsPsych v8 core -->
   <link rel="stylesheet" href="https://unpkg.com/jspsych@8/css/jspsych.css" />
 
-  <!-- Lab look: favicon + fonts (matches bradylab.ucsd.edu) -->
   <link rel="icon" href="favicon.ico" />
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;700;900&display=swap" rel="stylesheet" />
   <link href="fonts.css" rel="stylesheet" type="text/css" />
@@ -24,110 +22,49 @@
     .instr { max-width: 640px; margin: 0 auto; text-align: left; font-size: 18px; line-height: 1.45; }
   </style>
   <script src="https://unpkg.com/jspsych@8/dist/index.browser.min.js"></script>
-
-  <!-- standard jsPsych plugins for the wrapper screens -->
   <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2/dist/index.browser.min.js"></script>
   <script src="https://unpkg.com/@jspsych/plugin-html-button-response@2/dist/index.browser.min.js"></script>
   <script src="https://unpkg.com/@jspsych/plugin-instructions@2/dist/index.browser.min.js"></script>
   <script src="https://unpkg.com/@jspsych/plugin-fullscreen@2/dist/index.browser.min.js"></script>
 
-  <!-- optional confetti feedback (only used if N_PRACTICE > 0) -->
+  <!-- Cconfetti feedback (only used if N_PRACTICE > 0) -->
   <script src="https://unpkg.com/canvas-confetti@1.9.3/dist/confetti.browser.js"></script>
 
-  <!-- Brady-lab plugins: the color wheel, the shared helpers, then the plugin used here.
-       These files must sit in the SAME folder as this page. -->
+  <!-- Brady Lab plugins -->
   <script src="brady-color-wheel.js"></script>
   <script src="brady-plugin-utils.js"></script>
   <script src="jspsych-wm-forced-choice.js"></script>
 </head>
 <body></body>
 <script>
-/*
- * ============================================================================
- *  Study 26BR00 -- replication of Chunharas & Brady (2022), EXPERIMENT 1
- *  "Memory distortion vs. response strategy": remember two colors that are
- *  45 deg apart in color space, then pick the cued item's color in a 2-AFC.
- *  The wrong option (foil) is 6 deg from the correct color, either TOWARD or
- *  AWAY from the uncued (non-target) color. 60 trials per condition = 120.
- *
- *  Built on the Brady-lab jsPsych v8 plugin `wm-forced-choice`, from the
- *  chunharas2022.html boilerplate. Original task code: original_WMbias_2AFC.html
- *  (OSF qp6xk). That file is reproduced, commented out, in the APPENDIX at the
- *  bottom of this script, with its bug marked.
- *
- *  Flow: consent -> fullscreen -> instructions -> [practice] -> 120 trials -> save.
- *
- *  URL parameters (SONA fills in the participant's survey code):
- *     ?subjectId=XXXX   (also accepted: ?id=XXXX or ?code=XXXX)
- *     &test=1           test run: 8 trials, saved to the folder 26BR00_test
- *
- * ----------------------------------------------------------------------------
- *  DISCREPANCY LOG  (paper vs. original code vs. this version)
- *  Where the paper (Exp 1 Methods) and the original code disagree, this version
- *  follows the PAPER, except for the color space (item 2).
- *  1. BUG FIXED. The original froze which member of each location pair is the
- *     target (see APPENDIX A, "BUG"), so a participant's probed locations were
- *     lopsided (on average ~3 of 12 locations were never probed). Here the
- *     target and non-target locations are drawn fresh on every trial.
- *  2. Color space. Paper text: CIE L*a*b* L=70, a=20, b=38, radius=60 (Zhang &
- *     Luck wheel). Original code (vismemCC.js angle2HEX): L=65, a=9, b=9,
- *     radius=50, Rec.709 gamma. This file uses what the CODE did (the stimuli
- *     participants actually saw), NOT the paper's values: pushed through the
- *     same conversion, the paper's values put 201 of 360 hues outside the RGB
- *     gamut (code's values: 56, tiny overshoot), so the wheel would be heavily
- *     desaturated. Switch with COLOR_SPACE below to look at it; ask Tim first.
- *  3. Item separation. Paper: always exactly 45 deg. Code: 45 deg plus an
- *     independent uniform +/-3 deg jitter on each item (separation 39-51 deg).
- *     Here: exactly 45 (HUE_JITTER_DEG = 0); set it to 3 to reproduce the code.
- *     The actual separation is still saved on every trial (item_separation).
- *  4. Item locations. Paper: two randomly chosen placeholders (of 12) with "at
- *     least 2 empty placeholders" between them, i.e. 3 to 6 slots apart; no
- *     hemifield restriction. Code: 12 fixed pairs, always exactly 3 slots (90
- *     deg) apart. Here: the paper's rule (MIN_SLOT_GAP = 3). The TARGET location
- *     is balanced (each of the 12 slots is probed 10 times, 5 toward / 5 away);
- *     the non-target is drawn at random from the 7 allowed slots.
- *  4b. Response options. Paper: centered +/-35 px from fixation. Code: +/-30 px.
- *     Here: 35 px (OPTION_OFFSET_PX).
- *  4c. Canvas. Paper: 500 px canvas with a 1 px border. Code: 400 px. The plugin's
- *     box is 2*radius + 2*item_size + 40 = 360 px and cannot be set directly.
- *     Ring radius (120), item radius (20) and 12 placeholders agree with the paper.
- *     Padding the box to 500 px with CSS (stimuli unchanged) is possible but NOT
- *     applied in this version.
- *  5. Not in the paper, but in the code: a 2000 ms fixation interval with empty
- *     placeholders before every array. Kept (PRE_ARRAY_MS).
- *  6. 180-deg catch trials in the code belong to the Experiment 2 control
- *     replication, not Experiment 1. Not used here (120 trials, not 132).
- *  7. Look of the display now comes from the plugin: "+" fixation, a black ring
- *     (instead of a triangle) marks the probed location, thin gray placeholder
- *     outlines, 360 px box (code: 400 px canvas). Revisit with the lab.
- * ============================================================================
- */
-
-// ============================================================================
-//  CONFIG
-// ============================================================================
 //
-//  >>> SEARCH THIS FILE FOR  "REVIEW"  <<<  to find every setting that was changed to follow the paper,
-//  that still disagrees with the paper or the original code, or that is an open question:
-//   REVIEW 1  HUE_JITTER_DEG      paper: exactly 45 deg (0). Original code: +/-3 deg jitter.  Now 0.
-//   REVIEW 2  MIN_SLOT_GAP        paper's location rule (>= 2 empty placeholders between items). Original: 12 fixed pairs 3 apart.
-//   REVIEW 3  buildTrialList()    HOW the allowed locations are sampled is my choice (paper only says "randomly selected").
-//   REVIEW 4  OPTION_OFFSET_PX    paper: 35 px. Original code: 30 px.  Now 35.
-//   REVIEW 5  COLOR_SPACE         paper's L/a/b/radius vs the code's. Now the CODE's (paper's values are mostly out of gamut). OPEN QUESTION.
-//   REVIEW 6  PRE_ARRAY_MS        2000 ms fixation before each array: in the original code, not mentioned in the paper.
-//   REVIEW 7  N_PRACTICE          original had no practice trials.  Now 0.
-//   REVIEW 8  show_progress_bar   progress bar at the top: NOT in the original.  Now on.
-//   REVIEW 9  cue_test_location   probe cue is a black ring (plugin); paper/original used a small black triangle.
-//   REVIEW 10 canvas size         paper 500 px, original 400 px, plugin box 360 px (set by ring radius + item size). Stimuli unchanged.
-//   REVIEW 11 IRB_CONSENT_FINAL, the payment paragraph, SONA_EXPERIMENT_ID, SONA_CREDIT_TOKEN   still to be filled in.
-//   REVIEW 12 EXPERIMENTER, SAVE_URL, EXPERIMENT_NAME   check that the data path is the one you want on the server.
-//   REVIEW 13 N_REPS / the balancing of target locations   design choice (each of 12 locations is the target 10 times).
+//  Timeline Flow: Consent -> Fullscreen -> Instructions -> Practice -> Full Task (120 trials) -> Save/Export Data
+//
+//  URL parameters (SONA fills in the participant's survey code):
+//    ?subjectId=XXXX   (also accepted: ?id=XXXX or ?code=XXXX)
+//    &test=1           test run: 8 trials, saved to the folder 26BR00_test
+//
+//  CONFIG
+//
+//   1  HUE_JITTER_DEG      paper: exactly 45 deg (0). Original code: +/-3 deg jitter.  Now 0.
+//   2  MIN_SLOT_GAP        paper's location rule (>= 2 empty placeholders between items). Original: 12 fixed pairs 3 apart.
+//   3  buildTrialList()    HOW the allowed locations are sampled is my choice (paper only says "randomly selected").
+//   4  OPTION_OFFSET_PX    paper: 35 px. Original code: 30 px.  Now 35.
+//   5  COLOR_SPACE         paper's L/a/b/radius vs the code's. Now the CODE's (paper's values are mostly out of gamut). OPEN QUESTION.
+//   6  PRE_ARRAY_MS        2000 ms fixation before each array: in the original code, not mentioned in the paper.
+//   7  N_PRACTICE          original had no practice trials.  Now 0.
+//   8  show_progress_bar   progress bar at the top: NOT in the original.  Now on.
+//   9  cue_test_location   probe cue is a black ring (plugin); paper/original used a small black triangle.
+//   10 canvas size         paper 500 px, original 400 px, plugin box 360 px (set by ring radius + item size). Stimuli unchanged.
+//   11 IRB_CONSENT_FINAL, the payment paragraph, SONA_EXPERIMENT_ID, SONA_CREDIT_TOKEN   still to be filled in.
+//   12 EXPERIMENTER, SAVE_URL, EXPERIMENT_NAME   check that the data path is the one you want on the server.
+//   13 N_REPS / the balancing of target locations   design choice (each of 12 locations is the target 10 times).
 
-// ---- Where the data go (see save.php) ---------------------------------------
-// REVIEW 12: data go to data/26BR00/{id}.txt next to save.php. save.php only accepts EXPERIMENT_NAME "26BR00" (and "26BR00_test").
+// Constants for data export using save.php
+
 const EXPERIMENT_NAME = "26BR00";
 const EXPERIMENTER    = "";           // optional extra folder: data/{EXPERIMENTER}/26BR00/. "" = data/26BR00/
-const SAVE_URL        = "save.php";   // relative to this page; change if save.php lives elsewhere
+const SAVE_URL        = "save.php";   // relative path
 
 // ---- SONA completion (fill in from the SONA study settings) -----------------
 // REVIEW 11: fill these in from the SONA study settings, otherwise participants are not redirected to receive credit.
@@ -582,231 +519,5 @@ async function saveAndFinish() {
     });
   }
 }
-
-/*
- * ============================================================================
- *  APPENDIX -- ORIGINAL CODE, kept for reference (original_WMbias_2AFC.html).
- *  Lines starting  //|  are verbatim from the original file.
- *  Lines starting  // >>>  are annotations added here, not part of the original.
- * ============================================================================
- */
-
-// ---- APPENDIX A: original trial generation (the part with the bug) ----------
-//|         var stimdur = 150;
-//|         var delay = 750;
-//|         var colordist = 45;
-//|         var trlrep = 5;
-//|         var colortstdist = [-6,6]
-//|         // counter balancing hemifield positions
-//|         var pairpos = [[0,3],[1,4],[2,5],[6,9],[7,10],[8,11],[3,6],[4,7],[5,8],[9,0],[10,1],[11,2]]
-// >>> Exp 1 has no catch trials: 2 foil directions x 12 pairs x 5 reps = 120. The '+ pairpos.length' below adds the
-// >>> 12 catch trials of the Exp 2 control replication (132 total). Not used in this version.
-//|         var nTrials = colortstdist.length*pairpos.length*trlrep + pairpos.length;
-//|
-//|         var postemp = []
-//|         var tsttemp = [];
-//|
-//|         var isTestkey=false;
-//|
-//|         for (var irep = 0; irep < trlrep; irep++){
-//|             for (var itst = 0; itst < colortstdist.length; itst++){
-//|                 for (ipair = 0 ; ipair < pairpos.length; ipair++){
-//|
-// >>> BUG: shuffle() (defined below) shuffles IN PLACE and returns the SAME array object. So every trial that uses
-// >>> this pair pushes a reference to one shared array, and the target/non-target order within each pair is
-// >>> frozen for the whole session (all 10 trials + the catch trial of a pair see the same final order).
-// >>> Consequence: each participant has 12 fixed target slots (one per pair). In simulation ~3 of the 12 locations
-// >>> are never probed and others are probed 20 times. Intended behavior: a fresh target/non-target draw per trial.
-// >>> Fix in this file: buildTrialList() draws the non-target location fresh on every trial (and balances the target
-// >>> location); it follows the paper's rule (>= 2 empty placeholders between the items) instead of fixed 90-deg pairs.
-//|                     postemp.push(shuffle(pairpos[ipair]))
-//|                     tsttemp.push(shuffle([colortstdist[itst],0]))
-//|
-//|                 }
-//|             }
-//|         }
-//|         //
-//|
-//|
-//|         for (ipair = 0 ; ipair < pairpos.length; ipair++){
-//|
-// >>> BUG: shuffle() (defined below) shuffles IN PLACE and returns the SAME array object. So every trial that uses
-// >>> this pair pushes a reference to one shared array, and the target/non-target order within each pair is
-// >>> frozen for the whole session (all 10 trials + the catch trial of a pair see the same final order).
-// >>> Consequence: each participant has 12 fixed target slots (one per pair). In simulation ~3 of the 12 locations
-// >>> are never probed and others are probed 20 times. Intended behavior: a fresh target/non-target draw per trial.
-// >>> Fix in this file: buildTrialList() draws the non-target location fresh on every trial (and balances the target
-// >>> location); it follows the paper's rule (>= 2 empty placeholders between the items) instead of fixed 90-deg pairs.
-//|                     postemp.push(shuffle(pairpos[ipair]))
-// >>> 180-deg catch trials: Exp 2 control replication only. Dropped here.
-//|                     tsttemp.push(shuffle([180,0]))
-//|
-//|                 }
-//|
-//|         var tempcol = [0,colordist];
-//|
-//|         // Shuffle them!
-//|         var alltrlseq = [];
-//|         var alltrlrot = [];
-//|         var alltstpos = [];
-//|         var alltstcol = [];
-//|         var alltstcode = [];
-//|         var alltarcode =[];
-//|         var tempseq = [];
-//|         var alltstord = 0;
-//|
-//|         for (var itst=0; itst < colortstdist.length; itst++) {
-//|             for($iall=0;$iall < nTrials/colortstdist.length;$iall++){
-//|
-//|                 var icol = Math.round(Math.random(1)*360);
-//|                 var sumcol = [];
-//|                 for(var imem=0; imem < tempcol.length; imem++) {
-//|                     var thiscol = tempcol[imem]+icol;
-//|                     if (thiscol/360>1){
-//|                         thiscol = thiscol-360
-//|                     }
-//|                     sumcol.push(thiscol);
-//|                 }
-//|
-//|                 tempseq.push(shufflecolor(sumcol));
-//|                 alltrlrot.push((Math.round(Math.random()*1000)/1000)*360)
-//|             }
-//|         }
-//|
-//|         var thishuff =[]; for (itrl = 0; itrl<nTrials;itrl++){ thishuff.push(itrl)}
-//|         var trialOrder = [];for (itrl = 0; itrl<nTrials;itrl++){trialOrder.push(itrl)}
-//|         var trialStruct = [];
-//|         shuffle(thishuff);
-//|         for (var itrl = 0; itrl < nTrials; itrl++){
-//|             thistrlpos = (postemp[thishuff[itrl]]);
-//|             alltstpos.push(thistrlpos)
-//|
-//|             testcol = [];
-//|             thiststtemp=[];
-//|             memdirec = wrapTo180(tempseq[itrl][0]-tempseq[itrl][1])<0;
-//|
-//|             if (memdirec){
-//|                     thiststtemp = tsttemp[thishuff[itrl]];
-//|             }else {
-//|
-//|                 for (var itemp =0; itemp < tsttemp[thishuff[itrl]].length; itemp++){
-//|                     thiststtemp[itemp] = tsttemp[thishuff[itrl]][itemp]*-1;
-//|                 }
-//|             }
-//|
-//|             for (var intst =0; intst<thiststtemp.length; intst++){
-//|
-//|
-//|                 var thiststcol = thiststtemp[intst]+tempseq[itrl][0];
-//|                     if (thiststcol/360>1){
-//|                         thiststcol = thiststcol-360
-//|                     }
-//|                     if (thiststcol<=0){
-//|                         thiststcol = thiststcol+360
-//|                     }
-//|                     testcol.push(thiststcol);
-//|             }
-//|
-//|             alltstcol.push(testcol);
-//|             alltstcode.push(paintcolor(alltstcol[itrl]));
-//|             var allcol =[]; for(var item = 0; item < numDots; item++){allcol[item]= 99999}
-//|             for (var icol = 0; icol < alltstpos[itrl].length; icol++){
-//|                 allcol[thistrlpos[icol]] = tempseq[itrl][icol]
-//|             }
-//|             alltrlseq.push(allcol);
-//|             alltarcode.push(paintcolor(allcol));
-//|
-//|         }
-//|
-//|         // var nTrials = alltrlseq.length;
-//|         function wrapTo180(lon){
-//|             if (lon<0){
-//|                 lon = lon+360;
-//|             }
-//|             if (lon > 180){
-//|                 lon_wrap = wrapTo360(lon + 180) - 180;
-//|             }else {
-//|                 lon_wrap = lon;
-//|             }
-//|
-//|             return lon_wrap
-//|         }
-//|
-//|         function wrapTo360(lon){
-//|
-//|             lonMod = lon % 360;
-//|             if (lonMod==0 & lon>0){
-//|                 lonMod = 360;
-//|             }
-//|
-//|             return lonMod
-//|         }
-//|
-//|         function shufflecolor(thisseq){
-//|             thisgroup = shuffle(thisseq)
-//|             for($ishuff=0;$ishuff < numDots;$ishuff++){
-//|                 var ini = (Math.round(Math.random()*1000)/1000)*360 ;
-//|                 var currAng = addarray_withnoise(thisgroup,ini)
-//|             }
-//|             return currAng
-//|         }
-//|
-//|         function addarray_withnoise(a,b) {
-//|             var c = [];
-//|             for($iadd=0;$iadd< a.length;$iadd++){
-// >>> Independent uniform +/-3 deg jitter on every item (the paper says the items differ by exactly 45 deg).
-// >>> Not used in this version (the paper says exactly 45): HUE_JITTER_DEG = 0. Set it to 3 to reproduce the code.
-//|                 c.push( (a[$iadd]+ b + ((Math.random()-0.5)/0.5)*3 )%360 ); // add 3 degree noise
-//|             }
-//|             return c;
-//|         }
-//|
-//|         function shuffle(array) {
-//|           var currentIndex = array.length, temporaryValue, randomIndex;
-//|
-//|           // While there remain elements to shuffle...
-//|           while (0 !== currentIndex) {
-//|
-//|             // Pick a remaining element...
-//|             randomIndex = Math.floor(Math.random() * currentIndex);
-//|             currentIndex -= 1;
-//|
-//|             // And swap it with the current element.
-//|             temporaryValue = array[currentIndex];
-//|             array[currentIndex] = array[randomIndex];
-//|             array[randomIndex] = temporaryValue;
-//|           }
-//|
-//|           return array;
-//|         }
-
-// ---- APPENDIX B: original placeholder positions (what POSITION_ANGLE_OFFSET reproduces) ----
-// >>> circRot = 5.5 (rad), objDist = 120. Slot i is at x = cx - R cos(2*pi*i/12 + 5.5), y = cy + R sin(2*pi*i/12 + 5.5).
-// >>> The plugin's slot i is at x = cx + R sin(2*pi*i/12 + offset), y = cy + R cos(2*pi*i/12 + offset); they match
-// >>> when offset = 5.5 - pi/2 (= 225.1 deg) -- POSITION_ANGLE_OFFSET_DEG above.
-//|         // Object positions
-//|
-//|         // Define positions before rotation
-//|         xTemp=[];
-//|         yTemp=[];
-//|
-//|         for(i=0;i<numDots;i++){
-//|             xTemp.push(objDist*Math.cos((2*Math.PI/numDots)*i));
-//|             yTemp.push(objDist*Math.sin((2*Math.PI/numDots)*i))
-//|         }
-//|
-//|         // Rotate positions
-//|         xPos=[];
-//|         yPos=[];
-//|
-//|         for(i=0;i<numDots;i++){
-//|             xPos.push(centerX-(Math.cos(circRot)*xTemp[i])+(Math.sin(circRot)*yTemp[i]));
-//|             yPos.push(centerY+(Math.sin(circRot)*xTemp[i])+(Math.cos(circRot)*yTemp[i]))
-//|         }
-
-// ---- APPENDIX C: original scoring of a response -------------------------------
-// >>> 'Correct' was decided by floating-point equality of the chosen color's angle with the target's angle.
-// >>> Here the correct option is simply option 0 (correct_option: 0), so `correct` comes from the plugin.
-//|                             respTFs.push(alltstcol[curTrial][respLR] == alltrlseq[curTrial][alltstpos[curTrial][0]]);
 </script>
 </html>
