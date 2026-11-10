@@ -539,6 +539,9 @@ function beginOrdeal() {
     // Show the task div and run the trials (jsPsych draws only inside it)
     taskEl.hidden = false;
     taskEl.focus();   // jsPsych listens for the Z / M keys on this div
+    // A click anywhere else on the page (e.g. the gray background) takes focus away from this div,
+    // and then Z / M presses never reach jsPsych and the trial cannot end. Put focus back on every click.
+    document.addEventListener("click", () => { if (!taskEl.hidden) taskEl.focus(); });
     jsPsych.run(timeline);
 }
 
