@@ -21,7 +21,7 @@ For this replication, the experiment will consist of the same 2-AFC color wheel 
 
 Link to Paradigm: https://ccnlab.ucsd.edu/jaashby/26TR04/chunharas2022.html?subjectId=ME
 Link for SONA Participants: https://ccnlab.ucsd.edu/jaashby/26TR04/chunharas2022.html?subjectId=%SURVEY_CODE%
-Link for Test Paradigm: https://ccnlab.ucsd.edu/jaashby/26TR04/chunharas2022.html?test=1&subjectId=ME
+Link for Beta Test Paradigm: https://ccnlab.ucsd.edu/jaashby/26TR04/chunharas2022.html?test=1&subjectId=ME
 
 OSF Link: https://osf.io/qp6xk/files/osfstorage?view_only=0559769c587c4c8294288451e8af239e
 

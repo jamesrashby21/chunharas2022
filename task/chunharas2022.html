@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Color memory task</title>
+    <title>Visual Working Memory Task</title>
 
     <link rel="stylesheet" href="https://unpkg.com/jspsych@8/css/jspsych.css" />
     <script src="https://unpkg.com/jspsych@8/dist/index.browser.min.js"></script>
@@ -13,7 +13,7 @@
     <script src="jspsych-wm-forced-choice.js"></script>
 
     <style>
-        html { background-color: rgb(175, 175, 175); }
+        html { background-color: rgb(200, 200, 200); }
         body {
             display: flex;
             justify-content: center;
@@ -54,13 +54,26 @@
         }
         /* jsPsych draws only inside this div */
         #jspsych-target { margin: 0; width: 100%; height: 100vh; }
+        /* Covers whatever screen is up when fullscreen is left */
+        #fs-overlay {
+            position: fixed; inset: 0; margin: 0; z-index: 10000;
+            background: #ffffff;   /* Opaque, so the memory array cannot be seen through it */
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 0 16px;
+        }
+        .fs-ov-title { color: #c0281f; font-size: 44px; margin: 0 0 18px; }
+        .fs-ov-text { font-size: 24px; font-weight: normal; line-height: 1.35; margin: 0 0 40px; max-width: 1100px; }
+        /* Demo pictures on the instruction pages: same box as the plugin's stage (see drawDemo) */
+        .demo-box { position: relative; margin: 0 auto; background: #ffffff; border: 1px solid #000; box-sizing: content-box;
+                    font-family: "Open Sans", "Arial", sans-serif; line-height: 1.6em; }
     </style>
 </head>
 <body>
     <!-- Fullscreen Startup Screen -->
     <div id="startupScreen">
-        <p>Please start the experiment in fullscreen for the best experience.</p>
+        <p>This experiment must be completed in fullscreen. Please click the button below to switch to fullscreen before you begin.</p>
         <button class="button-next">Start Fullscreen</button>
+        <p id="fs-fail" hidden>Your browser did not enter fullscreen. Please click the button again. If it keeps happening, try Chrome, Firefox, Edge or Safari on a computer.</p>
     </div>
 
     <!-- Consent & Instructions -->
@@ -145,10 +158,12 @@
 
     <div id="instructions2" hidden>
         <p>
-            On each trial you will see two colors and need to remember their hues as accurately as possible. <br /><br />
-            We encourage you to use visual memory (remember as if you are taking a photograph of them). <br /><br />
-            Please keep your eyes on the crosshair in the middle.
+            On each trial, you'll see two colors and need to remember their hues as accurate as possible. <br />
+            We encourage you to use visual memory (remember as if you are taking a photograph of it). <br />
+            Please keep your eyes at the crosshair in the middle. <br />
+            Two colors will appear breifly at 2 of 12 locations that form a ring
         </p>
+        <div class="demo" data-demo="empty"></div>
         <div class="nav-buttons">
             <button class="button-back" onclick="document.getElementById('instructions2').hidden=true; document.getElementById('instructions1').hidden=false;">&#8592;</button>
             <button class="button-next">Click here when you are ready to proceed.</button>
@@ -157,10 +172,10 @@
 
     <div id="instructions3" hidden>
         <p>
-            The two colors will appear briefly (less than a second) at 2 of 12 locations that form a ring around the crosshair. <br /><br />
-            You might find it a little challenging sometimes. Don't worry, just try your best. <br /><br />
-            Then the colors will disappear for a short period (less than a second).
+            You'll see something like this but only briefly (less than a second). <br />
+            You might find it a little challenging sometime. Don't worry and just try your best.
         </p>
+        <div class="demo" data-demo="array"></div>
         <div class="nav-buttons">
             <button class="button-back" onclick="document.getElementById('instructions3').hidden=true; document.getElementById('instructions2').hidden=false;">&#8592;</button>
             <button class="button-next">Click here when you are ready to proceed.</button>
@@ -169,10 +184,9 @@
 
     <div id="instructions4" hidden>
         <p>
-            Then a <b>black ring</b> will mark the location of one of the two colors, and two <b>very similar</b>
-            color choices will appear on each side of the crosshair. You have to report the color that was shown at the marked location. <br /><br />
-            Press <b>"<span class="keyLeft"></span>"</b> to choose the left circle or <b>"<span class="keyRight"></span>"</b> to choose the right circle.
+            Then, the colors will disappear for a short period (less than a second).
         </p>
+        <div class="demo" data-demo="empty"></div>
         <div class="nav-buttons">
             <button class="button-back" onclick="document.getElementById('instructions4').hidden=true; document.getElementById('instructions3').hidden=false;">&#8592;</button>
             <button class="button-next">Click here when you are ready to proceed.</button>
@@ -181,12 +195,26 @@
 
     <div id="instructions5" hidden>
         <p>
-            The next trial starts after you make a response. <br /><br />
-            The sequence is always the same: two colors appear and disappear, then you make a response, and repeat. <br /><br />
-            Are you ready?
+            Then two <b>very similar</b> color choices will appear on each side of the crosshair, you will have to report the correct hue
+            at the test location (marked by the black ring). <br /><br />
+            Please press <b>"<span class="keyLeft"></span>"</b> to choose the left circle OR <b>"<span class="keyRight"></span>"</b> to choose the right circle as your response.
         </p>
+        <div class="demo" data-demo="test"></div>
         <div class="nav-buttons">
             <button class="button-back" onclick="document.getElementById('instructions5').hidden=true; document.getElementById('instructions4').hidden=false;">&#8592;</button>
+            <button class="button-next">Click here when you are ready to proceed.</button>
+        </div>
+    </div>
+
+    <div id="instructions6" hidden>
+        <p>
+            The next trail will start after you make a response. <br />
+            The sequence will always be like this. Two colors come up and disappear for a brief period, then you make a response, and repeat. <br />
+            Are you ready?
+        </p>
+        <div class="demo" data-demo="empty"></div>
+        <div class="nav-buttons">
+            <button class="button-back" onclick="document.getElementById('instructions6').hidden=true; document.getElementById('instructions5').hidden=false;">&#8592;</button>
             <button class="button-next">Click here when you are ready to proceed.</button>
         </div>
     </div>
@@ -292,7 +320,7 @@ const config = TEST_MODE ? allConfig.debug : allConfig.group1;
 const wrap360 = (x) => ((x % 360) + 360) % 360;
 const signedDiff = (a, b) => { const d = wrap360(a - b); return d > 180 ? d - 360 : d; };   // a - b in (-180, 180]
 
-// Bug fix for shuffling error from original code
+// Bug fix for shuffling error from original task code
 function shuffleCopy(arr, rng) {
   rng = rng || Math.random;
   const a = arr.slice();
@@ -405,6 +433,119 @@ function checkTrialList(list, nPerCell) {
   return balanced && gapsOk;
 }
 
+//  Demo pictures for the instruction pages: static copies of the task display, laid out like the plugin's own box
+//  Example trial: target at slot 0, non-target 45 deg away at slot 3, foil 6 deg from the target (away from the non-target)
+const DEMO = { targetSlot: 0, nontargetSlot: 3, targetHue: 1, nontargetHue: 1 + COLOR_DIST_DEG, foilHue: 1 - FOIL_OFFSET_DEG };
+
+function demoDisk(size, hex) {
+  const cv = document.createElement("canvas");
+  cv.width = size; cv.height = size;
+  const ctx = cv.getContext("2d");
+  ctx.beginPath();
+  ctx.arc(size / 2, size / 2, size / 2 - 1, 0, 2 * Math.PI);
+  if (hex) { ctx.fillStyle = hex; ctx.fill(); }
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = hex ? "#222" : "#999";   // Colored disk, or the empty placeholder outline
+  ctx.stroke();
+  return cv;
+}
+
+// kind: "empty" = ring + crosshair, "array" = the two colors, "test" = black ring on the probed location + the two options
+function drawDemo(host, kind) {
+  const box = 2 * RING_RADIUS_PX + 2 * ITEM_SIZE_PX + 40, c = box / 2;
+  const stage = document.createElement("div");
+  stage.className = "demo-box";
+  stage.style.width = stage.style.height = box + "px";
+  const color = {};
+  if (kind === "array") { color[DEMO.targetSlot] = hueToHex(DEMO.targetHue); color[DEMO.nontargetSlot] = hueToHex(DEMO.nontargetHue); }
+  for (let i = 0; i < NUM_PLACEHOLDERS; i++) {
+    const ang = 2 * Math.PI * i / NUM_PLACEHOLDERS + POSITION_ANGLE_OFFSET_RAD;
+    const cv = demoDisk(ITEM_SIZE_PX, color[i]);
+    cv.style.cssText = "position:absolute;border-radius:50%;top:" + (Math.cos(ang) * RING_RADIUS_PX + c - ITEM_SIZE_PX / 2) + "px;left:" +
+                       (Math.sin(ang) * RING_RADIUS_PX + c - ITEM_SIZE_PX / 2) + "px";
+    if (kind === "test" && i === DEMO.targetSlot) cv.style.boxShadow = "0 0 0 5px #000";
+    stage.appendChild(cv);
+  }
+  stage.insertAdjacentHTML("beforeend", "<span style='position:absolute;top:" + (c - 10) + "px;left:" + (c - 6) + "px'>+</span>");
+  if (kind === "test") {   // Target on the left, foil on the right, each OPTION_OFFSET_PX from fixation
+    [[hueToHex(DEMO.targetHue), -1], [hueToHex(DEMO.foilHue), 1]].forEach(([hex, side]) => {
+      const cv = demoDisk(ITEM_SIZE_PX, hex);
+      cv.style.cssText = "position:absolute;z-index:5;border-radius:50%;border:1px solid #222;top:" + (c - ITEM_SIZE_PX / 2) + "px;left:" +
+                         (c + side * OPTION_OFFSET_PX - ITEM_SIZE_PX / 2) + "px";
+      stage.appendChild(cv);
+    });
+  }
+  host.appendChild(stage);
+}
+document.querySelectorAll(".demo").forEach((el) => drawDemo(el, el.dataset.demo));
+
+//  Forced fullscreen
+//  Leaving fullscreen covers the page and blocks the keys until the person returns
+const DM_FS = window.matchMedia ? window.matchMedia("(display-mode: fullscreen)") : null;
+let DM_SEEN = false; 
+const docFullscreen = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function isFullscreen() {
+  const doc = docFullscreen(), dm = !!(DM_FS && DM_FS.matches);
+  if (doc && dm) DM_SEEN = true;
+  return doc && !(DM_SEEN && !dm);
+}
+function requestFullscreen() {
+  const el = document.documentElement;
+  const go = () => {
+    const p = el.requestFullscreen ? el.requestFullscreen() : el.webkitRequestFullscreen ? el.webkitRequestFullscreen() : null;
+    if (p && p.catch) p.catch(() => {});
+  };
+  if (docFullscreen() && document.exitFullscreen && document.fullscreenElement) document.exitFullscreen().then(go, go);
+  else go();
+}
+
+let fsEnforced = false;      // Overlay on/off
+let fsTaskRunning = false;   // Exits are only counted while trials run
+let fsExits = 0;
+let fsWatching = false;
+
+function showFsOverlay() {
+  if (document.getElementById("fs-overlay")) return;
+  const ov = document.createElement("div");
+  ov.id = "fs-overlay";
+  ov.innerHTML = "<p class='fs-ov-title'>Please use fullscreen</p>" +
+    "<p class='fs-ov-text'>You have left fullscreen mode. This experiment must be completed in fullscreen.<br />" +
+    "Please click the button below to return to fullscreen and continue.</p>" +
+    "<button class='button-next'>Return to fullscreen</button>";
+  ov.querySelector("button").onclick = requestFullscreen;
+  document.body.appendChild(ov);
+}
+function hideFsOverlay() {
+  const ov = document.getElementById("fs-overlay");
+  if (!ov) return;
+  ov.remove();
+  if (fsTaskRunning) taskEl.focus();   // Clicking the overlay button moved focus away, and jsPsych only hears keys inside this div
+}
+
+function installFullscreenWatch() {
+  if (fsWatching) return;
+  fsWatching = true;
+  let wasFs = isFullscreen();
+  const onChange = () => {
+    const fs = isFullscreen();
+    if (fs) hideFsOverlay();
+    else {
+      if (wasFs && fsTaskRunning) fsExits += 1;
+      if (fsEnforced) showFsOverlay();
+    }
+    wasFs = fs;
+  };
+  document.addEventListener("fullscreenchange", onChange);
+  document.addEventListener("webkitfullscreenchange", onChange);
+  if (DM_FS) { if (DM_FS.addEventListener) DM_FS.addEventListener("change", onChange); else if (DM_FS.addListener) DM_FS.addListener(onChange); }
+  window.addEventListener("resize", onChange);
+  setInterval(onChange, 250);   // Backup in case a browser sends no event
+  // Keys do nothing while the overlay is up, so no response is given to a screen the person cannot see
+  const block = (e) => { if (document.getElementById("fs-overlay")) { e.stopImmediatePropagation(); e.preventDefault(); } };
+  window.addEventListener("keydown", block, true);
+  window.addEventListener("keyup", block, true);
+}
+
 //  jsPsych setup
 const taskEl     = document.getElementById("jspsych-target");
 const doneScreen = document.getElementById("done-screen");
@@ -435,6 +576,7 @@ jsPsych.data.addProperties({
 
 //  Trial Logic
 function makeTrial(t) {
+  let exitsAtStart = 0;
   return {
     type: jsPsychWmForcedChoice,
 
@@ -473,7 +615,9 @@ function makeTrial(t) {
     auto_zoom: AUTO_ZOOM,
 
     data: Object.assign({ phase: "main" }, t),
-    on_finish: (d) => { d.window_w = window.innerWidth; d.window_h = window.innerHeight; },
+    on_start: () => { exitsAtStart = fsExits; },
+    // fs_exits_in_trial > 0: fullscreen was left during this trial (the array or options may not have been seen)
+    on_finish: (d) => { d.window_w = window.innerWidth; d.window_h = window.innerHeight; d.fs_exits_in_trial = fsExits - exitsAtStart; },
   };
 }
 
@@ -511,19 +655,25 @@ function linkNextScreen(first, next, fn) {
 document.querySelectorAll(".keyLeft").forEach(el => el.textContent = KEY_LEFT.toUpperCase());
 document.querySelectorAll(".keyRight").forEach(el => el.textContent = KEY_RIGHT.toUpperCase());
 
-// Startup → Consent (request fullscreen here ONLY)
-linkNextScreen("#startupScreen", "#consent", () => {
-    const el = document.documentElement;
-    try {
-        const p =
-            (el.requestFullscreen && el.requestFullscreen()) ||
-            (el.webkitRequestFullscreen && el.webkitRequestFullscreen()) ||
-            (el.msRequestFullscreen && el.msRequestFullscreen());
-        // If a promise is returned, catch rejections so we don't throw
-        if (p && typeof p.catch === "function") p.catch(err => console.warn("Fullscreen request failed:", err));
-    } catch (err) {
-        console.warn("Fullscreen request threw:", err);
-    }
+// Startup → Consent: moves on only once the page is really in fullscreen, then the fullscreen watch starts
+document.querySelector("#startupScreen .button-next").addEventListener("click", (e) => {
+    e.preventDefault();
+    const failEl = document.getElementById("fs-fail");
+    failEl.hidden = true;
+    requestFullscreen();
+    const t0 = Date.now();
+    const timer = setInterval(() => {
+        if (isFullscreen()) {
+            clearInterval(timer);
+            installFullscreenWatch();
+            fsEnforced = true;
+            document.getElementById("startupScreen").hidden = true;
+            document.getElementById("consent").hidden = false;
+        } else if (Date.now() - t0 > 5000) {
+            clearInterval(timer);
+            failEl.hidden = false;   // Browser refused fullscreen: stay here
+        }
+    }, 100);
 });
 // Consent → Instructions Chain (no fullscreen here)
 linkNextScreen("#consent", "#instructions1");
@@ -531,14 +681,16 @@ linkNextScreen("#instructions1", "#instructions2");
 linkNextScreen("#instructions2", "#instructions3");
 linkNextScreen("#instructions3", "#instructions4");
 linkNextScreen("#instructions4", "#instructions5");
+linkNextScreen("#instructions5", "#instructions6");
 // Last Instruction Page → Trials
-linkNextScreen("#instructions5", null, () => beginOrdeal());
+linkNextScreen("#instructions6", null, () => beginOrdeal());
 
 //  Main Flow
 function beginOrdeal() {
     // Show the task div and run the trials (jsPsych draws only inside it)
     taskEl.hidden = false;
     taskEl.focus();   // jsPsych listens for the Z / M keys on this div
+    fsTaskRunning = true;
     jsPsych.run(timeline);
 }
 
@@ -569,8 +721,10 @@ async function saveAndFinish() {
   taskEl.hidden = true;
   doneScreen.hidden = false;
   doneScreen.innerHTML = "<p>Saving your data. Please do not close this window...</p>";
+  fsEnforced = false; fsTaskRunning = false; hideFsOverlay();   // Fullscreen is no longer required from here on
   try { if (document.fullscreenElement) await document.exitFullscreen(); } catch (e) { /* ignore */ }
 
+  jsPsych.data.addProperties({ fullscreen_exits: fsExits });   // Total times fullscreen was left during the trials
   const json = jsPsych.data.get().json();
   let saved = false;
   for (let attempt = 1; attempt <= 3 && !saved; attempt++) {
