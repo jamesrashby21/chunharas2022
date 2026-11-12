@@ -14,18 +14,18 @@ format:
 
 ## Introduction
 
-This experiment will be a replication of Chunharas & Brady, 2022[1]. The original focus of the paper was to elucidate properties of visual working memory. The goal of experiment 1 was to demonstrate repulsion as a functional memory distortion, when remembering a small set of very similar, yet distinguishable items (colors). Repulsion serves to make the representations of each color more distinct from one another while held in visual working memory. The first experiment in Chunharas, 2022 consisted of a two-alternative forced choice task (2-AFC) using a color wheel. Experiment 1 yielded very strong evidence for repulsion bias as a feature  visual working memory. Their results demonstrated participants were "better at rejecting a foil color that was distorted toward the non-target memory item than rejecting a foil color that was distorted away from the non-target memory item" (Chunharas, 2022).
+This experiment will be a replication of Chunharas 2022[1]. The original focus of the paper was to elucidate properties of visual working memory (VWM). The specific goal of experiment 1 was to demonstrate repulsion bias as a functional memory distortion, when remembering a small set of very similar, yet distinguishable items (colors). Repulsion serves to make the representations of each color more distinct from one another, while they are held in visual working memory. The first experiment in Chunharas, 2022 consisted of a two-alternative forced choice task (2-AFC) where participants saw two colors, then were asked to recall a target color from 2 colors on screen (one being correct, one being a foil). Experiment 1 yielded very strong evidence for repulsion bias as a feature visual working memory, as participants were "better at rejecting a foil color that was distorted toward the non-target memory item than rejecting a foil color that was distorted away from the non-target memory item" (Chunharas, 2022).
 
-For this replication, the experiment will consist of the same 2-AFC color wheel VWM task from Experiment 1 of Chunharas, 2022, able to be conducted online through the SONA platform. The task involves a continuous color wheel, where there will be 2 color samples displayed from the wheel: one "correct" color and one non-target color, 45º apart in color space from each other. The participant will then be asked to choose the correct target from two colors, one of which will be a foil either 6º towards the non-target or 6º away from the non-target (in relation to the correct color). The experiment was a within-subjects design where each condition was equally balanced, 60 trials of each type. I will have to re-code it in Javascript, HTML, and CSS, since the original experiment used MATLAB and Psychophysics toolbox. Thankfully, all of the paper's code was registered via OSF, including the original code for the task, participant data, and analysis code. Following data collection, data analysis will consist of a paired t-tests on accuracy. The original results showed toward vs. away gave t(44)=3.98, p<.001, toward vs. chance gave t(44)=3.73, p=.006, and away vs. chance gave t(44)=-1.76, p=.08.
+For this replication, the experiment will consist of the same 2-AFC VWM task from Experiment 1 of Chunharas, 2022, still in an online format, instead the SONA platform for data collection. The task involves an empty color array with a fixation cross in the center surrounded by 12 empty circles, there will be 2 color samples displayed from the wheel: one "target" color and one non-target color, 45º apart in color space from each other. The participant will then be asked to choose the correct target from two colors, one of which will be a foil either 6º towards the non-target or 6º away from the non-target (in relation to the correct color). The experiment was a within-subjects design where each condition was equally balanced, 60 trials of each type, with 12 catch trials to filter out unengaged participants. The task code will be recoded in HTML and jsPsych (with the Brady lab's plugins) since the original experiment used MATLAB and Psychophysics toolbox. Thankfully, all of the paper's code was registered via OSF, including the original code for the task, participant data, and analysis code. Following data collection, data analysis will consist of a paired t-tests on accuracy. The original results showed toward vs. away gave t(44)=3.98, p<.001, toward vs. chance gave t(44)=3.73, p=.006, and away vs. chance gave t(44)=-1.76, p=.08.
 
 
 Link to Paradigm: https://ccnlab.ucsd.edu/jaashby/26TR04/chunharas2022.html?subjectId=ME
+Link for Beta Test Paradigm: https://ccnlab.ucsd.edu/jaashby/26TR04/chunharas2022.html?test=1&subjectId=M
 Link for SONA Participants: https://ccnlab.ucsd.edu/jaashby/26TR04/chunharas2022.html?subjectId=%SURVEY_CODE%
-Link for Beta Test Paradigm: https://ccnlab.ucsd.edu/jaashby/26TR04/chunharas2022.html?test=1&subjectId=ME
-
-OSF Link: https://osf.io/qp6xk/files/osfstorage?view_only=0559769c587c4c8294288451e8af239e
 
 Replication Repository: https://github.com/jamesrashby21/chunharas2022
+
+OSF Link: https://osf.io/qp6xk/files/osfstorage?view_only=0559769c587c4c8294288451e8af239e
 
 Replication Paper: https://dx.doi.org/10.1037/xlm0001014
 
@@ -34,11 +34,11 @@ Replication Paper: https://dx.doi.org/10.1037/xlm0001014
 
 ## Methods
 
-I rebuilt Experiment 1 of Chunharas and Brady (2022) in jsPsych v8 using The Brady Vision and Memory Lab plugins. Participants were presented with two colors 45° apart, that were shown for 150 ms, followed by a 750 ms delay and a two-alternative forced choice (2-AFC) between the cued color and a foil 6° away (toward or away from the uncued color; 60 trials per condition, 120 in total), with responses made via key press. 
+I rebuilt Experiment 1 of Chunharas and Brady (2022) in jsPsych v8 using The Brady Vision and Memory Lab plugins. Participants were presented with two colors 45° apart, that were shown for 150 ms, followed by a 750 ms delay and a two-alternative forced choice (2-AFC) between the cued color and a foil 6° away (toward or away from the non-target color; 60 trials per condition, with 12 catch trials, 120 in total), with responses made via key press. 
 
 ### Power Analysis
 
-Effect size not displayed in the original paper, but can be extrapolated from data and figures later. Power analysis needed to confirm viability of sample size in order to achieve 80%, 90%, 95% power to detect the original effect size.
+Effect size not displayed in the original paper, but can be extrapolated from data and figures later. Power analysis for replication sampele size is conducted below.
 
 ```{r}
 library(pwr)
@@ -93,15 +93,15 @@ res
 
 ### Planned Sample
 
-The sample will consist of UC San Diego undergraduates, recruited via the SONA platform and compensated with class credit for their participation. The anticipated sample will be pre-screened to ensure normal or corrected-to-normal vision without any color-blindness. The estimated size of the sample will be 50 people, which is only slightly more than the original population. The larger sample is due to the WEIRD (Western, educated, industrialized, rich, and democratic) nature of the SONA population, as well as extraneous noise that can sometimes occur during online experiments among a busy undergraduate student body. 
+The sample will consist of UC San Diego undergraduates, recruited via the SONA platform and compensated with class credit for their participation (Target n = 60). The anticipated sample will be pre-screened to ensure normal or corrected-to-normal vision without any color-blindness. The estimated size of the sample will be 60 people, which is only slightly more than the original population. The larger sample is due to the WEIRD (Western, educated, industrialized, rich, and democratic) nature of the SONA population, as well as extraneous noise that can sometimes occur during online experiments among a busy undergraduate student body. 
 
 ### Materials
 
-All materials consist of the code needed to recreate the task, and access to the online SONA platform.
+All materials consist of the code needed to recreate the task, jsPsych plugins from the UCSD Vision and Memory Lab plugins and access to the online SONA platform.
 
 ### Procedure	
 
-The task was coded in HTML, CSS, and Javascript, using jsPsych v8 plugins made by the UCSD Vision and Memory lab. The task display will consist of a 500x500 pixel white background with a 1 pixel wide, with a fixation cross in the center, surrounded by 12 small circular placeholders each centered at a distance of 120 pixels. Each placeholder should have a radius of 20 pixels, and will be 62 pixels apart when measuring center-to-center. There will be 6 placeholders on the left side of the screen, and 6 on the right. There are also two empty placeholders on the left and right of the cross, 35 pixels from fixation. Finally, the location probe on screen is a small equilateral black triangle, 20 pixels wide and 20 pixels tall.
+The task was coded in HTML and Javascript, using jsPsych v8 plugins made by the UCSD Vision and Memory lab. The task display will consist of a 500x500 pixel white background with a 1 pixel wide, with a fixation cross in the center, surrounded by 12 small circular placeholders each centered at a distance of 120 pixels. Each placeholder should have a radius of 20 pixels, and will be 62 pixels apart when measuring center-to-center. There will be 6 placeholders on the left side of the screen, and 6 on the right. There are also two empty placeholders for the response options for the 2-AFC, 35 pixels to the left and right of the fixation cross. Finally, the location probe on screen will be a black circle surrounding where the target color was during the initial exposure. Participants will choose between the two presented colors, using Z to select the left color, and M to select the right color.
 
 The task consisted of showing participants two colors on the color wheel, one "correct" color, and one non-target color, which will always be 45º away in color space from the correct color. There were also 2 empty placeholders between each of the two memory items. Following a 750ms delay, a location cue appears on screen identifying the correct color. This was followed by the two placeholders next to the fixation cross presenting two response options. One response was always the correct color, while the other was always a foil, which differed either by 6º toward the non-target color, or 6º away totaling 120 trials (60 trials each, balanced across conditions). The position of the correct color on either the left or right of the fixation cross was randomized. The participants were asked to select one of the two color choices on screen on either the left (Z key) or on the right (M key), before advancing.
 
@@ -109,7 +109,7 @@ The task consisted of showing participants two colors on the color wheel, one "c
 
 Data analysis will consist of simply running a paired samples t-test comparing accuracy between the two foil conditions in the 2-AFC task. 
 
-I also plan to visualize the data myself, and see if I can plot new figures if reaction time was recorded.
+I also plan to visualize the data myself, and see if I can plot novel figures including different measurements.
 
 ```
 setwd("~/yourWorkingDirectory/.../data_codes/R") # <- please change this to your own path
@@ -128,21 +128,23 @@ t.test(datcsv[datcsv$fdirec==-1,'val']-datcsv[datcsv$fdirec==1,'val'])
 
 ### Differences from Original Study
 
-During the recreation of the task's code I followed the original paper’s methods rather than the shared task code found on OSF, as they differed on presentation of stimuli presentation in several respects. The code placed the two colors at one of 12 fixed location pairs exactly three placeholders apart, added independent ±3° jitter to each item’s hue, and centered the response options ±30 px from fixation. Whereas the paper describes two randomly chosen placeholders with at least two empty placeholders between them, a color separation of exactly 45°, and options at ±35 px. I implemented the paper’s descriptions for these features. Stimulus colors were generated with the color wheel implemented in the original code (L = 65, a = 9, b = 9, radius 50) rather than the parameters reported in the paper (L = 70, a = 20, b = 38, radius 60), because those values fall largely outside the displayable RGB range under the code’s conversion (201 of 360 hues). 
+(1) Experimental Procedure Inconsistencies -- During the recreation of the task's code I followed the original paper’s methods rather than the shared task code found on OSF, as they differed on presentation of stimuli presentation in several respects. The code placed the two colors at one of 12 fixed location pairs exactly three placeholders apart, added independent ±3° jitter to each item’s hue, and centered the response options ±30 px from fixation. Whereas the paper describes two randomly chosen placeholders with at least two empty placeholders between them, a color separation of exactly 45°, and options at ±35 px. I implemented the paper’s descriptions for these features. Stimulus colors were generated with the color wheel implemented in the original code (L = 65, a = 9, b = 9, radius 50) rather than the parameters reported in the paper (L = 70, a = 20, b = 38, radius 60), because those values fall largely outside the displayable RGB range under the code’s conversion (201 of 360 hues). 
 
-Other differences come from the implementation of the updated plugins: the display box was 360 px rather than 500 px (ring radius and item size matched the paper's design), the target color was probed with a black ring rather surrounding it, instead of a triangle pointing to it. Fixation was a plus sign preceded by a 2,000 ms fixation interval taken from the original code, and the code was adapted to run participants through SONA rather than MTurk.
+(2) Small Deviations Due to Plugins -- Other differences come from the implementation of the updated plugins: the display box was 360 px rather than 500 px (ring radius and item size matched the paper's design), the target color was probed with a black ring rather surrounding it, instead of a triangle pointing to it. Fixation was a plus sign preceded by a 2,000 ms fixation interval taken from the original code, and the code was adapted to run participants through SONA rather than MTurk.
 
-The original task code found on OSF contained a small shuffling error: shuffle() reorders an array in place and returns that same array, so the assignment of target and non-target for each location pair fixed for the whole session. This is to say, before the colors are filled, a pair of locations for initial display (say 0 and 3) are chosen and then they are randomly assigned to be the target or the non-target color. The shuffling error caused the same location to be assigned to contain the target color for each pair of locations (For location pair 0 and 3, location 3 always contained the target color, therefore not randomized). In simulations of 120 trials, this bug had about three of the 12 locations, while three locations were probed (contained the target color) on 20 trials. Our version redraws the locations on every trial, thus the location of the target color is balanced across the 12 locations (10 times for each location).
+(3) Shuffling Bug -- The original task code found on OSF contained a small shuffling error: shuffle() reorders an array in place and returns that same array, so the assignment of target and non-target for each location pair fixed for the whole session. This is to say, before the colors are filled, a pair of locations for initial display (say 0 and 3) are chosen and then they are randomly assigned to be the target or the non-target color. The shuffling error caused the same location to be assigned to contain the target color for each pair of locations (For location pair 0 and 3, location 3 always contained the target color, therefore not randomized). In simulations of 120 trials, this bug had about three of the 12 locations, while three locations were probed (contained the target color) on 20 trials. Our version redraws the locations on every trial, thus the location of the target color is balanced across the 12 locations (10 times for each location).
 
 ### Methods Addendum (Post Data Collection)
 
-You can comment this section out prior to final report with data collection.
+  You can comment this section out prior to final report with data collection.
 
 #### Actual Sample
-  Sample size, demographics, data exclusions based on rules spelled out in analysis plan
+
+  Sample size, demographics, data exclusions based on rules spelled out in analysis plan.
 
 #### Differences from pre-data collection methods plan
-  Any differences from what was described as the original plan, or “none”.
+
+  See above, other than that no deviations,
 
 
 ## Results

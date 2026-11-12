@@ -46,12 +46,24 @@
             overflow: auto;
             border: 1px solid #666;
             padding: 8px 16px;
-            text-align: center;
+            text-align: left;
             font-size: 14px;
             font-weight: normal;
             width: min(1000px, 92vw);
             margin: 0 auto 16px;
         }
+        .consent-box p { margin: 0 0 12px; max-width: none; line-height: 1.4; }
+        /* Final questions (scrolls if the window is short) */
+        #debrief { width: min(760px, 92vw); max-height: calc(100vh - 40px); overflow-y: auto; }
+        #debrief-form { display: flex; flex-direction: column; align-items: stretch; gap: 16px; text-align: left; }
+        #debrief-form p { max-width: none; margin: 0; }
+        #debrief-form label { display: flex; flex-direction: column; gap: 6px; }
+        #debrief-form input, #debrief-form select, #debrief-form textarea { font: inherit; font-weight: normal; padding: 6px 8px; }
+        #debrief-form input { width: 8em; }
+        #debrief-form select { width: 16em; }
+        #debrief-form textarea { width: 100%; box-sizing: border-box; resize: vertical; }
+        #debrief-form .deb-note { font-size: 15px; font-weight: normal; }
+        #debrief-form button { align-self: center; }
         /* jsPsych draws only inside this div */
         #jspsych-target { margin: 0; width: 100%; height: 100vh; }
         /* Covers whatever screen is up when fullscreen is left */
@@ -63,9 +75,8 @@
         }
         .fs-ov-title { color: #c0281f; font-size: 44px; margin: 0 0 18px; }
         .fs-ov-text { font-size: 24px; font-weight: normal; line-height: 1.35; margin: 0 0 40px; max-width: 1100px; }
-        /* Demo pictures on the instruction pages: same box as the plugin's stage (see drawDemo) */
-        .demo-box { position: relative; margin: 0 auto; background: #ffffff; border: 1px solid #000; box-sizing: content-box;
-                    font-family: "Open Sans", "Arial", sans-serif; line-height: 1.6em; }
+        /* Practice / ready / check-in screens drawn inside the task area */
+        .screen-box { max-width: 760px; margin: 0 auto; text-align: center; font-family: Arial, sans-serif; }
     </style>
 </head>
 <body>
@@ -79,63 +90,14 @@
     <!-- Consent & Instructions -->
     <div id="consent" hidden>
         <div class="consent-box">
-            <p>
-            Dr. Timothy Rickard is conducting a research study to gain more knowledge
-            about human learning and skill acquisition. <br />You have been asked to participate
-            in this study because you are a UCSD student and because you have been selected
-            randomly from the psychology subject pool to participate. <br />There will be
-            approximately 50 participants in this study. <br /><br />
-
-            The purpose of this study is to learn more about how people learn and acquire new cognitive skills.
-            If you agree to be in this study, you will perform memory tasks <br />and (or) solve
-            problems at a computer terminal or using paper and pencil. You will receive one-hour
-            of experimental credit for each hour of participation. <br />Each session will last no more than 1 hour.
-            You will be involved in no more than three sessions. <br /><br />
-
-            Participation in this study may involve some risks or discomforts. These include the following: <br />
-            1. A potential for the loss of confidentiality. The risk is very low, however. No identifying
-            information is included in the data that will be used in analyses. <br />All copies of consent forms will be
-            stored in a secure location. <br />Research records will be kept confidential to the extent allowed by law.
-            Research records may be reviewed by the UCSD Institutional Review Board. <br />
-            2. There is potential for minor fatigue. The maximum one-hour duration of each session
-            minimizes this risk. <br /><br />
-
-            Because this is a research study, there may also be some unknown risks that are currently unforeseeable. <br />
-            You will be told if any important new information is found during the course of this study that
-            may affect your wanting to continue. <br /><br />
-
-            Participation in research is entirely voluntary. You may refuse to participate, withdraw or
-            refuse to answer specific <br />questions at any time without penalty or loss of the benefits in
-            which you are entitled to.<br /> If you decide that you no longer wish to continue this study,
-            you are required to inform the experimenter as soon as your decision is made. <br /><br />
-
-            If you decide not to participate, you will have the opportunity to receive equivalent course
-            credit by completing an assignment related to <br />one of the psychology courses in which you are
-            currently enrolled. Should you choose that alternative, contact your instructor for guidance. <br /><br />
-
-            There may or may not be any direct benefit to you from participating in this study. The investigator, however, <br />
-            may learn more about human learning and skill acquisition, and society may benefit from this knowledge. <br /><br />
-
-            The PI may remove you from the study without your consent if the PI feels that is in your best interest
-            or the best interest of the study. <br />For example, you may be withdrawn from the study if you do not
-            follow the instructions given to you by the study personnel. <br /><br />
-
-            You will not receive monetary compensation for participating in this research. You will receive one-hour
-            of course credit for each completed experimental session. <br /><br />
-
-            There will be no cost to you for participating in this study. <br /><br />
-
-            If you are injured as a direct result of participation in this research, the University of California will
-            provide any medical care you need to treat those injuries. <br />You may call the Human Research Protections Program
-            office at (858-246-HRPP (858-246-4777)) for more information about this, <br />to inquire about your
-            rights as a research subject, or to report research-related problems. <br /><br />
-
-            Timothy Rickard, James Ashby, or Kiara Lizarraga have explained this study to you and answered your questions. <br />
-            If you have other questions or research-related problems,you may reach Timothy Rickard at 858-822-0122. <br /><br />
-
-            If you agree to participate, please click the button below.
-
-            </p>
+            <p>You are being invited to participate in a research study titled "Reproducibility of Psychological Science and Instruction." This study is being done by Dr. Bria Long from UC San Diego and associated graduate students in Experimental Methods course. You were selected to participate in this study because you are an adult in the U.S. and have been a represented population in previous psychology studies.</p>
+            <p>The purpose of this study is to better understand how well previously published studies in the psychological field replicate online and with different populations. Your participation in this research should last approximately 5-30 minutes.</p>
+            <p>If you agree to take part in this study, you may be asked to view a set of stimuli, including pictures, sounds, written text, or videos and then giving some responses via key-presses, verbally, or with paper-and-pencil. We may also observe your choices or preferences among an array of stimuli. These stimuli will be taken directly from or closely adapted from studies that already exist in the published psychological literature. Stimuli will include, e.g., pictures of objects and human faces, audio and video clips, short text passages, etc. None of the stimuli will be disturbing, threatening, or offensive.</p>
+            <p>The online and in-person experiments described in this protocol will take no more than 30 minutes. An example game you might play would be to click on an image on the screen that matches a word you hear being said out loud. Your total expected time commitment for this study is between 5-30 minutes, and is specified in the study description.</p>
+            <p>Your participation in this study is completely voluntary and you can withdraw at any time. Choosing not to participate or withdrawing will result in no penalty or loss of benefits to which you are entitled. You are free to skip any question that you choose.</p>
+            <p>We will not be asking for any personally identifying information, and we will handle responses as confidentially as possible. Your SONA or Prolific IDs will never be tied to your responses on this survey. However, we cannot guarantee the confidentiality of information transmitted over the Internet. To minimize this risk, data containing anything that might be personally identifiable (e.g. Prolific IDs or IP addresses) will be encrypted on transfer and storage and will only be accessible to qualified lab personnel. We will be keeping data collected as part of this experiment indefinitely. This anonymized data (containing neither Prolific IDs nor IP addresses) may be shared with the scientific community or with other participants to be used as stimuli in future studies.</p>
+            <p>If you have questions about this project or if you have a research-related problem, you may contact the researcher(s), Dr. Bria Long, brlong@ucsd.edu. If you have any questions concerning your rights as a research subject, you may contact the UC San Diego Office of IRB Administration at irb@ucsd.edu or 858-246-4777.</p>
+            <p>By participating in this research you are indicating that you are at least 18 years old, have read this consent form, and agree to participate in this research study. Please keep this consent form for your records.</p>
         </div>
         <div class="nav-buttons">
             <button class="button-back" onclick="document.getElementById('consent').hidden=true; document.getElementById('startupScreen').hidden=false;">&#8592;</button>
@@ -146,7 +108,7 @@
     <div id="instructions1" hidden>
         <p>
             In this task you will remember pairs of colors and report one of them by choosing between two options. <br /><br />
-            There are 120 trials, and the task takes about 8-10 minutes. Each trial lasts about 3-5 seconds. <br /><br />
+            There are 132 trials, and the task takes about 8-10 minutes. Each trial lasts about 3-5 seconds. <br /><br />
             Please do not participate if you have any form of color blindness or do not have normal or
             corrected-to-normal vision (wearing glasses or contacts is fine). Please do this task only once.
         </p>
@@ -163,7 +125,6 @@
             Please keep your eyes at the crosshair in the middle. <br />
             Two colors will appear breifly at 2 of 12 locations that form a ring
         </p>
-        <div class="demo" data-demo="empty"></div>
         <div class="nav-buttons">
             <button class="button-back" onclick="document.getElementById('instructions2').hidden=true; document.getElementById('instructions1').hidden=false;">&#8592;</button>
             <button class="button-next">Click here when you are ready to proceed.</button>
@@ -175,7 +136,6 @@
             You'll see something like this but only briefly (less than a second). <br />
             You might find it a little challenging sometime. Don't worry and just try your best.
         </p>
-        <div class="demo" data-demo="array"></div>
         <div class="nav-buttons">
             <button class="button-back" onclick="document.getElementById('instructions3').hidden=true; document.getElementById('instructions2').hidden=false;">&#8592;</button>
             <button class="button-next">Click here when you are ready to proceed.</button>
@@ -186,7 +146,6 @@
         <p>
             Then, the colors will disappear for a short period (less than a second).
         </p>
-        <div class="demo" data-demo="empty"></div>
         <div class="nav-buttons">
             <button class="button-back" onclick="document.getElementById('instructions4').hidden=true; document.getElementById('instructions3').hidden=false;">&#8592;</button>
             <button class="button-next">Click here when you are ready to proceed.</button>
@@ -199,7 +158,6 @@
             at the test location (marked by the black ring). <br /><br />
             Please press <b>"<span class="keyLeft"></span>"</b> to choose the left circle OR <b>"<span class="keyRight"></span>"</b> to choose the right circle as your response.
         </p>
-        <div class="demo" data-demo="test"></div>
         <div class="nav-buttons">
             <button class="button-back" onclick="document.getElementById('instructions5').hidden=true; document.getElementById('instructions4').hidden=false;">&#8592;</button>
             <button class="button-next">Click here when you are ready to proceed.</button>
@@ -212,10 +170,21 @@
             The sequence will always be like this. Two colors come up and disappear for a brief period, then you make a response, and repeat. <br />
             Are you ready?
         </p>
-        <div class="demo" data-demo="empty"></div>
         <div class="nav-buttons">
             <button class="button-back" onclick="document.getElementById('instructions6').hidden=true; document.getElementById('instructions5').hidden=false;">&#8592;</button>
             <button class="button-next">Click here when you are ready to proceed.</button>
+        </div>
+    </div>
+
+    <div id="instructions7" hidden>
+        <p>
+            Next you will do one practice trial so you can see how the task works. <br /><br />
+            The practice trial does not count, and you will move on whichever circle you choose. <br /><br />
+            Remember to keep your eyes on the crosshair, and press <b>"<span class="keyLeft"></span>"</b> for the left circle OR <b>"<span class="keyRight"></span>"</b> for the right circle when the two circles appear.
+        </p>
+        <div class="nav-buttons">
+            <button class="button-back" onclick="document.getElementById('instructions7').hidden=true; document.getElementById('instructions6').hidden=false;">&#8592;</button>
+            <button class="button-next">Click here when you are ready to start the practice trial.</button>
         </div>
     </div>
 
@@ -230,15 +199,52 @@
         </p>
     </div>
 
-    <!-- Done Screen (no debriefing; the text is filled in by saveAndFinish) -->
+    <!-- Final questions, shown after the last trial (see askDebrief). Every question can be skipped -->
+    <div id="debrief" hidden>
+        <form id="debrief-form" autocomplete="off">
+            <p>You have finished the task. Please answer a few last questions before your data are saved. You may skip any question you prefer not to answer.</p>
+            <label>Age
+                <input type="number" id="deb-age" min="1" max="100" step="1" inputmode="numeric" />
+            </label>
+            <label>Gender
+                <select id="deb-gender">
+                    <option value="">(select one)</option>
+                    <option value="woman">Woman</option>
+                    <option value="man">Man</option>
+                    <option value="non-binary">Non-binary</option>
+                    <option value="another">Another gender</option>
+                    <option value="prefer_not_to_say">Prefer not to say</option>
+                </select>
+            </label>
+            <label>Sex assigned at birth
+                <select id="deb-sex">
+                    <option value="">(select one)</option>
+                    <option value="female">Female</option>
+                    <option value="male">Male</option>
+                    <option value="intersex">Intersex</option>
+                    <option value="prefer_not_to_say">Prefer not to say</option>
+                </select>
+            </label>
+            <label>Did anything weird or unexpected happen during the experiment? (for example a technical problem, an interruption, or something that confused you)
+                <textarea id="deb-weird" rows="4" maxlength="1000"></textarea>
+            </label>
+            <p class="deb-note">Please do not write your name or any other identifying information.</p>
+            <p class="deb-note" id="deb-redirect" hidden></p>   <!-- filled in by askDebrief when a SONA redirect will follow -->
+            <button type="submit" class="button-next">Submit and finish</button>
+        </form>
+    </div>
+
+    <!-- Done Screen (the text is filled in by saveAndFinish) -->
     <div id="done-screen" hidden></div>
 
     <script>
 "use strict";
 
-//  URL parameters (SONA fills in the participant's survey code):
-//     ?subjectId=XXXX   (also accepted: ?id=XXXX or ?code=XXXX)
+//  URL parameters (SONA fills in the participant's survey code, used only for the credit link, never saved):
+//     ?code=XXXX        (also accepted: ?sona_id=XXXX, ?subjectId=XXXX or ?id=XXXX)
 //     &test=1           test run: allConfig.debug (8 trials), saved to the folder 26TR04_test
+//  In SONA, the study URL is the page address with the code placeholder, which SONA replaces for each participant:
+//     https://ccnlab.ucsd.edu/jaashby/26TR04/chunharas2022.html?code=%SURVEY_CODE%
 
 // Constants for data export using save.php
 const EXPERIMENT_NAME = "26TR04";
@@ -246,17 +252,22 @@ const EXPERIMENTER    = "JamesAshby";
 const SAVE_URL        = "https://ccnlab.ucsd.edu/jaashby/save.php"; 
 const SAVE_SUCCESS_TEXT = "Success";
 
-// SONA completion, fill in from the SONA study settings (otherwise participants are not redirected to receive credit)
-
-const SONA_EXPERIMENT_ID = null;      // e.g. 1234  (null = no redirect, just a "you can close this tab" message)
-const SONA_CREDIT_TOKEN  = null;      // e.g. "805f6634..."
+// SONA completion: the experiment ID and credit token are from this study's client-side completion URL in SONA
+//    https://ucsd.sona-systems.com/webstudy_credit.aspx?experiment_id=3183&credit_token=...&survey_code=XXXX
+// (null for either = nobody is sent back to SONA for credit). The participant's own SONA code (?code=) goes only into
+// that credit link, it is never saved with the data.
+const SONA_EXPERIMENT_ID = 3183;
+const SONA_CREDIT_TOKEN  = "13a08ab8f4ac4d6097bae9c74425136f";
 const SONA_CREDIT_URL    = "https://ucsd.sona-systems.com/webstudy_credit.aspx";
 const CONTACT_EMAIL      = "jaashby@ucsd.edu";
 
 // Experimental Design
-//      5 reps x 12 target locations x 2 foil directions = 120 trials. Each location is the target exactly 10 times
-const N_REPS           = 5;     // x 12 target locations x 2 foil directions = 120 trials (60 per direction)
+//      5 reps x 12 target locations x 2 foil directions = 120 main trials. Each location is the target exactly 10 times
+//      + 12 catch trials (foil 180 deg from the correct color, one per target location) = 132 trials in one random order
+const N_REPS           = 5;     // x 12 target locations x 2 foil directions = 120 main trials (60 per direction)
+const N_CATCH_PER_LOC  = 1;     // Catch trials per target location (12 in total)
 const FOIL_OFFSET_DEG  = 6;     // Foil is 6 deg from the correct color
+const CATCH_FOIL_DEG   = 180;   // Catch trials: the foil is 180 deg away, so it should almost never be chosen
 const COLOR_DIST_DEG   = 45;    // The two target colors are 45 deg apart
 
 const MIN_SLOT_GAP = 3;
@@ -312,8 +323,8 @@ const SAVE_NAME  = TEST_MODE ? EXPERIMENT_NAME + "_test" : EXPERIMENT_NAME;   //
 
 // Experiment Config (allConfig: ?test=1 picks "debug", a real run picks "group1")
 const allConfig = {
-    debug:  { maxTrials: 8 },      // Only the first 8 trials
-    group1: { maxTrials: null },   // 120 trials (N_REPS x 24)
+    debug:  { maxMain: 6, maxCatch: 2 },        // 8 trials: 6 main + 2 catch
+    group1: { maxMain: null, maxCatch: null },  // 132 trials: 120 main + 12 catch
 };
 const config = TEST_MODE ? allConfig.debug : allConfig.group1;
 
@@ -372,12 +383,13 @@ const POSITION_ANGLE_OFFSET_DEG = POSITION_ANGLE_OFFSET_RAD * 180 / Math.PI;
 const slotSide = (slot) =>
   (Math.sin(2 * Math.PI * slot / NUM_PLACEHOLDERS + POSITION_ANGLE_OFFSET_RAD) > 0 ? "right" : "left");
 // Trial Generation
-// One "cell" = (target location) x (foil direction) x (repetition): 12 x 2 x 5 = 120, so every one of the 12 locations is probed exactly 10 times (5 toward, 5 away)
-// Cells are shuffled into a random order. For each trial:
+// One "cell" = (target location) x (foil direction) x (repetition): 12 x 2 x 5 = 120 main trials, so every one of the 12 locations is probed exactly 10 times (5 toward, 5 away)
+// Plus 12 catch trials, one per target location, whose foil is 180 deg from the target (so there is no toward / away)
+// Main and catch cells are shuffled together into one random order. For each trial:
 //    - the NON-target location is drawn at random from the slots that leave at least
 //      2 empty placeholders between the items (MIN_SLOT_GAP; 7 of the other 11 slots)
 //    - target color = random hue; non-target = exactly +/-45 deg from it
-//    - foil = target color shifted 6 deg toward or away from the non-target
+//    - foil = target color shifted 6 deg toward or away from the non-target (catch trials: shifted 180 deg)
 
 const slotGap = (a, b) => { const d = Math.abs(a - b) % NUM_PLACEHOLDERS; return Math.min(d, NUM_PLACEHOLDERS - d); };   // 0-6 around the ring
 const validNontargetSlots = (target) => {
@@ -388,96 +400,61 @@ const validNontargetSlots = (target) => {
 
 // Original paper only says the two placeholders were "randomly selected" with >= 2 empty between them
 // Here the target location is balanced (10 times each) and the non-target is uniform among the 7 allowed slots
-function buildTrialList(nPerCell, rng) {
+// One trial from one cell; foilDir is "toward", "away" or "catch"
+function makeTrialSpec(cell, num, rng) {
+  const targetSlot = cell.targetSlot;
+  const allowed = validNontargetSlots(targetSlot);
+  const nontargetSlot = allowed[Math.floor(rng() * allowed.length)];   // Fresh draw every trial (the bug fix)
+
+  const base = rng() * 360;                                  // Random position on the color circle
+  const offs = shuffleCopy([0, COLOR_DIST_DEG], rng);        // Which item is the "+45" one is random
+  const T = wrap360(base + offs[0]);
+  const N = wrap360(base + offs[1]);
+  const separation = signedDiff(N, T);                       // Non-target minus target, ~ +/-45
+  const toward = Math.sign(separation);                      // +1 if the non-target is "ahead" of the target
+  const isCatch = cell.foilDir === "catch";
+  const foilOffset = isCatch ? CATCH_FOIL_DEG : (cell.foilDir === "toward" ? 1 : -1) * toward * FOIL_OFFSET_DEG;
+  const F = wrap360(T + foilOffset);
+
+  return {
+    trial_num: num,
+    trial_kind: isCatch ? "catch" : "main",
+    foil_direction: isCatch ? "none" : cell.foilDir,         // A 180 deg foil is neither toward nor away
+    target_slot: targetSlot, nontarget_slot: nontargetSlot,
+    slot_gap: slotGap(targetSlot, nontargetSlot),
+    target_side: slotSide(targetSlot), nontarget_side: slotSide(nontargetSlot),
+    same_hemifield: slotSide(targetSlot) === slotSide(nontargetSlot),
+    target_hue: T, nontarget_hue: N, foil_hue: F,
+    item_separation: separation, foil_offset: foilOffset,
+    target_hex: hueToHex(T), nontarget_hex: hueToHex(N), foil_hex: hueToHex(F),
+  };
+}
+
+function buildTrialList(nPerCell, nCatchPerLoc, rng) {
   rng = rng || Math.random;
   const cells = [];
   for (let rep = 0; rep < nPerCell; rep++)
     for (const foilDir of ["toward", "away"])
       for (let s = 0; s < NUM_PLACEHOLDERS; s++) cells.push({ targetSlot: s, foilDir: foilDir });
+  for (let rep = 0; rep < nCatchPerLoc; rep++)
+    for (let s = 0; s < NUM_PLACEHOLDERS; s++) cells.push({ targetSlot: s, foilDir: "catch" });
 
-  return shuffleCopy(cells, rng).map((cell, i) => {
-    const targetSlot = cell.targetSlot;
-    const allowed = validNontargetSlots(targetSlot);
-    const nontargetSlot = allowed[Math.floor(rng() * allowed.length)];   // Fresh draw every trial (the bug fix)
-
-    const base = rng() * 360;                                  // Random position on the color circle
-    const offs = shuffleCopy([0, COLOR_DIST_DEG], rng);        // Which item is the "+45" one is random
-    const T = wrap360(base + offs[0]);
-    const N = wrap360(base + offs[1]);
-    const separation = signedDiff(N, T);                       // Non-target minus target, ~ +/-45
-    const toward = Math.sign(separation);                      // +1 if the non-target is "ahead" of the target
-    const foilOffset = (cell.foilDir === "toward" ? 1 : -1) * toward * FOIL_OFFSET_DEG;
-    const F = wrap360(T + foilOffset);
-
-    return {
-      trial_num: i + 1, foil_direction: cell.foilDir,
-      target_slot: targetSlot, nontarget_slot: nontargetSlot,
-      slot_gap: slotGap(targetSlot, nontargetSlot),
-      target_side: slotSide(targetSlot), nontarget_side: slotSide(nontargetSlot),
-      same_hemifield: slotSide(targetSlot) === slotSide(nontargetSlot),
-      target_hue: T, nontarget_hue: N, foil_hue: F,
-      item_separation: separation, foil_offset: foilOffset,
-      target_hex: hueToHex(T), nontarget_hex: hueToHex(N), foil_hex: hueToHex(F),
-    };
-  });
+  return shuffleCopy(cells, rng).map((cell, i) => makeTrialSpec(cell, i + 1, rng));
 }
 
 // Sanity checks on the generated list (console only)
-function checkTrialList(list, nPerCell) {
+function checkTrialList(list, nPerCell, nCatchPerLoc) {
   const n = {};
   list.forEach((t) => { const k = t.target_slot + "|" + t.foil_direction; n[k] = (n[k] || 0) + 1; });
-  const balanced = Object.keys(n).length === NUM_PLACEHOLDERS * 2 && Object.values(n).every((v) => v === nPerCell);
+  const want = (k) => (k.endsWith("|none") ? nCatchPerLoc : nPerCell);
+  const balanced = Object.keys(n).length === NUM_PLACEHOLDERS * (nCatchPerLoc ? 3 : 2) && Object.keys(n).every((k) => n[k] === want(k));
   const gapsOk = list.every((t) => t.nontarget_slot !== t.target_slot && slotGap(t.target_slot, t.nontarget_slot) >= MIN_SLOT_GAP);
+  const foilsOk = list.every((t) => Math.abs(Math.abs(signedDiff(t.foil_hue, t.target_hue)) - (t.trial_kind === "catch" ? CATCH_FOIL_DEG : FOIL_OFFSET_DEG)) < 1e-6);
   if (!balanced) console.error("Trial list is not balanced:", n);
   if (!gapsOk) console.error("Trial list has items closer than MIN_SLOT_GAP");
-  return balanced && gapsOk;
+  if (!foilsOk) console.error("Trial list has a foil that is not " + FOIL_OFFSET_DEG + " deg (main) or " + CATCH_FOIL_DEG + " deg (catch) from the target");
+  return balanced && gapsOk && foilsOk;
 }
-
-//  Demo pictures for the instruction pages: static copies of the task display, laid out like the plugin's own box
-//  Example trial: target at slot 0, non-target 45 deg away at slot 3, foil 6 deg from the target (away from the non-target)
-const DEMO = { targetSlot: 0, nontargetSlot: 3, targetHue: 1, nontargetHue: 1 + COLOR_DIST_DEG, foilHue: 1 - FOIL_OFFSET_DEG };
-
-function demoDisk(size, hex) {
-  const cv = document.createElement("canvas");
-  cv.width = size; cv.height = size;
-  const ctx = cv.getContext("2d");
-  ctx.beginPath();
-  ctx.arc(size / 2, size / 2, size / 2 - 1, 0, 2 * Math.PI);
-  if (hex) { ctx.fillStyle = hex; ctx.fill(); }
-  ctx.lineWidth = 1;
-  ctx.strokeStyle = hex ? "#222" : "#999";   // Colored disk, or the empty placeholder outline
-  ctx.stroke();
-  return cv;
-}
-
-// kind: "empty" = ring + crosshair, "array" = the two colors, "test" = black ring on the probed location + the two options
-function drawDemo(host, kind) {
-  const box = 2 * RING_RADIUS_PX + 2 * ITEM_SIZE_PX + 40, c = box / 2;
-  const stage = document.createElement("div");
-  stage.className = "demo-box";
-  stage.style.width = stage.style.height = box + "px";
-  const color = {};
-  if (kind === "array") { color[DEMO.targetSlot] = hueToHex(DEMO.targetHue); color[DEMO.nontargetSlot] = hueToHex(DEMO.nontargetHue); }
-  for (let i = 0; i < NUM_PLACEHOLDERS; i++) {
-    const ang = 2 * Math.PI * i / NUM_PLACEHOLDERS + POSITION_ANGLE_OFFSET_RAD;
-    const cv = demoDisk(ITEM_SIZE_PX, color[i]);
-    cv.style.cssText = "position:absolute;border-radius:50%;top:" + (Math.cos(ang) * RING_RADIUS_PX + c - ITEM_SIZE_PX / 2) + "px;left:" +
-                       (Math.sin(ang) * RING_RADIUS_PX + c - ITEM_SIZE_PX / 2) + "px";
-    if (kind === "test" && i === DEMO.targetSlot) cv.style.boxShadow = "0 0 0 5px #000";
-    stage.appendChild(cv);
-  }
-  stage.insertAdjacentHTML("beforeend", "<span style='position:absolute;top:" + (c - 10) + "px;left:" + (c - 6) + "px'>+</span>");
-  if (kind === "test") {   // Target on the left, foil on the right, each OPTION_OFFSET_PX from fixation
-    [[hueToHex(DEMO.targetHue), -1], [hueToHex(DEMO.foilHue), 1]].forEach(([hex, side]) => {
-      const cv = demoDisk(ITEM_SIZE_PX, hex);
-      cv.style.cssText = "position:absolute;z-index:5;border-radius:50%;border:1px solid #222;top:" + (c - ITEM_SIZE_PX / 2) + "px;left:" +
-                         (c + side * OPTION_OFFSET_PX - ITEM_SIZE_PX / 2) + "px";
-      stage.appendChild(cv);
-    });
-  }
-  host.appendChild(stage);
-}
-document.querySelectorAll(".demo").forEach((el) => drawDemo(el, el.dataset.demo));
 
 //  Forced fullscreen
 //  Leaving fullscreen covers the page and blocks the keys until the person returns
@@ -500,7 +477,9 @@ function requestFullscreen() {
 }
 
 let fsEnforced = false;      // Overlay on/off
-let fsTaskRunning = false;   // Exits are only counted while trials run
+let fsTrialActive = false;   // A trial is on screen: the overlay waits until it ends (see fsGate), so a trial is never interrupted and no pause adds to the RT
+let fsTaskRunning = false;   // Overlay and key blocking cover the practice trial too
+let fsCounting = false;      // Exits are only counted from the first real trial (not during the practice trial)
 let fsExits = 0;
 let fsWatching = false;
 
@@ -530,8 +509,8 @@ function installFullscreenWatch() {
     const fs = isFullscreen();
     if (fs) hideFsOverlay();
     else {
-      if (wasFs && fsTaskRunning) fsExits += 1;
-      if (fsEnforced) showFsOverlay();
+      if (wasFs && fsCounting) fsExits += 1;                  // Counted (and flagged in fs_exits_in_trial) even if a trial is running
+      if (fsEnforced && !fsTrialActive) showFsOverlay();     // Mid-trial: no overlay, the pause comes before the next trial
     }
     wasFs = fs;
   };
@@ -557,10 +536,10 @@ const jsPsych = jsPsychModule.initJsPsych({
   on_finish: () => saveAndFinish(),
 });
 
-// Participant ID from the URL (SONA survey code); random fallback so a test run still saves
-const urlId = params.get("subjectId") || params.get("id") || params.get("code");
-const subjectId = (urlId || ("NOID_" + jsPsych.randomization.randomID(8))).replace(/[^A-Za-z0-9_-]/g, "_").slice(0, 64);
-const sonaCode  = params.get("code") || params.get("subjectId") || params.get("id");
+// The ID saved with the data is a random ID made for each participant (same pattern as the Guiding Light task; the data are public)
+// The SONA code is only kept to build the credit link at the end, it is never saved
+const subjectId = "CH22" + Math.round(Math.random() * 100000000) + "55";   // Wide range so two participants are very unlikely to share an ID
+const sonaCode  = params.get("code") || params.get("sona_id") || params.get("subjectId") || params.get("id");
 
 jsPsych.data.addProperties({
   subject: subjectId,
@@ -575,7 +554,8 @@ jsPsych.data.addProperties({
 });
 
 //  Trial Logic
-function makeTrial(t) {
+function makeTrial(t, phase) {
+  phase = phase || "main";   // "practice" for the one practice trial
   let exitsAtStart = 0;
   return {
     type: jsPsychWmForcedChoice,
@@ -614,21 +594,141 @@ function makeTrial(t) {
     background_color: "#ffffff",
     auto_zoom: AUTO_ZOOM,
 
-    data: Object.assign({ phase: "main" }, t),
-    on_start: () => { exitsAtStart = fsExits; },
+    data: Object.assign({ phase: phase }, t),
+    on_start: () => { exitsAtStart = fsExits; earlyCount = 0; awaitingOptions = true; fsTrialActive = true; },
     // fs_exits_in_trial > 0: fullscreen was left during this trial (the array or options may not have been seen)
-    on_finish: (d) => { d.window_w = window.innerWidth; d.window_h = window.innerHeight; d.fs_exits_in_trial = fsExits - exitsAtStart; },
+    on_finish: (d) => {
+      fsTrialActive = false;   // From here the overlay may appear; fsGate holds the next trial until fullscreen is back
+      d.window_w = window.innerWidth; d.window_h = window.innerHeight; d.fs_exits_in_trial = fsExits - exitsAtStart;
+      d.early_presses = earlyCount; awaitingOptions = false;
+      if (phase === "main") noteRush(d);   // The practice trial does not count towards the rushing check
+    },
   };
 }
 
-//  Assemble the timeline (trials only; the screens before them are the plain HTML above)
-let mainList = buildTrialList(N_REPS);
-if (!checkTrialList(mainList, N_REPS)) console.error("Check the trial list before running participants.");
-if (config.maxTrials) mainList = mainList.slice(0, config.maxTrials);
+//  Rushing safeguard (same rule and values as the Su et al. 2025 task). It only records and pauses, nobody is excluded
+//  A trial is "rushed" if Z / M was pressed early_presses or more times before the two options appeared,
+//  or if the answer came faster than fast_rt_ms. When `trials` of the last `of_last` trials were rushed,
+//  a "please slow down" screen appears and the count starts again
+const RUSH = { early_presses: 3, fast_rt_ms: 200, of_last: 5, trials: 3, recent: [] };
+let earlyCount = 0, awaitingOptions = false;
+// Counts Z / M presses from the start of a trial until the options appear (the plugin only listens once they are up)
+window.addEventListener("keydown", (e) => {
+  if (awaitingOptions && !e.repeat && [KEY_LEFT, KEY_RIGHT].includes((e.key || "").toLowerCase())) earlyCount += 1;
+}, true);
+new MutationObserver(() => {
+  if (awaitingOptions && taskEl.querySelectorAll("canvas[data-pos]").length >= 2) awaitingOptions = false;
+}).observe(taskEl, { childList: true, subtree: true });
 
+function noteRush(d) {
+  d.rushed = (d.early_presses >= RUSH.early_presses || (d.rt != null && d.rt < RUSH.fast_rt_ms)) ? 1 : 0;
+  d.checkin_after = "";
+  RUSH.recent.push(d.rushed);
+  if (RUSH.recent.length > RUSH.of_last) RUSH.recent.shift();
+}
+
+//  Small screens drawn by the page itself: they wait for the spacebar (key: true) or for a button
+class ScreenPlugin {
+  constructor(jsPsych) { this.jsPsych = jsPsych; }
+  trial(el, trial) {
+    el.innerHTML = "<div class='screen-box'>" + trial.html +
+      (trial.button ? "<p><button class='button-next' id='screen-btn'>" + trial.button + "</button></p>" : "") + "</div>";
+    const t0 = performance.now();
+    const onKey = (e) => { if (e.key === " " && !e.repeat) { e.preventDefault(); done(); } };   // A held-down spacebar does not skip the screen
+    const done = () => {
+      document.removeEventListener("keydown", onKey);
+      el.innerHTML = "";
+      this.jsPsych.finishTrial({ rt: Math.round(performance.now() - t0) });
+    };
+    if (trial.key) document.addEventListener("keydown", onKey);
+    if (trial.button) el.querySelector("#screen-btn").addEventListener("click", done);
+  }
+}
+ScreenPlugin.info = {
+  name: "screen", version: "1.0.0",
+  parameters: {
+    html:   { type: jsPsychModule.ParameterType.HTML_STRING, default: "" },
+    key:    { type: jsPsychModule.ParameterType.BOOL, default: false },     // true = the spacebar continues
+    button: { type: jsPsychModule.ParameterType.STRING, default: "" },      // Text of a button that continues ("" = no button)
+  },
+  data: { rt: { type: jsPsychModule.ParameterType.INT } },
+};
+
+//  Fullscreen gate: sits before every trial. If fullscreen was left, the "return to fullscreen" screen holds the next trial
+//  until the person is back (so the pause is between trials and never inside one). Nothing is shown when fullscreen is on
+class FsGatePlugin {
+  constructor(jsPsych) { this.jsPsych = jsPsych; }
+  trial(el, trial) {
+    el.innerHTML = "";
+    showFsOverlay();
+    const t0 = performance.now();
+    const timer = setInterval(() => {
+      if (!isFullscreen()) return;
+      clearInterval(timer);
+      hideFsOverlay();
+      this.jsPsych.finishTrial({ rt: Math.round(performance.now() - t0) });   // How long the next trial was held up
+    }, 50);
+  }
+}
+FsGatePlugin.info = {
+  name: "fs-gate", version: "1.0.0",
+  parameters: {},
+  data: { rt: { type: jsPsychModule.ParameterType.INT } },
+};
+function fsGate() {
+  return {
+    timeline: [{ type: FsGatePlugin, data: { phase: "fsgate" } }],
+    conditional_function: () => fsEnforced && !isFullscreen(),
+  };
+}
+
+// "Please slow down" screen, shown after a trial when enough of the recent trials were rushed
+function rushCheckIn() {
+  return {
+    timeline: [{
+      type: ScreenPlugin, data: { phase: "checkin" }, key: true,   // Only the spacebar continues (no button)
+      html: "<h2>Please slow down a little</h2>" +
+        "<p>It looks like <b>" + KEY_LEFT.toUpperCase() + "</b> or <b>" + KEY_RIGHT.toUpperCase() + "</b> was pressed before the two circles appeared, or very quickly after they appeared.</p>" +
+        "<p>Wait until the two circles appear. Then press <b>" + KEY_LEFT.toUpperCase() + "</b> for the left circle or <b>" + KEY_RIGHT.toUpperCase() + "</b> for the right circle. Answer as accurately as you can.</p>" +
+        "<p>Press the <b>spacebar</b> when you are ready to continue.</p>",
+      on_finish: () => {
+        const last = jsPsych.data.get().filter({ phase: "main" }).last(1).values()[0];
+        if (last) last.checkin_after = "rushed";   // Marks the trial the pause came after
+        RUSH.recent = [];
+      },
+    }],
+    conditional_function: () => RUSH.recent.reduce((a, b) => a + b, 0) >= RUSH.trials,
+  };
+}
+
+//  Trial list: 120 main + 12 catch trials in one random order
+let trialList = buildTrialList(N_REPS, N_CATCH_PER_LOC);
+if (!checkTrialList(trialList, N_REPS, N_CATCH_PER_LOC)) console.error("Check the trial list before running participants.");
+if (config.maxMain) {   // Test run: the first few main and catch trials, kept in their random order
+  const keep = new Set(trialList.filter((t) => t.trial_kind === "main").slice(0, config.maxMain)
+    .concat(trialList.filter((t) => t.trial_kind === "catch").slice(0, config.maxCatch)));
+  trialList = trialList.filter((t) => keep.has(t)).map((t, i) => Object.assign({}, t, { trial_num: i + 1 }));
+}
+
+//  One practice trial, drawn like the real ones: no feedback, and it moves on whichever circle is chosen. It is not saved in the CSV
+const practiceSpec = Object.assign(
+  makeTrialSpec({ targetSlot: Math.floor(Math.random() * NUM_PLACEHOLDERS), foilDir: Math.random() < 0.5 ? "toward" : "away" }, 0, Math.random),
+  { trial_kind: "practice" });
+
+const READY_HTML = "<h2>That was the practice trial</h2>" +
+  "<p>When the two circles appear in the real task, press <b>" + KEY_LEFT.toUpperCase() + "</b> for the left circle or <b>" + KEY_RIGHT.toUpperCase() + "</b> for the right circle.</p>" +
+  "<p>Press the <b>spacebar</b> when you are ready to begin. The first trial starts right away.</p>";
+
+//  Assemble the timeline: practice trial, spacebar screen, then the trials (the screens before them are the plain HTML above)
 const timeline = [];
-
-mainList.forEach((t) => timeline.push(makeTrial(t)));
+timeline.push(fsGate());
+timeline.push(makeTrial(practiceSpec, "practice"));
+timeline.push({ type: ScreenPlugin, data: { phase: "ready" }, key: true, html: READY_HTML, on_finish: () => { fsCounting = true; } });
+trialList.forEach((t, i) => {
+  timeline.push(fsGate());   // Holds the trial if fullscreen was left (checked after any "slow down" screen too)
+  timeline.push(makeTrial(t));
+  if (i < trialList.length - 1) timeline.push(rushCheckIn());   // None after the last trial
+});
 
 //  Navigation Helpers
 function linkNextScreen(first, next, fn) {
@@ -682,8 +782,9 @@ linkNextScreen("#instructions2", "#instructions3");
 linkNextScreen("#instructions3", "#instructions4");
 linkNextScreen("#instructions4", "#instructions5");
 linkNextScreen("#instructions5", "#instructions6");
-// Last Instruction Page → Trials
-linkNextScreen("#instructions6", null, () => beginOrdeal());
+linkNextScreen("#instructions6", "#instructions7");
+// Last Instruction Page → Practice trial → Trials
+linkNextScreen("#instructions7", null, () => beginOrdeal());
 
 //  Main Flow
 function beginOrdeal() {
@@ -694,15 +795,89 @@ function beginOrdeal() {
     jsPsych.run(timeline);
 }
 
+//  Data format
+//  One CSV per participant (save.php stores the text as it is, as <id>.txt):
+//     row 1  = column names
+//     row 2  = the final-questions row (trial_kind "debrief": age, gender, sex_at_birth, anything_weird + the session columns)
+//     rows 3+ = one row per trial (trial_kind "main" or "catch"; the four answer columns are empty)
+const CSV_COLUMNS = [
+  "subject", "trial_num", "trial_kind",
+  // Final questions (filled on the "debrief" row only)
+  "age", "gender", "sex_at_birth", "anything_weird",
+  // Design
+  "foil_direction", "foil_offset", "item_separation",
+  "target_slot", "nontarget_slot", "slot_gap", "target_side", "nontarget_side", "same_hemifield",
+  "target_hue", "nontarget_hue", "foil_hue", "target_hex", "nontarget_hex", "foil_hex",
+  // Response
+  "response", "correct_key", "correct", "rt", "multiple_keys_pressed", "early_presses", "rushed", "checkin_after",
+  // Checks
+  "actual_stim_duration", "time_elapsed", "fs_exits_in_trial", "fullscreen_exits", "window_w", "window_h",
+  // Session (the same on every row)
+  "experiment", "test_mode", "start_time", "color_space", "plugin_version", "screen_w", "screen_h", "pixel_ratio", "user_agent",
+];
+
+function csvCell(v) {
+  if (v === null || v === undefined) return "";
+  if (typeof v === "boolean") return v ? "1" : "0";   // true/false saved as 1/0
+  const s = String(v);
+  return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;   // Cells with commas get quoted (the user agent has some)
+}
+
+function buildCsv(debrief) {
+  const otherKey = (k) => (k === KEY_LEFT ? KEY_RIGHT : KEY_LEFT);
+  const mains = jsPsych.data.get().filter({ phase: "main" }).values();
+  const lines = mains.map((d) => {
+    // correct_key = the key that was right on this trial (so a left/right response bias can be checked)
+    const row = Object.assign({}, d, { correct_key: d.response == null ? null : (d.correct ? d.response : otherKey(d.response)) });
+    return CSV_COLUMNS.map((c) => csvCell(row[c])).join(",");
+  });
+  // The final-questions answers are their own row, first after the column names. It carries the same session columns as every trial row
+  const first = mains[0] || {};
+  const debRow = Object.assign({ subject: subjectId, trial_kind: "debrief" }, debrief || {});
+  ["fullscreen_exits", "experiment", "test_mode", "start_time", "color_space", "plugin_version", "screen_w", "screen_h", "pixel_ratio", "user_agent"]
+    .forEach((k) => { debRow[k] = first[k]; });
+  lines.unshift(CSV_COLUMNS.map((c) => csvCell(debRow[c])).join(","));
+  return CSV_COLUMNS.join(",") + "\n" + lines.join("\n") + "\n";
+}
+
+// Final questions: shows the form and resolves with the answers when it is submitted (all optional; blank = skipped)
+function askDebrief() {
+  return new Promise((resolve) => {
+    const box = document.getElementById("debrief"), form = document.getElementById("debrief-form");
+    // One line per CSV row. Text that starts with = + - @ gets a leading ' so a spreadsheet will not run it as a formula
+    const oneLine = (s) => { const t = String(s).replace(/\s+/g, " ").trim(); return /^[=+\-@]/.test(t) ? "'" + t : t; };
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();   // (the browser only fires this when the age, if given, is a whole number from 1 to 100)
+      box.hidden = true;
+      resolve({
+        age: oneLine(document.getElementById("deb-age").value),
+        gender: document.getElementById("deb-gender").value,
+        sex_at_birth: document.getElementById("deb-sex").value,
+        anything_weird: oneLine(document.getElementById("deb-weird").value),
+      });
+    }, { once: true });
+    // Tell the participant what happens next: only when a credit link will really follow (a real run with the SONA settings and their code)
+    const redirectNote = document.getElementById("deb-redirect");
+    const sonaSet = !!(SONA_EXPERIMENT_ID && SONA_CREDIT_TOKEN);
+    if (TEST_MODE ? sonaSet : !!creditUrl()) {
+      redirectNote.textContent = "When you click Submit, your data will be saved and this page will then take you back to SONA so that you receive your credit. " +
+        "Please do not close the window until that happens." + (TEST_MODE ? " (Test mode: no redirect will happen.)" : "");
+      redirectNote.hidden = false;
+    }
+    box.hidden = false;
+    document.getElementById("deb-age").focus();
+  });
+}
+
 //  Saving
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function postData(json) {
+async function postData(csv) {
   const dataToServer = {
     id: subjectId,
     experimenter: EXPERIMENTER,
     experimentName: SAVE_NAME,
-    curData: json,
+    curData: csv,
   };
   const resp = await fetch(SAVE_URL, { method: "POST", body: new URLSearchParams(dataToServer) });
   const text = await resp.text();
@@ -710,25 +885,31 @@ async function postData(json) {
   return true;
 }
 
+// The link that gives the participant credit in SONA. Needs the study's ID + token above and the participant's own ?code=
 function creditUrl() {
   if (!SONA_EXPERIMENT_ID || !SONA_CREDIT_TOKEN || !sonaCode) return null;
-  return SONA_CREDIT_URL + "?experiment_id=" + encodeURIComponent(SONA_EXPERIMENT_ID) +
-         "&credit_token=" + encodeURIComponent(SONA_CREDIT_TOKEN) + "&survey_code=" + encodeURIComponent(sonaCode);
+  return (SONA_CREDIT_URL + "?experiment_id=" + encodeURIComponent(SONA_EXPERIMENT_ID) +
+          "&credit_token=" + encodeURIComponent(SONA_CREDIT_TOKEN) + "&survey_code=" + encodeURIComponent(sonaCode)
+         ).replace(/'/g, "%27");   // encodeURIComponent leaves ' alone, and the link is written inside a quoted href below
 }
+if (!TEST_MODE && !(SONA_EXPERIMENT_ID && SONA_CREDIT_TOKEN))
+  console.warn("SONA experiment ID / credit token are not set (see SONA_EXPERIMENT_ID): participants will NOT be sent back to SONA for credit.");
 
 async function saveAndFinish() {
-  // Swap the task screen for the done screen while saving
   taskEl.hidden = true;
+  fsTaskRunning = false; fsCounting = false;   // The trials are over: no more exits are counted. Fullscreen itself stays on (and the overlay stays enforced) during the final questions
+  jsPsych.data.addProperties({ fullscreen_exits: fsExits });   // Total times fullscreen was left during the trials
+
+  // Final questions first, then everything is saved in one file (the server never overwrites, so it is saved once, after this)
+  const debrief = await askDebrief();
+  fsEnforced = false; hideFsOverlay();   // Fullscreen is no longer required from here on
+  try { if (document.fullscreenElement) await document.exitFullscreen(); } catch (e) { /* ignore */ }
   doneScreen.hidden = false;
   doneScreen.innerHTML = "<p>Saving your data. Please do not close this window...</p>";
-  fsEnforced = false; fsTaskRunning = false; hideFsOverlay();   // Fullscreen is no longer required from here on
-  try { if (document.fullscreenElement) await document.exitFullscreen(); } catch (e) { /* ignore */ }
-
-  jsPsych.data.addProperties({ fullscreen_exits: fsExits });   // Total times fullscreen was left during the trials
-  const json = jsPsych.data.get().json();
+  const csv = buildCsv(debrief);
   let saved = false;
   for (let attempt = 1; attempt <= 3 && !saved; attempt++) {
-    try { saved = await postData(json); }
+    try { saved = await postData(csv); }
     catch (e) { console.warn("Save attempt " + attempt + " failed:", e); await sleep(1500 * attempt); }
   }
 
@@ -738,14 +919,15 @@ async function saveAndFinish() {
     console.log("Saved!");
     doneScreen.innerHTML = "<p>Thank you for participating, we appreciate your time and effort!</p><p>Your data have been saved.</p>" +
       (url ? "<p>You will now be taken back to SONA to receive your credit. <a href='" + url + "'>Click here if nothing happens.</a></p>"
-           : "<p>You can close this tab.</p>");
+           : "<p>You can close this tab.</p>" +
+             (TEST_MODE ? "" : "<p>If you came from SONA and did not receive credit, please email <b>" + CONTACT_EMAIL + "</b>.</p>"));
     if (url) setTimeout(() => { window.location.href = url; }, 2500);
     if (TEST_MODE) {
-      // Test version only: a local copy of the JSON so it can be inspected without going to the server
+      // Test version only: a local copy of the CSV so it can be inspected without going to the server
       doneScreen.insertAdjacentHTML("beforeend",
-        "<p><b>TEST MODE</b> (" + config.maxTrials + " trials, saved to " + SAVE_NAME + ").</p>" +
-        "<p><button id='dl' class='button-next'>Download test data (JSON)</button></p>");
-      document.getElementById("dl").addEventListener("click", () => downloadJson(json));
+        "<p><b>TEST MODE</b> (" + trialList.length + " trials, saved to " + SAVE_NAME + ").</p>" +
+        "<p><button id='dl' class='button-next'>Download test data (CSV)</button></p>");
+      document.getElementById("dl").addEventListener("click", () => downloadCsv(csv));
     }
   } else {
     // Failsafe in case the data cannot save to server
@@ -753,15 +935,15 @@ async function saveAndFinish() {
       "<p>We could not save your data to our server. Please click the button to download your data file and " +
       "email it to <b>" + CONTACT_EMAIL + "</b>.</p><p><button id='dl' class='button-next'>Download my data</button></p>" +
       (url ? "<p><a href='" + url + "'>Continue to SONA to receive your credit</a></p>" : "");
-    document.getElementById("dl").addEventListener("click", () => downloadJson(json));
+    document.getElementById("dl").addEventListener("click", () => downloadCsv(csv));
   }
 }
 
-// Saves the JSON string to the participant's own computer (used by the save-failure failsafe and by test mode)
-function downloadJson(json) {
+// Saves the CSV text to the participant's own computer (used by the save-failure failsafe and by test mode)
+function downloadCsv(csv) {
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([json], { type: "application/json" }));
-  a.download = SAVE_NAME + "_" + subjectId + ".json";
+  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+  a.download = SAVE_NAME + "_" + subjectId + ".csv";
   a.click();
 }
     </script>
