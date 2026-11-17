@@ -1,6 +1,6 @@
 ---
 title: "Replication of 'An Adaptive Perspective on Visual Working Memory Distortions' by Chunharas, Rademaker, Brady, and Serences (2022, Journal of Experimental Psychology)"
-author: "Chaipat Chunharas (chaipat.c@chula.ac.th) and Tim Brady"
+author: "James Ashby"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 format:
   pdf:
@@ -40,7 +40,7 @@ I rebuilt Experiment 1 of Chunharas and Brady (2022) in jsPsych v8.4 using The B
 
 ### Power Analysis
 
-Effect size not displayed in the original paper, but can be extrapolated from data and figures later. Power analysis for replication sampele size is conducted below.
+Effect size not displayed in the original paper, but can be extrapolated from data and figures later. Power analysis for replication sample size is conducted below.
 
 ```{r}
 library(pwr)
@@ -113,6 +113,8 @@ Data analysis will consist of simply running a paired samples t-test comparing a
 
 I also plan to visualize the data, and plot novel figures including both participant accuracy by condition, and reaction time.
 
+From original data analysis:
+
 ```
 setwd("~/yourWorkingDirectory/.../data_codes/R") # <- please change this to your own path
 
@@ -160,16 +162,26 @@ t.test(datcsv[datcsv$fdirec==-1,'val']-datcsv[datcsv$fdirec==1,'val'])
 
 Data preparation following the analysis plan.
 	
-```{r include=F}
-### Data Preparation
-
-#### Load Relevant Libraries and Functions
-
+```{r}
 #### Import data
+files <- list.files("26TR04 Raw Data", pattern = "\\.txt$", full.names = TRUE)
+need  <- c("subject", "trial_kind", "foil_direction", "correct")   
+dat   <- do.call(rbind, lapply(files, function(f) read.csv(f, colClasses = "character", na.strings = c("", "NA"))[, need]))
+dat$correct <- as.numeric(dat$correct)
 
-#### Data exclusion / filtering
+#### Data Preparation
+main  <- subset(dat, trial_kind == "main")
+catch <- subset(dat, trial_kind == "catch")
+acc   <- tapply(main$correct, list(main$subject, main$foil_direction), mean)
+catch_correct <- as.numeric(tapply(catch$correct, catch$subject, sum)[rownames(acc)])
 
-#### Prepare data for analysis - create columns etc.
+#### Whole Participant Sample: Paired t-test on accuracy, toward vs. away
+t.test(acc[, "toward"], acc[, "away"], paired = TRUE)
+
+#### Exclusion Criteria Sample: Excluding participants with fewer than 10 of 12 catch trials correct
+keep <- !is.na(catch_correct) & catch_correct >= 10
+t.test(acc[keep, "toward"], acc[keep, "away"], paired = TRUE)
+
 ```
 
 ### Confirmatory analysis

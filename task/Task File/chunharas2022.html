@@ -135,8 +135,8 @@
 
     <div id="instructions2" hidden>
         <p>
-            On each trial, two colors will appear and you will need to remember their hues as accurately as possible. <br />
-            We encourage you to use visual memory (remember as if you are taking a photograph of it). <br />
+            On each trial, two colors will appear and you will need to remember their hues as accurately as possible. <br /><br />
+            We encourage you to use visual memory (remember as if you are taking a photograph of it). <br /><br />
             At the start of each trial, start your eyes on the crosshair at the middle of the screen.
         </p>
         <div class="nav-buttons">
@@ -147,8 +147,8 @@
 
     <div id="instructions3" hidden>
         <p>
-            Two colors will appear <b>very briefly</b> at 2 of the 12 locations that will be aranged in a circle around the crosshair. <br />
-            The colors will only appear for a very brief period of time (less than a second). <br />
+            Two colors will appear <b>very briefly</b> at 2 of the 12 locations that will be aranged in a circle around the crosshair. <br /><br />
+            The colors will only appear for a very brief period of time (less than a second). <br /><br />
             So make sure to keep your eyes on the screen for the entire duration of the task.
         </p>
         <div class="nav-buttons">
@@ -159,8 +159,8 @@
 
     <div id="instructions4" hidden>
         <p>
-            After seeing the two colors, you will be asked to recall one of them from memory. <br />
-            The location where the correct color was will be <b>indicated by a black circle surrounding it.</b><br />
+            After seeing the two colors, you will be asked to recall one of them from memory. <br /><br />
+            The location where the correct color was will be <b>indicated by a black circle surrounding it.</b><br /><br />
         </p>
         <div class="nav-buttons">
             <button class="button-back" onclick="document.getElementById('instructions4').hidden=true; document.getElementById('instructions3').hidden=false;">&#8592;</button>
@@ -170,8 +170,8 @@
 
     <div id="instructions5" hidden>
         <p>
-            Two <b>very similar</b> color choices will appear on each side of the crosshair, you will have to choose between the two colors.<br />
-            Remember, you are choosing the color that was <b>inside the location the black circle is surrounding.</b>. <br />
+            Two <b>very similar</b> color choices will appear on each side of the crosshair, you will have to choose between the two colors.<br /><br />
+            Remember, you are choosing the color that was <b>inside the location the black circle is surrounding.</b>. <br /><br />
             Please press <b>"<span class="keyLeft"></span>"</b> to choose the left circle OR <b>"<span class="keyRight"></span>"</b> to choose the right circle as your response.
         </p>
         <div class="nav-buttons">
@@ -182,8 +182,8 @@
 
     <div id="instructions6" hidden>
         <p>
-            After you make a response, the next trial will begin. So please keep your focus on the screen the entire time <br />
-            Please choose your response as <b>quickly and accurately</b> as possible. <br />
+            After you make a response, the next trial will begin. So please keep your focus on the screen the entire time <br /><br />
+            Please choose your response as <b>quickly and accurately</b> as possible.
         </p>
         <div class="nav-buttons">
             <button class="button-back" onclick="document.getElementById('instructions6').hidden=true; document.getElementById('instructions5').hidden=false;">&#8592;</button>
@@ -835,7 +835,7 @@ function askDebrief() {
     const redirectNote = document.getElementById("deb-redirect");
     const sonaSet = !!(SONA_EXPERIMENT_ID && SONA_CREDIT_TOKEN);
     if (TEST_MODE ? sonaSet : !!creditUrl()) {
-      redirectNote.textContent = "When you click Submit, your data will be saved and this page will then take you back to SONA so that you receive your credit. " +
+      redirectNote.textContent = "When you click Submit this page will redirect you you back to SONA so that you receive your credit. " +
         "Please do not close the window until that happens." + (TEST_MODE ? " (Test mode: no redirect will happen.)" : "");
       redirectNote.hidden = false;
     }
