@@ -48,6 +48,9 @@ po/*~
 # RStudio Connect folder
 rsconnect/
 
+# ignore raw data file
+chunharas2022/writeup/raw_data
+
 # ignore all CSVs
 *.csv
 # unless they end with -anon
