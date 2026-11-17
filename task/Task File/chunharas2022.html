@@ -3,10 +3,10 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Visual Working Memory Task</title>
+    <title>Visual Memory Task</title>
 
-    <link rel="stylesheet" href="https://unpkg.com/jspsych@8/css/jspsych.css" />
-    <script src="https://unpkg.com/jspsych@8/dist/index.browser.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/jspsych@8.4.0/css/jspsych.css" />
+    <script src="https://unpkg.com/jspsych@8.4.0/dist/index.browser.min.js"></script> 
 
     <script src="brady-color-wheel.js"></script>
     <script src="brady-plugin-utils.js"></script>
@@ -46,9 +46,9 @@
             overflow: auto;
             border: 1px solid #666;
             padding: 8px 16px;
-            text-align: left;
-            font-size: 14px;
-            font-weight: normal;
+            text-align: center;
+            font-size: 16.5px;
+            font-weight: bold;
             width: min(1000px, 92vw);
             margin: 0 auto 16px;
         }
@@ -84,20 +84,35 @@
     <div id="startupScreen">
         <p>This experiment must be completed in fullscreen. Please click the button below to switch to fullscreen before you begin.</p>
         <button class="button-next">Start Fullscreen</button>
-        <p id="fs-fail" hidden>Your browser did not enter fullscreen. Please click the button again. If it keeps happening, try Chrome, Firefox, Edge or Safari on a computer.</p>
+        <p id="fs-fail" hidden>Your browser did not enter fullscreen. Please click the button again. <br />
+          If this keeps happening, ensure you are on a large enough screen or try using a different browser.</p>
     </div>
 
     <!-- Consent & Instructions -->
     <div id="consent" hidden>
         <div class="consent-box">
-            <p>You are being invited to participate in a research study titled "Reproducibility of Psychological Science and Instruction." This study is being done by Dr. Bria Long from UC San Diego and associated graduate students in Experimental Methods course. You were selected to participate in this study because you are an adult in the U.S. and have been a represented population in previous psychology studies.</p>
-            <p>The purpose of this study is to better understand how well previously published studies in the psychological field replicate online and with different populations. Your participation in this research should last approximately 5-30 minutes.</p>
-            <p>If you agree to take part in this study, you may be asked to view a set of stimuli, including pictures, sounds, written text, or videos and then giving some responses via key-presses, verbally, or with paper-and-pencil. We may also observe your choices or preferences among an array of stimuli. These stimuli will be taken directly from or closely adapted from studies that already exist in the published psychological literature. Stimuli will include, e.g., pictures of objects and human faces, audio and video clips, short text passages, etc. None of the stimuli will be disturbing, threatening, or offensive.</p>
-            <p>The online and in-person experiments described in this protocol will take no more than 30 minutes. An example game you might play would be to click on an image on the screen that matches a word you hear being said out loud. Your total expected time commitment for this study is between 5-30 minutes, and is specified in the study description.</p>
-            <p>Your participation in this study is completely voluntary and you can withdraw at any time. Choosing not to participate or withdrawing will result in no penalty or loss of benefits to which you are entitled. You are free to skip any question that you choose.</p>
-            <p>We will not be asking for any personally identifying information, and we will handle responses as confidentially as possible. Your SONA or Prolific IDs will never be tied to your responses on this survey. However, we cannot guarantee the confidentiality of information transmitted over the Internet. To minimize this risk, data containing anything that might be personally identifiable (e.g. Prolific IDs or IP addresses) will be encrypted on transfer and storage and will only be accessible to qualified lab personnel. We will be keeping data collected as part of this experiment indefinitely. This anonymized data (containing neither Prolific IDs nor IP addresses) may be shared with the scientific community or with other participants to be used as stimuli in future studies.</p>
-            <p>If you have questions about this project or if you have a research-related problem, you may contact the researcher(s), Dr. Bria Long, brlong@ucsd.edu. If you have any questions concerning your rights as a research subject, you may contact the UC San Diego Office of IRB Administration at irb@ucsd.edu or 858-246-4777.</p>
-            <p>By participating in this research you are indicating that you are at least 18 years old, have read this consent form, and agree to participate in this research study. Please keep this consent form for your records.</p>
+            You are being invited to participate in a research study titled "Reproducibility of Psychological Science and Instruction." 
+            This study is being done by Dr. Bria Long from UC San Diego and associated graduate students in Experimental Methods course. 
+            You were selected to participate in this study because you are an adult in the U.S. and have been a represented population in previous psychology studies.<br /><br />
+            The purpose of this study is to better understand how well previously published studies in the psychological field replicate online and with different populations.
+            Your participation in this research should last approximately 5-30 minutes.<br /><br />
+            If you agree to take part in this study, you may be asked to view a set of stimuli, including pictures, sounds, written text, or videos and then giving some responses via key-presses, verbally, or with paper-and-pencil. 
+            We may also observe your choices or preferences among an array of stimuli. These stimuli will be taken directly from or closely adapted from studies that already exist in the published psychological literature. 
+            Stimuli will include, e.g., pictures of objects and human faces, audio and video clips, short text passages, etc. None of the stimuli will be disturbing, threatening, or offensive.<br /><br />
+            The online and in-person experiments described in this protocol will take no more than 30 minutes. 
+            An example game you might play would be to click on an image on the screen that matches a word you hear being said out loud. 
+            Your total expected time commitment for this study is between 5-30 minutes, and is specified in the study description.</p>
+            Your participation in this study is completely voluntary and you can withdraw at any time. Choosing not to participate or withdrawing will result in no penalty or loss of benefits to which you are entitled. 
+            You are free to skip any question that you choose.<br /><br />
+            We will not be asking for any personally identifying information, and we will handle responses as confidentially as possible. 
+            Your SONA or Prolific IDs will never be tied to your responses on this survey. However, we cannot guarantee the confidentiality of information transmitted over the Internet. 
+            To minimize this risk, data containing anything that might be personally identifiable (e.g. Prolific IDs or IP addresses) will be encrypted on transfer and storage and will only be accessible to qualified lab personnel. 
+            We will be keeping data collected as part of this experiment indefinitely. 
+            This anonymized data (containing neither Prolific IDs nor IP addresses) may be shared with the scientific community or with other participants to be used as stimuli in future studies.<br /><br />
+            If you have questions about this project or if you have a research-related problem, you may contact the researcher(s), Dr. Bria Long, brlong@ucsd.edu. 
+            If you have any questions concerning your rights as a research subject, you may contact the UC San Diego Office of IRB Administration at irb@ucsd.edu or 858-246-4777.<br /><br />
+            By participating in this research you are indicating that you are at least 18 years old, have read this consent form, and agree to participate in this research study. 
+            Please keep this consent form for your records.
         </div>
         <div class="nav-buttons">
             <button class="button-back" onclick="document.getElementById('consent').hidden=true; document.getElementById('startupScreen').hidden=false;">&#8592;</button>
@@ -108,9 +123,9 @@
     <div id="instructions1" hidden>
         <p>
             In this task you will remember pairs of colors and report one of them by choosing between two options. <br /><br />
-            There are 132 trials, and the task takes about 8-10 minutes. Each trial lasts about 3-5 seconds. <br /><br />
-            Please do not participate if you have any form of color blindness or do not have normal or
-            corrected-to-normal vision (wearing glasses or contacts is fine). Please do this task only once.
+            There are 132 trials, and the task only takes about 8-10 minutes. Each trial will be <b>very fast, lasting only 3-5 seconds.</b> <br /><br />
+            <b>Please do not participate if you have any form of color blindness or do not have normal or
+            corrected-to-normal vision (wearing glasses or contacts is fine).</b>
         </p>
         <div class="nav-buttons">
             <button class="button-back" onclick="document.getElementById('instructions1').hidden=true; document.getElementById('consent').hidden=false;">&#8592;</button>
@@ -120,10 +135,9 @@
 
     <div id="instructions2" hidden>
         <p>
-            On each trial, you'll see two colors and need to remember their hues as accurate as possible. <br />
+            On each trial, two colors will appear and you will need to remember their hues as accurately as possible. <br />
             We encourage you to use visual memory (remember as if you are taking a photograph of it). <br />
-            Please keep your eyes at the crosshair in the middle. <br />
-            Two colors will appear breifly at 2 of 12 locations that form a ring
+            At the start of each trial, start your eyes on the crosshair at the middle of the screen.
         </p>
         <div class="nav-buttons">
             <button class="button-back" onclick="document.getElementById('instructions2').hidden=true; document.getElementById('instructions1').hidden=false;">&#8592;</button>
@@ -133,8 +147,9 @@
 
     <div id="instructions3" hidden>
         <p>
-            You'll see something like this but only briefly (less than a second). <br />
-            You might find it a little challenging sometime. Don't worry and just try your best.
+            Two colors will appear <b>very briefly</b> at 2 of the 12 locations that will be aranged in a circle around the crosshair. <br />
+            The colors will only appear for a very brief period of time (less than a second). <br />
+            So make sure to keep your eyes on the screen for the entire duration of the task.
         </p>
         <div class="nav-buttons">
             <button class="button-back" onclick="document.getElementById('instructions3').hidden=true; document.getElementById('instructions2').hidden=false;">&#8592;</button>
@@ -144,7 +159,8 @@
 
     <div id="instructions4" hidden>
         <p>
-            Then, the colors will disappear for a short period (less than a second).
+            After seeing the two colors, you will be asked to recall one of them from memory. <br />
+            The location where the correct color was will be <b>indicated by a black circle surrounding it.</b><br />
         </p>
         <div class="nav-buttons">
             <button class="button-back" onclick="document.getElementById('instructions4').hidden=true; document.getElementById('instructions3').hidden=false;">&#8592;</button>
@@ -154,8 +170,8 @@
 
     <div id="instructions5" hidden>
         <p>
-            Then two <b>very similar</b> color choices will appear on each side of the crosshair, you will have to report the correct hue
-            at the test location (marked by the black ring). <br /><br />
+            Two <b>very similar</b> color choices will appear on each side of the crosshair, you will have to choose between the two colors.<br />
+            Remember, you are choosing the color that was <b>inside the location the black circle is surrounding.</b>. <br />
             Please press <b>"<span class="keyLeft"></span>"</b> to choose the left circle OR <b>"<span class="keyRight"></span>"</b> to choose the right circle as your response.
         </p>
         <div class="nav-buttons">
@@ -166,9 +182,8 @@
 
     <div id="instructions6" hidden>
         <p>
-            The next trail will start after you make a response. <br />
-            The sequence will always be like this. Two colors come up and disappear for a brief period, then you make a response, and repeat. <br />
-            Are you ready?
+            After you make a response, the next trial will begin. So please keep your focus on the screen the entire time <br />
+            Please choose your response as <b>quickly and accurately</b> as possible. <br />
         </p>
         <div class="nav-buttons">
             <button class="button-back" onclick="document.getElementById('instructions6').hidden=true; document.getElementById('instructions5').hidden=false;">&#8592;</button>
@@ -178,9 +193,9 @@
 
     <div id="instructions7" hidden>
         <p>
-            Next you will do one practice trial so you can see how the task works. <br /><br />
-            The practice trial does not count, and you will move on whichever circle you choose. <br /><br />
-            Remember to keep your eyes on the crosshair, and press <b>"<span class="keyLeft"></span>"</b> for the left circle OR <b>"<span class="keyRight"></span>"</b> for the right circle when the two circles appear.
+            On the next screen you will do one practice trial so you can see how the task works. <br /><br />
+            The practice trial does not count, and you will proceed to the actual task whether you are right or wrong. <br /><br />
+            <b>Remember to reset your eyes on the crosshair at the start of each trial,</b> and press <b>"<span class="keyLeft"></span>"</b> to select the left circle OR <b>"<span class="keyRight"></span>"</b> to select the right circle when they appear on screen.
         </p>
         <div class="nav-buttons">
             <button class="button-back" onclick="document.getElementById('instructions7').hidden=true; document.getElementById('instructions6').hidden=false;">&#8592;</button>
@@ -195,14 +210,14 @@
     <div id="device-screen" hidden>
         <p>
             Sorry, this task cannot be done on a phone or tablet. <br /><br />
-            Please open this link again on a desktop or laptop computer with a keyboard. You can close this window.
+            Please open this link again on a desktop or laptop computer with a keyboard. You can safely close this window.
         </p>
     </div>
 
     <!-- Final questions, shown after the last trial (see askDebrief). Every question can be skipped -->
     <div id="debrief" hidden>
         <form id="debrief-form" autocomplete="off">
-            <p>You have finished the task. Please answer a few last questions before your data are saved. You may skip any question you prefer not to answer.</p>
+            <p>You have finished the task. Please answer a few questions before your data are saved. You may skip any question you prefer not to answer.</p>
             <label>Age
                 <input type="number" id="deb-age" min="1" max="100" step="1" inputmode="numeric" />
             </label>
@@ -212,7 +227,7 @@
                     <option value="woman">Woman</option>
                     <option value="man">Man</option>
                     <option value="non-binary">Non-binary</option>
-                    <option value="another">Another gender</option>
+                    <option value="other">Other</option>
                     <option value="prefer_not_to_say">Prefer not to say</option>
                 </select>
             </label>
@@ -240,22 +255,13 @@
     <script>
 "use strict";
 
-//  URL parameters (SONA fills in the participant's survey code, used only for the credit link, never saved):
-//     ?code=XXXX        (also accepted: ?sona_id=XXXX, ?subjectId=XXXX or ?id=XXXX)
-//     &test=1           test run: allConfig.debug (8 trials), saved to the folder 26TR04_test
-//  In SONA, the study URL is the page address with the code placeholder, which SONA replaces for each participant:
-//     https://ccnlab.ucsd.edu/jaashby/26TR04/chunharas2022.html?code=%SURVEY_CODE%
-
 // Constants for data export using save.php
 const EXPERIMENT_NAME = "26TR04";
 const EXPERIMENTER    = "JamesAshby";
 const SAVE_URL        = "https://ccnlab.ucsd.edu/jaashby/save.php"; 
 const SAVE_SUCCESS_TEXT = "Success";
 
-// SONA completion: the experiment ID and credit token are from this study's client-side completion URL in SONA
-//    https://ucsd.sona-systems.com/webstudy_credit.aspx?experiment_id=3183&credit_token=...&survey_code=XXXX
-// (null for either = nobody is sent back to SONA for credit). The participant's own SONA code (?code=) goes only into
-// that credit link, it is never saved with the data.
+// SONA completion
 const SONA_EXPERIMENT_ID = 3183;
 const SONA_CREDIT_TOKEN  = "13a08ab8f4ac4d6097bae9c74425136f";
 const SONA_CREDIT_URL    = "https://ucsd.sona-systems.com/webstudy_credit.aspx";
@@ -270,7 +276,7 @@ const FOIL_OFFSET_DEG  = 6;     // Foil is 6 deg from the correct color
 const CATCH_FOIL_DEG   = 180;   // Catch trials: the foil is 180 deg away, so it should almost never be chosen
 const COLOR_DIST_DEG   = 45;    // The two target colors are 45 deg apart
 
-const MIN_SLOT_GAP = 3;
+const MIN_SLOT_GAP = 3, MAX_SLOT_GAP = 3;   // Non-target is always exactly 3 slots (90 deg) from the target, leaving 2 empty placeholders between them, as in the original code's 12 fixed pairs (the paper only says ">= 2 empty")
 
 // Timing (ms) 
 const STIM_DUR_MS  = 150;       // Memory array
@@ -294,7 +300,6 @@ const KEY_LEFT = "z", KEY_RIGHT = "m";
 
 // Device check (phones and tablets are turned away)
 // Set to false to allow every device. Nothing is saved for a blocked device
-
 const BLOCK_MOBILE_DEVICES = true;
 
 function isPhoneOrTablet() {
@@ -328,6 +333,8 @@ const allConfig = {
 };
 const config = TEST_MODE ? allConfig.debug : allConfig.group1;
 
+if (window.BradyUtils) BradyUtils.PLACEMENT_WARNINGS = false;
+
 const wrap360 = (x) => ((x % 360) + 360) % 360;
 const signedDiff = (a, b) => { const d = wrap360(a - b); return d > 180 ? d - 360 : d; };   // a - b in (-180, 180]
 
@@ -342,7 +349,7 @@ function shuffleCopy(arr, rng) {
   return a;
 }
 
-//  Color conversion: a line-by-line port of angle2HEX() in vismemCC.js
+// Color conversion: a line-by-line port of angle2HEX() in vismemCC.js
 function hueToHex(angleDeg) {
   const cs = COLOR_SPACE;
   const w = angleDeg * (Math.PI / 180);
@@ -383,24 +390,13 @@ const POSITION_ANGLE_OFFSET_DEG = POSITION_ANGLE_OFFSET_RAD * 180 / Math.PI;
 const slotSide = (slot) =>
   (Math.sin(2 * Math.PI * slot / NUM_PLACEHOLDERS + POSITION_ANGLE_OFFSET_RAD) > 0 ? "right" : "left");
 // Trial Generation
-// One "cell" = (target location) x (foil direction) x (repetition): 12 x 2 x 5 = 120 main trials, so every one of the 12 locations is probed exactly 10 times (5 toward, 5 away)
-// Plus 12 catch trials, one per target location, whose foil is 180 deg from the target (so there is no toward / away)
-// Main and catch cells are shuffled together into one random order. For each trial:
-//    - the NON-target location is drawn at random from the slots that leave at least
-//      2 empty placeholders between the items (MIN_SLOT_GAP; 7 of the other 11 slots)
-//    - target color = random hue; non-target = exactly +/-45 deg from it
-//    - foil = target color shifted 6 deg toward or away from the non-target (catch trials: shifted 180 deg)
-
 const slotGap = (a, b) => { const d = Math.abs(a - b) % NUM_PLACEHOLDERS; return Math.min(d, NUM_PLACEHOLDERS - d); };   // 0-6 around the ring
 const validNontargetSlots = (target) => {
   const out = [];
-  for (let s = 0; s < NUM_PLACEHOLDERS; s++) if (slotGap(target, s) >= MIN_SLOT_GAP) out.push(s);
+  for (let s = 0; s < NUM_PLACEHOLDERS; s++) if (slotGap(target, s) >= MIN_SLOT_GAP && slotGap(target, s) <= MAX_SLOT_GAP) out.push(s);   // = target + 3 and target - 3
   return out;
 };
 
-// Original paper only says the two placeholders were "randomly selected" with >= 2 empty between them
-// Here the target location is balanced (10 times each) and the non-target is uniform among the 7 allowed slots
-// One trial from one cell; foilDir is "toward", "away" or "catch"
 function makeTrialSpec(cell, num, rng) {
   const targetSlot = cell.targetSlot;
   const allowed = validNontargetSlots(targetSlot);
@@ -440,20 +436,6 @@ function buildTrialList(nPerCell, nCatchPerLoc, rng) {
     for (let s = 0; s < NUM_PLACEHOLDERS; s++) cells.push({ targetSlot: s, foilDir: "catch" });
 
   return shuffleCopy(cells, rng).map((cell, i) => makeTrialSpec(cell, i + 1, rng));
-}
-
-// Sanity checks on the generated list (console only)
-function checkTrialList(list, nPerCell, nCatchPerLoc) {
-  const n = {};
-  list.forEach((t) => { const k = t.target_slot + "|" + t.foil_direction; n[k] = (n[k] || 0) + 1; });
-  const want = (k) => (k.endsWith("|none") ? nCatchPerLoc : nPerCell);
-  const balanced = Object.keys(n).length === NUM_PLACEHOLDERS * (nCatchPerLoc ? 3 : 2) && Object.keys(n).every((k) => n[k] === want(k));
-  const gapsOk = list.every((t) => t.nontarget_slot !== t.target_slot && slotGap(t.target_slot, t.nontarget_slot) >= MIN_SLOT_GAP);
-  const foilsOk = list.every((t) => Math.abs(Math.abs(signedDiff(t.foil_hue, t.target_hue)) - (t.trial_kind === "catch" ? CATCH_FOIL_DEG : FOIL_OFFSET_DEG)) < 1e-6);
-  if (!balanced) console.error("Trial list is not balanced:", n);
-  if (!gapsOk) console.error("Trial list has items closer than MIN_SLOT_GAP");
-  if (!foilsOk) console.error("Trial list has a foil that is not " + FOIL_OFFSET_DEG + " deg (main) or " + CATCH_FOIL_DEG + " deg (catch) from the target");
-  return balanced && gapsOk && foilsOk;
 }
 
 //  Forced fullscreen
@@ -531,13 +513,12 @@ const doneScreen = document.getElementById("done-screen");
 
 const jsPsych = jsPsychModule.initJsPsych({
   display_element: taskEl,   // jsPsych only draws inside this div; everything else is the plain HTML screens above
-  // Original had no progress bar, set to false for this option
+  // Original task had no progress bar, set to false for this option
   show_progress_bar: false,
   on_finish: () => saveAndFinish(),
 });
 
-// The ID saved with the data is a random ID made for each participant (same pattern as the Guiding Light task; the data are public)
-// The SONA code is only kept to build the credit link at the end, it is never saved
+// The ID saved with the data is a random ID made for each participant
 const subjectId = "CH22" + Math.round(Math.random() * 100000000) + "55";   // Wide range so two participants are very unlikely to share an ID
 const sonaCode  = params.get("code") || params.get("sona_id") || params.get("subjectId") || params.get("id");
 
@@ -555,7 +536,7 @@ jsPsych.data.addProperties({
 
 //  Trial Logic
 function makeTrial(t, phase) {
-  phase = phase || "main";   // "practice" for the one practice trial
+  phase = phase || "main";
   let exitsAtStart = 0;
   return {
     type: jsPsychWmForcedChoice,
@@ -606,10 +587,7 @@ function makeTrial(t, phase) {
   };
 }
 
-//  Rushing safeguard (same rule and values as the Su et al. 2025 task). It only records and pauses, nobody is excluded
-//  A trial is "rushed" if Z / M was pressed early_presses or more times before the two options appeared,
-//  or if the answer came faster than fast_rt_ms. When `trials` of the last `of_last` trials were rushed,
-//  a "please slow down" screen appears and the count starts again
+//  Rushing safeguard
 const RUSH = { early_presses: 3, fast_rt_ms: 200, of_last: 5, trials: 3, recent: [] };
 let earlyCount = 0, awaitingOptions = false;
 // Counts Z / M presses from the start of a trial until the options appear (the plugin only listens once they are up)
@@ -655,7 +633,6 @@ ScreenPlugin.info = {
 };
 
 //  Fullscreen gate: sits before every trial. If fullscreen was left, the "return to fullscreen" screen holds the next trial
-//  until the person is back (so the pause is between trials and never inside one). Nothing is shown when fullscreen is on
 class FsGatePlugin {
   constructor(jsPsych) { this.jsPsych = jsPsych; }
   trial(el, trial) {
@@ -703,14 +680,13 @@ function rushCheckIn() {
 
 //  Trial list: 120 main + 12 catch trials in one random order
 let trialList = buildTrialList(N_REPS, N_CATCH_PER_LOC);
-if (!checkTrialList(trialList, N_REPS, N_CATCH_PER_LOC)) console.error("Check the trial list before running participants.");
 if (config.maxMain) {   // Test run: the first few main and catch trials, kept in their random order
   const keep = new Set(trialList.filter((t) => t.trial_kind === "main").slice(0, config.maxMain)
     .concat(trialList.filter((t) => t.trial_kind === "catch").slice(0, config.maxCatch)));
   trialList = trialList.filter((t) => keep.has(t)).map((t, i) => Object.assign({}, t, { trial_num: i + 1 }));
 }
 
-//  One practice trial, drawn like the real ones: no feedback, and it moves on whichever circle is chosen. It is not saved in the CSV
+//  One practice trial (unsaved)
 const practiceSpec = Object.assign(
   makeTrialSpec({ targetSlot: Math.floor(Math.random() * NUM_PLACEHOLDERS), foilDir: Math.random() < 0.5 ? "toward" : "away" }, 0, Math.random),
   { trial_kind: "practice" });
@@ -719,7 +695,7 @@ const READY_HTML = "<h2>That was the practice trial</h2>" +
   "<p>When the two circles appear in the real task, press <b>" + KEY_LEFT.toUpperCase() + "</b> for the left circle or <b>" + KEY_RIGHT.toUpperCase() + "</b> for the right circle.</p>" +
   "<p>Press the <b>spacebar</b> when you are ready to begin. The first trial starts right away.</p>";
 
-//  Assemble the timeline: practice trial, spacebar screen, then the trials (the screens before them are the plain HTML above)
+//  Assemble the timeline: practice trial, spacebar screen, then the trials
 const timeline = [];
 timeline.push(fsGate());
 timeline.push(makeTrial(practiceSpec, "practice"));
@@ -771,11 +747,11 @@ document.querySelector("#startupScreen .button-next").addEventListener("click", 
             document.getElementById("consent").hidden = false;
         } else if (Date.now() - t0 > 5000) {
             clearInterval(timer);
-            failEl.hidden = false;   // Browser refused fullscreen: stay here
+            failEl.hidden = false;   // Browser refused fullscreen
         }
     }, 100);
 });
-// Consent → Instructions Chain (no fullscreen here)
+// Consent → Instructions Chain
 linkNextScreen("#consent", "#instructions1");
 linkNextScreen("#instructions1", "#instructions2");
 linkNextScreen("#instructions2", "#instructions3");
@@ -796,13 +772,9 @@ function beginOrdeal() {
 }
 
 //  Data format
-//  One CSV per participant (save.php stores the text as it is, as <id>.txt):
-//     row 1  = column names
-//     row 2  = the final-questions row (trial_kind "debrief": age, gender, sex_at_birth, anything_weird + the session columns)
-//     rows 3+ = one row per trial (trial_kind "main" or "catch"; the four answer columns are empty)
 const CSV_COLUMNS = [
   "subject", "trial_num", "trial_kind",
-  // Final questions (filled on the "debrief" row only)
+  // Debrief questions
   "age", "gender", "sex_at_birth", "anything_weird",
   // Design
   "foil_direction", "foil_offset", "item_separation",
@@ -812,7 +784,7 @@ const CSV_COLUMNS = [
   "response", "correct_key", "correct", "rt", "multiple_keys_pressed", "early_presses", "rushed", "checkin_after",
   // Checks
   "actual_stim_duration", "time_elapsed", "fs_exits_in_trial", "fullscreen_exits", "window_w", "window_h",
-  // Session (the same on every row)
+  // Session
   "experiment", "test_mode", "start_time", "color_space", "plugin_version", "screen_w", "screen_h", "pixel_ratio", "user_agent",
 ];
 
@@ -820,7 +792,7 @@ function csvCell(v) {
   if (v === null || v === undefined) return "";
   if (typeof v === "boolean") return v ? "1" : "0";   // true/false saved as 1/0
   const s = String(v);
-  return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;   // Cells with commas get quoted (the user agent has some)
+  return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;   // Cells with commas get quoted
 }
 
 function buildCsv(debrief) {
@@ -828,10 +800,13 @@ function buildCsv(debrief) {
   const mains = jsPsych.data.get().filter({ phase: "main" }).values();
   const lines = mains.map((d) => {
     // correct_key = the key that was right on this trial (so a left/right response bias can be checked)
-    const row = Object.assign({}, d, { correct_key: d.response == null ? null : (d.correct ? d.response : otherKey(d.response)) });
+    // The plugin returns the key as typed ("Z" if Caps Lock is on), so response is lowercased here
+    const resp = d.response == null ? null : String(d.response).toLowerCase();
+    const row = Object.assign({}, d, { response: resp, correct_key: resp == null ? null : (d.correct ? resp : otherKey(resp)) });
     return CSV_COLUMNS.map((c) => csvCell(row[c])).join(",");
   });
-  // The final-questions answers are their own row, first after the column names. It carries the same session columns as every trial row
+  // The debrief 
+  // Answers are their own row, first after the column names. It carries the same session columns as every trial row
   const first = mains[0] || {};
   const debRow = Object.assign({ subject: subjectId, trial_kind: "debrief" }, debrief || {});
   ["fullscreen_exits", "experiment", "test_mode", "start_time", "color_space", "plugin_version", "screen_w", "screen_h", "pixel_ratio", "user_agent"]
@@ -840,7 +815,7 @@ function buildCsv(debrief) {
   return CSV_COLUMNS.join(",") + "\n" + lines.join("\n") + "\n";
 }
 
-// Final questions: shows the form and resolves with the answers when it is submitted (all optional; blank = skipped)
+// Debrief questions: shows the form and resolves with the answers when it is submitted (all optional; blank = skipped)
 function askDebrief() {
   return new Promise((resolve) => {
     const box = document.getElementById("debrief"), form = document.getElementById("debrief-form");
@@ -916,7 +891,6 @@ async function saveAndFinish() {
   // Test runs never go to SONA (no credit, no redirect), so the download button below stays clickable
   const url = TEST_MODE ? null : creditUrl();
   if (saved) {
-    console.log("Saved!");
     doneScreen.innerHTML = "<p>Thank you for participating, we appreciate your time and effort!</p><p>Your data have been saved.</p>" +
       (url ? "<p>You will now be taken back to SONA to receive your credit. <a href='" + url + "'>Click here if nothing happens.</a></p>"
            : "<p>You can close this tab.</p>" +
