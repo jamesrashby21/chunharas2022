@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Visual Memory Task</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/jspsych@8.4.0/css/jspsych.css" />
+    <script src="https://unpkg.com/jspsych@8.4.0/dist/index.browser.min.js"></script> 
+
+    <script src="brady-color-wheel.js"></script>
+    <script src="brady-plugin-utils.js"></script>
+    <script src="jspsych-wm-forced-choice.js"></script>
+
+    <style>
+        html { background-color: rgb(200, 200, 200); }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        /* Make the hidden attribute always win */
+        [hidden] { display: none !important; }
+
+        body > div, .nav-buttons { margin: 20px; text-align: center; }
+        body > div > p { max-width: 760px; margin-left: auto; margin-right: auto; }
+        .button-next { font-size: 20px; padding: 10px; font-weight: bold; }
+        .button-back { font-size: 20px; padding: 10px; font-weight: bold; width: 46px; height: 46px; cursor: pointer; }
+        .nav-buttons { display: flex; justify-content: center; align-items: center; gap: 10px; }
+        /* Startup screen */
+        #startupScreen {
+            display: flex; /* Visible on load */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        /* Consent Form*/
+        .consent-box {
+            height: 60vh;
+            overflow: auto;
+            border: 1px solid #666;
+            padding: 8px 16px;
+            text-align: center;
+            font-size: 16.5px;
+            font-weight: bold;
+            width: min(1000px, 92vw);
+            margin: 0 auto 16px;
+        }
+        .consent-box p { margin: 0 0 12px; max-width: none; line-height: 1.4; }
+        /* Final questions (scrolls if the window is short) */
+        #debrief { width: min(760px, 92vw); max-height: calc(100vh - 40px); overflow-y: auto; }
+        #debrief-form { display: flex; flex-direction: column; align-items: stretch; gap: 16px; text-align: left; }
+        #debrief-form p { max-width: none; margin: 0; }
+        #debrief-form label { display: flex; flex-direction: column; gap: 6px; }
+        #debrief-form input, #debrief-form select, #debrief-form textarea { font: inherit; font-weight: normal; padding: 6px 8px; }
+        #debrief-form input { width: 8em; }
+        #debrief-form select { width: 16em; }
+        #debrief-form textarea { width: 100%; box-sizing: border-box; resize: vertical; }
+        #debrief-form .deb-note { font-size: 15px; font-weight: normal; }
+        #debrief-form button { align-self: center; }
+        /* jsPsych draws only inside this div */
+        #jspsych-target { margin: 0; width: 100%; height: 100vh; }
+        /* Covers whatever screen is up when fullscreen is left */
+        #fs-overlay {
+            position: fixed; inset: 0; margin: 0; z-index: 10000;
+            background: #ffffff;   /* Opaque, so the memory array cannot be seen through it */
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 0 16px;
+        }
+        .fs-ov-title { color: #c0281f; font-size: 44px; margin: 0 0 18px; }
+        .fs-ov-text { font-size: 24px; font-weight: normal; line-height: 1.35; margin: 0 0 40px; max-width: 1100px; }
+        /* Practice / ready / check-in screens drawn inside the task area */
+        .screen-box { max-width: 760px; margin: 0 auto; text-align: center; font-family: Arial, sans-serif; }
+    </style>
+</head>
+<body>
+    <!-- Fullscreen Startup Screen -->
+    <div id="startupScreen">
+        <p>This experiment must be completed in fullscreen. Please click the button below to switch to fullscreen before you begin.</p>
+        <button class="button-next">Start Fullscreen</button>
+        <p id="fs-fail" hidden>Your browser did not enter fullscreen. Please click the button again. <br />
+          If this keeps happening, ensure you are on a large enough screen or try using a different browser.</p>
+    </div>
+
+    <!-- Consent & Instructions -->
+    <div id="consent" hidden>
+        <div class="consent-box">
+            You are being invited to participate in a research study titled "Reproducibility of Psychological Science and Instruction." 
+            This study is being done by Dr. Bria Long from UC San Diego and associated graduate students in Experimental Methods course. 
+            You were selected to participate in this study because you are an adult in the U.S. and have been a represented population in previous psychology studies.<br /><br />
+            The purpose of this study is to better understand how well previously published studies in the psychological field replicate online and with different populations.
+            Your participation in this research should last approximately 5-30 minutes.<br /><br />
+            If you agree to take part in this study, you may be asked to view a set of stimuli, including pictures, sounds, written text, or videos and then giving some responses via key-presses, verbally, or with paper-and-pencil. 
+            We may also observe your choices or preferences among an array of stimuli. These stimuli will be taken directly from or closely adapted from studies that already exist in the published psychological literature. 
+            Stimuli will include, e.g., pictures of objects and human faces, audio and video clips, short text passages, etc. None of the stimuli will be disturbing, threatening, or offensive.<br /><br />
+            The online and in-person experiments described in this protocol will take no more than 30 minutes. 
+            An example game you might play would be to click on an image on the screen that matches a word you hear being said out loud. 
+            Your total expected time commitment for this study is between 5-30 minutes, and is specified in the study description.<br /><br />
+            Your participation in this study is completely voluntary and you can withdraw at any time. Choosing not to participate or withdrawing will result in no penalty or loss of benefits to which you are entitled. 
+            You are free to skip any question that you choose.<br /><br />
+            We will not be asking for any personally identifying information, and we will handle responses as confidentially as possible. 
+            Your SONA or Prolific IDs will never be tied to your responses on this survey. However, we cannot guarantee the confidentiality of information transmitted over the Internet. 
+            To minimize this risk, data containing anything that might be personally identifiable (e.g. Prolific IDs or IP addresses) will be encrypted on transfer and storage and will only be accessible to qualified lab personnel. 
+            We will be keeping data collected as part of this experiment indefinitely. 
+            This anonymized data (containing neither Prolific IDs nor IP addresses) may be shared with the scientific community or with other participants to be used as stimuli in future studies.<br /><br />
+            If you have questions about this project or if you have a research-related problem, you may contact the researcher(s), Dr. Bria Long, brlong@ucsd.edu. 
+            If you have any questions concerning your rights as a research subject, you may contact the UC San Diego Office of IRB Administration at irb@ucsd.edu or 858-246-4777.<br /><br />
+            By participating in this research you are indicating that you are at least 18 years old, have read this consent form, and agree to participate in this research study. 
+            Please keep this consent form for your records.
+        </div>
+        <div class="nav-buttons">
+            <button class="button-back" onclick="document.getElementById('consent').hidden=true; document.getElementById('startupScreen').hidden=false;">&#8592;</button>
+            <button class="button-next">By clicking here, I consent to participate in this study.</button>
+        </div>
+    </div>
+
+    <div id="instructions1" hidden>
+        <p>
+            In this task you will remember pairs of colors and report one of them by choosing between two options. <br /><br />
+            There are 132 trials, and the task only takes about 8-10 minutes. Each trial will be <b>very fast, lasting only 3-5 seconds.</b> <br /><br />
+            <b>Please do not participate if you have any form of color blindness or do not have normal or
+            corrected-to-normal vision (wearing glasses or contacts is fine).</b>
+        </p>
+        <div class="nav-buttons">
+            <button class="button-back" onclick="document.getElementById('instructions1').hidden=true; document.getElementById('consent').hidden=false;">&#8592;</button>
+            <button class="button-next">Click here when you are ready to proceed.</button>
+        </div>
+    </div>
+
+    <div id="instructions2" hidden>
+        <p>
+            On each trial, two colors will appear and you will need to remember their hues as accurately as possible. <br /><br />
+            We encourage you to use visual memory (remember as if you are taking a photograph of it). <br /><br />
+            At the start of each trial, start your eyes on the crosshair at the middle of the screen.
+        </p>
+        <div class="nav-buttons">
+            <button class="button-back" onclick="document.getElementById('instructions2').hidden=true; document.getElementById('instructions1').hidden=false;">&#8592;</button>
+            <button class="button-next">Click here when you are ready to proceed.</button>
+        </div>
+    </div>
+
+    <div id="instructions3" hidden>
+        <p>
+            Two colors will appear <b>very briefly</b> at 2 of the 12 locations that will be aranged in a circle around the crosshair. <br /><br />
+            The colors will only appear for a very brief period of time (less than a second). <br /><br />
+            So make sure to keep your eyes on the screen for the entire duration of the task.
+        </p>
+        <div class="nav-buttons">
+            <button class="button-back" onclick="document.getElementById('instructions3').hidden=true; document.getElementById('instructions2').hidden=false;">&#8592;</button>
+            <button class="button-next">Click here when you are ready to proceed.</button>
+        </div>
+    </div>
+
+    <div id="instructions4" hidden>
+        <p>
+            After seeing the two colors, you will be asked to recall one of them from memory. <br /><br />
+            The location where the correct color was will be <b>indicated by a black circle surrounding it.</b><br /><br />
+        </p>
+        <div class="nav-buttons">
+            <button class="button-back" onclick="document.getElementById('instructions4').hidden=true; document.getElementById('instructions3').hidden=false;">&#8592;</button>
+            <button class="button-next">Click here when you are ready to proceed.</button>
+        </div>
+    </div>
+
+    <div id="instructions5" hidden>
+        <p>
+            Two <b>very similar</b> color choices will appear on each side of the crosshair, you will have to choose between the two colors.<br /><br />
+            Remember, you are choosing the color that was <b>inside the location the black circle is surrounding.</b>. <br /><br />
+            Please press <b>"<span class="keyLeft"></span>"</b> to choose the left circle OR <b>"<span class="keyRight"></span>"</b> to choose the right circle as your response.
+        </p>
+        <div class="nav-buttons">
+            <button class="button-back" onclick="document.getElementById('instructions5').hidden=true; document.getElementById('instructions4').hidden=false;">&#8592;</button>
+            <button class="button-next">Click here when you are ready to proceed.</button>
+        </div>
+    </div>
+
+    <div id="instructions6" hidden>
+        <p>
+            After you make a response, the next trial will begin. So please keep your focus on the screen the entire time <br /><br />
+            Please choose your response as <b>quickly and accurately</b> as possible.
+        </p>
+        <div class="nav-buttons">
+            <button class="button-back" onclick="document.getElementById('instructions6').hidden=true; document.getElementById('instructions5').hidden=false;">&#8592;</button>
+            <button class="button-next">Click here when you are ready to proceed.</button>
+        </div>
+    </div>
+
+    <div id="instructions7" hidden>
+        <p>
+            On the next screen you will do one practice trial so you can see how the task works. <br /><br />
+            The practice trial does not count, and you will proceed to the actual task whether you are right or wrong. <br /><br />
+            <b>Remember to reset your eyes on the crosshair at the start of each trial,</b> and press <b>"<span class="keyLeft"></span>"</b> to select the left circle OR <b>"<span class="keyRight"></span>"</b> to select the right circle when they appear on screen.
+        </p>
+        <div class="nav-buttons">
+            <button class="button-back" onclick="document.getElementById('instructions7').hidden=true; document.getElementById('instructions6').hidden=false;">&#8592;</button>
+            <button class="button-next">Click here when you are ready to start the practice trial.</button>
+        </div>
+    </div>
+
+    <!-- Task Area (hidden until the trials begin; jsPsych draws only in here) -->
+    <div id="jspsych-target" hidden></div>
+
+    <!-- Wrong device (phones and tablets; see BLOCK_MOBILE_DEVICES) -->
+    <div id="device-screen" hidden>
+        <p>
+            Sorry, this task cannot be done on a phone or tablet. <br /><br />
+            Please open this link again on a desktop or laptop computer with a keyboard. You can safely close this window.
+        </p>
+    </div>
+
+    <!-- Final questions, shown after the last trial (see askDebrief). Every question can be skipped -->
+    <div id="debrief" hidden>
+        <form id="debrief-form" autocomplete="off">
+            <p>You have finished the task. Please answer a few questions before your data are saved. You may skip any question you prefer not to answer.</p>
+            <label>Age
+                <input type="number" id="deb-age" min="1" max="100" step="1" inputmode="numeric" />
+            </label>
+            <label>Gender
+                <select id="deb-gender">
+                    <option value="">(select one)</option>
+                    <option value="woman">Woman</option>
+                    <option value="man">Man</option>
+                    <option value="non-binary">Non-binary</option>
+                    <option value="other">Other</option>
+                    <option value="prefer_not_to_say">Prefer not to say</option>
+                </select>
+            </label>
+            <label>Sex assigned at birth
+                <select id="deb-sex">
+                    <option value="">(select one)</option>
+                    <option value="female">Female</option>
+                    <option value="male">Male</option>
+                    <option value="intersex">Intersex</option>
+                    <option value="prefer_not_to_say">Prefer not to say</option>
+                </select>
+            </label>
+            <label>Did anything weird or unexpected happen during the experiment? (for example a technical problem, an interruption, or something that confused you)
+                <textarea id="deb-weird" rows="4" maxlength="1000"></textarea>
+            </label>
+            <p class="deb-note">Please do not write your name or any other identifying information.</p>
+            <p class="deb-note" id="deb-redirect" hidden></p>   <!-- filled in by askDebrief when a SONA redirect will follow -->
+            <button type="submit" class="button-next">Submit and finish</button>
+        </form>
+    </div>
+
+    <!-- Done Screen (the text is filled in by saveAndFinish) -->
+    <div id="done-screen" hidden></div>
+
+    <script>
+"use strict";
+
+// Constants for data export using save.php
+const EXPERIMENT_NAME = "26TR04";
+const EXPERIMENTER    = "JamesAshby";
+const SAVE_URL        = "https://ccnlab.ucsd.edu/jaashby/save.php"; 
+const SAVE_SUCCESS_TEXT = "Success";
+
+// SONA completion
+const SONA_EXPERIMENT_ID = 3183;
+const SONA_CREDIT_TOKEN  = "13a08ab8f4ac4d6097bae9c74425136f";
+const SONA_CREDIT_URL    = "https://ucsd.sona-systems.com/webstudy_credit.aspx";
+const CONTACT_EMAIL      = "jaashby@ucsd.edu";
+
+// Experimental Design
+//      5 reps x 12 target locations x 2 foil directions = 120 main trials. Each location is the target exactly 10 times
+//      + 12 catch trials (foil 180 deg from the correct color, one per target location) = 132 trials in one random order
+const N_REPS           = 5;     // x 12 target locations x 2 foil directions = 120 main trials (60 per direction)
+const N_CATCH_PER_LOC  = 1;     // Catch trials per target location (12 in total)
+const FOIL_OFFSET_DEG  = 6;     // Foil is 6 deg from the correct color
+const CATCH_FOIL_DEG   = 180;   // Catch trials: the foil is 180 deg away, so it should almost never be chosen
+const COLOR_DIST_DEG   = 45;    // The two target colors are 45 deg apart
+
+const MIN_SLOT_GAP = 3, MAX_SLOT_GAP = 3;   // Non-target is always exactly 3 slots (90 deg) from the target, leaving 2 empty placeholders between them, as in the original code's 12 fixed pairs (the paper only says ">= 2 empty")
+
+// Timing (ms) 
+const STIM_DUR_MS  = 150;       // Memory array
+const DELAY_MS     = 750;       // Blank retention interval
+const PRE_ARRAY_MS = 2000;      // Fixation before each array that contains empty placeholders
+
+// Geometry (px)
+const NUM_PLACEHOLDERS      = 12;
+const RING_RADIUS_PX        = 120; 
+const ITEM_SIZE_PX          = 40; 
+const OPTION_OFFSET_PX      = 35;    // Each response option sits this far left/right of fixation (paper: 35; original code tstDist: 30)
+const CIRC_ROT_RAD          = 5.5;   // The code rotates the ring by 5.5 rad; the plugin's equivalent is derived below
+// The Brady lab plugin's box is 2*RING_RADIUS_PX + 2*ITEM_SIZE_PX + 40 = 360 px (paper 500 px, original code 400 px); ring radius and item size match the paper
+const AUTO_ZOOM             = false; // false = true pixel sizes as in the original; true = scale the box to the window
+
+// Color Space (Using the code, since paper's values created hues outside of the range of normal displays)
+const COLOR_SPACE = { name: "code-L65-a9-b9-r50", L: 65, a0: 9, b0: 9, radius: 50 };
+
+// Keys: left / right option, by screen position
+const KEY_LEFT = "z", KEY_RIGHT = "m";
+
+// Device check (phones and tablets are turned away)
+// Set to false to allow every device. Nothing is saved for a blocked device
+const BLOCK_MOBILE_DEVICES = true;
+
+function isPhoneOrTablet() {
+  const ua = navigator.userAgent || "";
+  // Chrome/Edge on Android say so directly
+  const uaMobile = !!(navigator.userAgentData && navigator.userAgentData.mobile === true);
+  // Phone/tablet names in the browser's user-agent string (an Android browser in "desktop site" mode hides these)
+  const uaNames = /Android|iPhone|iPad|iPod|Mobile|Tablet|Silk|Kindle|BlackBerry|IEMobile|Opera Mini|webOS/i.test(ua);
+  // iPadOS Safari pretends to be a Mac, but a Mac has no touch screen
+  const iPadAsMac = /Macintosh/.test(ua) && navigator.maxTouchPoints > 1;
+  // Main input is a finger and there is no mouse / trackpad at all (a touch-screen laptop still has a trackpad)
+  const fingerOnly = !!window.matchMedia && matchMedia("(pointer: coarse)").matches && !matchMedia("(any-pointer: fine)").matches;
+  return uaMobile || uaNames || iPadAsMac || fingerOnly;
+}
+
+// Blocked: hide the startup screen so there is no way to start the task
+if (BLOCK_MOBILE_DEVICES && isPhoneOrTablet()) {
+  document.getElementById("startupScreen").hidden = true;
+  document.getElementById("device-screen").hidden = false;
+}
+
+//  Small helpers
+const params     = new URLSearchParams(window.location.search);
+const TEST_MODE  = params.get("test") === "1";
+const SAVE_NAME  = TEST_MODE ? EXPERIMENT_NAME + "_test" : EXPERIMENT_NAME;   // Test runs are saved to their own folder
+
+// Experiment Config (allConfig: ?test=1 picks "debug", a real run picks "group1")
+const allConfig = {
+    debug:  { maxMain: 6, maxCatch: 2 },        // 8 trials: 6 main + 2 catch
+    group1: { maxMain: null, maxCatch: null },  // 132 trials: 120 main + 12 catch
+};
+const config = TEST_MODE ? allConfig.debug : allConfig.group1;
+
+if (window.BradyUtils) BradyUtils.PLACEMENT_WARNINGS = false;
+
+const wrap360 = (x) => ((x % 360) + 360) % 360;
+const signedDiff = (a, b) => { const d = wrap360(a - b); return d > 180 ? d - 360 : d; };   // a - b in (-180, 180]
+
+// Bug fix for shuffling error from original task code
+function shuffleCopy(arr, rng) {
+  rng = rng || Math.random;
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Color conversion: a line-by-line port of angle2HEX() in vismemCC.js
+function hueToHex(angleDeg) {
+  const cs = COLOR_SPACE;
+  const w = angleDeg * (Math.PI / 180);
+  const L = cs.L, a = cs.a0 + cs.radius * Math.cos(w), b = cs.b0 + cs.radius * Math.sin(w);
+  const white = [0.950456, 1, 1.088754];
+  const fY = (L + 16) / 116, fX = fY + a / 500, fZ = fY - b / 200;
+  const invf = (f) => { const Y = Math.pow(f, 3); return Y < 0.008856 ? (f - 4 / 29) * (108 / 841) : Y; };
+  const X = white[0] * invf(fX), Y = white[1] * invf(fY), Z = white[2] * invf(fZ);
+  let R =  3.240479 * X - 1.53715  * Y - 0.498535 * Z;
+  let G = -0.969256 * X + 1.875992 * Y + 0.041556 * Z;
+  let B =  0.055648 * X - 0.204043 * Y + 1.057311 * Z;
+  const addWhite = -Math.min(R, G, B, 0);
+  const scale = Math.max(Math.max(R, G, B) + addWhite, 1);
+  R = (R + addWhite) / scale; G = (G + addWhite) / scale; B = (B + addWhite) / scale;
+  const gamma = (c) => (c < 0.018 ? 4.5138 * c : 1.099 * Math.pow(c, 0.45) - 0.099);
+  const hex = (c) => {
+    const v = Math.min(255, Math.max(0, Math.round(255 * gamma(c))));
+    return (v < 16 ? "0" : "") + v.toString(16);
+  };
+  return "#" + hex(R) + hex(G) + hex(B);
+}
+
+const STUDY_WHEEL = (function () {
+  const colors = [];
+  for (let d = 0; d < 360; d++) {
+    const h = hueToHex(d);
+    colors.push([parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]);
+  }
+  return window.BradyColorWheel.make(colors, COLOR_SPACE.name);
+})();
+
+//  Geometry: the plugin's slot i <-> the original code's position i
+//  Original: x = cx - R*cos(theta_i + rot), y = cy + R*sin(theta_i + rot), theta_i = 2*pi*i/12
+//  Plugin:   x = cx + R*sin(2*pi*i/12 + offset), y = cy + R*cos(2*pi*i/12 + offset)
+//  These agree when offset = rot - pi/2 (verified numerically in the test run)
+const POSITION_ANGLE_OFFSET_RAD = CIRC_ROT_RAD - Math.PI / 2;
+const POSITION_ANGLE_OFFSET_DEG = POSITION_ANGLE_OFFSET_RAD * 180 / Math.PI;
+const slotSide = (slot) =>
+  (Math.sin(2 * Math.PI * slot / NUM_PLACEHOLDERS + POSITION_ANGLE_OFFSET_RAD) > 0 ? "right" : "left");
+// Trial Generation
+const slotGap = (a, b) => { const d = Math.abs(a - b) % NUM_PLACEHOLDERS; return Math.min(d, NUM_PLACEHOLDERS - d); };   // 0-6 around the ring
+const validNontargetSlots = (target) => {
+  const out = [];
+  for (let s = 0; s < NUM_PLACEHOLDERS; s++) if (slotGap(target, s) >= MIN_SLOT_GAP && slotGap(target, s) <= MAX_SLOT_GAP) out.push(s);   // = target + 3 and target - 3
+  return out;
+};
+
+function makeTrialSpec(cell, num, rng) {
+  const targetSlot = cell.targetSlot;
+  const allowed = validNontargetSlots(targetSlot);
+  const nontargetSlot = allowed[Math.floor(rng() * allowed.length)];   // Fresh draw every trial (the bug fix)
+
+  const base = rng() * 360;                                  // Random position on the color circle
+  const offs = shuffleCopy([0, COLOR_DIST_DEG], rng);        // Which item is the "+45" one is random
+  const T = wrap360(base + offs[0]);
+  const N = wrap360(base + offs[1]);
+  const separation = signedDiff(N, T);                       // Non-target minus target, ~ +/-45
+  const toward = Math.sign(separation);                      // +1 if the non-target is "ahead" of the target
+  const isCatch = cell.foilDir === "catch";
+  const foilOffset = isCatch ? CATCH_FOIL_DEG : (cell.foilDir === "toward" ? 1 : -1) * toward * FOIL_OFFSET_DEG;
+  const F = wrap360(T + foilOffset);
+
+  return {
+    trial_num: num,
+    trial_kind: isCatch ? "catch" : "main",
+    foil_direction: isCatch ? "none" : cell.foilDir,         // A 180 deg foil is neither toward nor away
+    target_slot: targetSlot, nontarget_slot: nontargetSlot,
+    slot_gap: slotGap(targetSlot, nontargetSlot),
+    target_side: slotSide(targetSlot), nontarget_side: slotSide(nontargetSlot),
+    same_hemifield: slotSide(targetSlot) === slotSide(nontargetSlot),
+    target_hue: T, nontarget_hue: N, foil_hue: F,
+    item_separation: separation, foil_offset: foilOffset,
+    target_hex: hueToHex(T), nontarget_hex: hueToHex(N), foil_hex: hueToHex(F),
+  };
+}
+
+function buildTrialList(nPerCell, nCatchPerLoc, rng) {
+  rng = rng || Math.random;
+  const cells = [];
+  for (let rep = 0; rep < nPerCell; rep++)
+    for (const foilDir of ["toward", "away"])
+      for (let s = 0; s < NUM_PLACEHOLDERS; s++) cells.push({ targetSlot: s, foilDir: foilDir });
+  for (let rep = 0; rep < nCatchPerLoc; rep++)
+    for (let s = 0; s < NUM_PLACEHOLDERS; s++) cells.push({ targetSlot: s, foilDir: "catch" });
+
+  return shuffleCopy(cells, rng).map((cell, i) => makeTrialSpec(cell, i + 1, rng));
+}
+
+//  Forced fullscreen
+//  Leaving fullscreen covers the page and blocks the keys until the person returns
+const DM_FS = window.matchMedia ? window.matchMedia("(display-mode: fullscreen)") : null;
+let DM_SEEN = false; 
+const docFullscreen = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function isFullscreen() {
+  const doc = docFullscreen(), dm = !!(DM_FS && DM_FS.matches);
+  if (doc && dm) DM_SEEN = true;
+  return doc && !(DM_SEEN && !dm);
+}
+function requestFullscreen() {
+  const el = document.documentElement;
+  const go = () => {
+    const p = el.requestFullscreen ? el.requestFullscreen() : el.webkitRequestFullscreen ? el.webkitRequestFullscreen() : null;
+    if (p && p.catch) p.catch(() => {});
+  };
+  if (docFullscreen() && document.exitFullscreen && document.fullscreenElement) document.exitFullscreen().then(go, go);
+  else go();
+}
+
+let fsEnforced = false;      // Overlay on/off
+let fsTrialActive = false;   // A trial is on screen: the overlay waits until it ends (see fsGate), so a trial is never interrupted and no pause adds to the RT
+let fsTaskRunning = false;   // Overlay and key blocking cover the practice trial too
+let fsCounting = false;      // Exits are only counted from the first real trial (not during the practice trial)
+let fsExits = 0;
+let fsWatching = false;
+
+function showFsOverlay() {
+  if (document.getElementById("fs-overlay")) return;
+  const ov = document.createElement("div");
+  ov.id = "fs-overlay";
+  ov.innerHTML = "<p class='fs-ov-title'>Please use fullscreen</p>" +
+    "<p class='fs-ov-text'>You have left fullscreen mode. This experiment must be completed in fullscreen.<br />" +
+    "Please click the button below to return to fullscreen and continue.</p>" +
+    "<button class='button-next'>Return to fullscreen</button>";
+  ov.querySelector("button").onclick = requestFullscreen;
+  document.body.appendChild(ov);
+}
+function hideFsOverlay() {
+  const ov = document.getElementById("fs-overlay");
+  if (!ov) return;
+  ov.remove();
+  if (fsTaskRunning) taskEl.focus();   // Clicking the overlay button moved focus away, and jsPsych only hears keys inside this div
+}
+
+function installFullscreenWatch() {
+  if (fsWatching) return;
+  fsWatching = true;
+  let wasFs = isFullscreen();
+  const onChange = () => {
+    const fs = isFullscreen();
+    if (fs) hideFsOverlay();
+    else {
+      if (wasFs && fsCounting) fsExits += 1;                  // Counted (and flagged in fs_exits_in_trial) even if a trial is running
+      if (fsEnforced && !fsTrialActive) showFsOverlay();     // Mid-trial: no overlay, the pause comes before the next trial
+    }
+    wasFs = fs;
+  };
+  document.addEventListener("fullscreenchange", onChange);
+  document.addEventListener("webkitfullscreenchange", onChange);
+  if (DM_FS) { if (DM_FS.addEventListener) DM_FS.addEventListener("change", onChange); else if (DM_FS.addListener) DM_FS.addListener(onChange); }
+  window.addEventListener("resize", onChange);
+  setInterval(onChange, 250);   // Backup in case a browser sends no event
+  // Keys do nothing while the overlay is up, so no response is given to a screen the person cannot see
+  const block = (e) => { if (document.getElementById("fs-overlay")) { e.stopImmediatePropagation(); e.preventDefault(); } };
+  window.addEventListener("keydown", block, true);
+  window.addEventListener("keyup", block, true);
+}
+
+//  jsPsych setup
+const taskEl     = document.getElementById("jspsych-target");
+const doneScreen = document.getElementById("done-screen");
+
+const jsPsych = jsPsychModule.initJsPsych({
+  display_element: taskEl,   // jsPsych only draws inside this div; everything else is the plain HTML screens above
+  // Original task had no progress bar, set to false for this option
+  show_progress_bar: false,
+  on_finish: () => saveAndFinish(),
+});
+
+// The ID saved with the data is a random ID made for each participant
+const subjectId = "CH22" + Math.round(Math.random() * 100000000) + "55";   // Wide range so two participants are very unlikely to share an ID
+const sonaCode  = params.get("code") || params.get("sona_id") || params.get("subjectId") || params.get("id");
+
+jsPsych.data.addProperties({
+  subject: subjectId,
+  experiment: SAVE_NAME,
+  task: "chunharas2022_exp1_2AFC_replication",
+  color_space: COLOR_SPACE.name,
+  test_mode: TEST_MODE,
+  screen_w: window.screen.width, screen_h: window.screen.height,
+  pixel_ratio: window.devicePixelRatio,
+  user_agent: navigator.userAgent,
+  start_time: new Date().toISOString(),
+});
+
+//  Trial Logic
+function makeTrial(t, phase) {
+  phase = phase || "main";
+  let exitsAtStart = 0;
+  return {
+    type: jsPsychWmForcedChoice,
+
+    // Memory array: item 0 = TARGET, item 1 = non-target. which_test = 0 probes the target
+    stimuli: [t.target_hex, t.nontarget_hex],
+    item_type: "color",
+    color_wheel: STUDY_WHEEL,                       
+    which_test: 0,
+    item_positions: [t.target_slot, t.nontarget_slot],
+    num_placeholders: NUM_PLACEHOLDERS,
+    radius: RING_RADIUS_PX,
+    item_size: ITEM_SIZE_PX,
+    position_angle_offset: POSITION_ANGLE_OFFSET_DEG, // Keeps the original's ring orientation
+
+    // Timing (original: 2000 ms fixation, 150 ms array, 750 ms delay, no click-to-start)
+    click_to_start: false,
+    delay_start: PRE_ARRAY_MS,
+    display_time: STIM_DUR_MS,
+    delay_time: DELAY_MS,
+
+    // Two options on either side of fixation: [correct, foil]; display left/right is randomized
+    test_options: [t.target_hex, t.foil_hex],
+    correct_option: 0,
+    option_layout: "center",
+    option_gap: 2 * OPTION_OFFSET_PX - ITEM_SIZE_PX,
+    shuffle_options: true,
+    // Draws black ring around target color, original paper used small black triangle (not available in the plugin)
+    cue_test_location: true,         
+
+    // Response: Z = left option, M = right option
+    response_ui: "keyboard",
+    choice_keys: [KEY_LEFT, KEY_RIGHT],
+    prompt: "<p>Press <b>" + KEY_LEFT.toUpperCase() + "</b> for the left circle, <b>" + KEY_RIGHT.toUpperCase() + "</b> for the right circle.</p>",
+
+    background_color: "#ffffff",
+    auto_zoom: AUTO_ZOOM,
+
+    data: Object.assign({ phase: phase }, t),
+    on_start: () => { exitsAtStart = fsExits; earlyCount = 0; awaitingOptions = true; fsTrialActive = true; },
+    // fs_exits_in_trial > 0: fullscreen was left during this trial (the array or options may not have been seen)
+    on_finish: (d) => {
+      fsTrialActive = false;   // From here the overlay may appear; fsGate holds the next trial until fullscreen is back
+      d.window_w = window.innerWidth; d.window_h = window.innerHeight; d.fs_exits_in_trial = fsExits - exitsAtStart;
+      d.early_presses = earlyCount; awaitingOptions = false;
+      if (phase === "main") noteRush(d);   // The practice trial does not count towards the rushing check
+    },
+  };
+}
+
+//  Rushing safeguard
+const RUSH = { early_presses: 3, fast_rt_ms: 200, of_last: 5, trials: 3, recent: [] };
+let earlyCount = 0, awaitingOptions = false;
+// Counts Z / M presses from the start of a trial until the options appear (the plugin only listens once they are up)
+window.addEventListener("keydown", (e) => {
+  if (awaitingOptions && !e.repeat && [KEY_LEFT, KEY_RIGHT].includes((e.key || "").toLowerCase())) earlyCount += 1;
+}, true);
+new MutationObserver(() => {
+  if (awaitingOptions && taskEl.querySelectorAll("canvas[data-pos]").length >= 2) awaitingOptions = false;
+}).observe(taskEl, { childList: true, subtree: true });
+
+function noteRush(d) {
+  d.rushed = (d.early_presses >= RUSH.early_presses || (d.rt != null && d.rt < RUSH.fast_rt_ms)) ? 1 : 0;
+  d.checkin_after = "";
+  RUSH.recent.push(d.rushed);
+  if (RUSH.recent.length > RUSH.of_last) RUSH.recent.shift();
+}
+
+//  Small screens drawn by the page itself: they wait for the spacebar (key: true) or for a button
+class ScreenPlugin {
+  constructor(jsPsych) { this.jsPsych = jsPsych; }
+  trial(el, trial) {
+    el.innerHTML = "<div class='screen-box'>" + trial.html +
+      (trial.button ? "<p><button class='button-next' id='screen-btn'>" + trial.button + "</button></p>" : "") + "</div>";
+    const t0 = performance.now();
+    const onKey = (e) => { if (e.key === " " && !e.repeat) { e.preventDefault(); done(); } };   // A held-down spacebar does not skip the screen
+    const done = () => {
+      document.removeEventListener("keydown", onKey);
+      el.innerHTML = "";
+      this.jsPsych.finishTrial({ rt: Math.round(performance.now() - t0) });
+    };
+    if (trial.key) document.addEventListener("keydown", onKey);
+    if (trial.button) el.querySelector("#screen-btn").addEventListener("click", done);
+  }
+}
+ScreenPlugin.info = {
+  name: "screen", version: "1.0.0",
+  parameters: {
+    html:   { type: jsPsychModule.ParameterType.HTML_STRING, default: "" },
+    key:    { type: jsPsychModule.ParameterType.BOOL, default: false },     // true = the spacebar continues
+    button: { type: jsPsychModule.ParameterType.STRING, default: "" },      // Text of a button that continues ("" = no button)
+  },
+  data: { rt: { type: jsPsychModule.ParameterType.INT } },
+};
+
+//  Fullscreen gate: sits before every trial. If fullscreen was left, the "return to fullscreen" screen holds the next trial
+class FsGatePlugin {
+  constructor(jsPsych) { this.jsPsych = jsPsych; }
+  trial(el, trial) {
+    el.innerHTML = "";
+    showFsOverlay();
+    const t0 = performance.now();
+    const timer = setInterval(() => {
+      if (!isFullscreen()) return;
+      clearInterval(timer);
+      hideFsOverlay();
+      this.jsPsych.finishTrial({ rt: Math.round(performance.now() - t0) });   // How long the next trial was held up
+    }, 50);
+  }
+}
+FsGatePlugin.info = {
+  name: "fs-gate", version: "1.0.0",
+  parameters: {},
+  data: { rt: { type: jsPsychModule.ParameterType.INT } },
+};
+function fsGate() {
+  return {
+    timeline: [{ type: FsGatePlugin, data: { phase: "fsgate" } }],
+    conditional_function: () => fsEnforced && !isFullscreen(),
+  };
+}
+
+// "Please slow down" screen, shown after a trial when enough of the recent trials were rushed
+function rushCheckIn() {
+  return {
+    timeline: [{
+      type: ScreenPlugin, data: { phase: "checkin" }, key: true,   // Only the spacebar continues (no button)
+      html: "<h2>Please slow down a little</h2>" +
+        "<p>It looks like <b>" + KEY_LEFT.toUpperCase() + "</b> or <b>" + KEY_RIGHT.toUpperCase() + "</b> was pressed before the two circles appeared, or very quickly after they appeared.</p>" +
+        "<p>Wait until the two circles appear. Then press <b>" + KEY_LEFT.toUpperCase() + "</b> for the left circle or <b>" + KEY_RIGHT.toUpperCase() + "</b> for the right circle. Answer as accurately as you can.</p>" +
+        "<p>Press the <b>spacebar</b> when you are ready to continue.</p>",
+      on_finish: () => {
+        const last = jsPsych.data.get().filter({ phase: "main" }).last(1).values()[0];
+        if (last) last.checkin_after = "rushed";   // Marks the trial the pause came after
+        RUSH.recent = [];
+      },
+    }],
+    conditional_function: () => RUSH.recent.reduce((a, b) => a + b, 0) >= RUSH.trials,
+  };
+}
+
+//  Trial list: 120 main + 12 catch trials in one random order
+let trialList = buildTrialList(N_REPS, N_CATCH_PER_LOC);
+if (config.maxMain) {   // Test run: the first few main and catch trials, kept in their random order
+  const keep = new Set(trialList.filter((t) => t.trial_kind === "main").slice(0, config.maxMain)
+    .concat(trialList.filter((t) => t.trial_kind === "catch").slice(0, config.maxCatch)));
+  trialList = trialList.filter((t) => keep.has(t)).map((t, i) => Object.assign({}, t, { trial_num: i + 1 }));
+}
+
+//  One practice trial (unsaved)
+const practiceSpec = Object.assign(
+  makeTrialSpec({ targetSlot: Math.floor(Math.random() * NUM_PLACEHOLDERS), foilDir: Math.random() < 0.5 ? "toward" : "away" }, 0, Math.random),
+  { trial_kind: "practice" });
+
+const READY_HTML = "<h2>That was the practice trial</h2>" +
+  "<p>When the two circles appear in the real task, press <b>" + KEY_LEFT.toUpperCase() + "</b> for the left circle or <b>" + KEY_RIGHT.toUpperCase() + "</b> for the right circle.</p>" +
+  "<p>Press the <b>spacebar</b> when you are ready to begin. The first trial starts right away.</p>";
+
+//  Assemble the timeline: practice trial, spacebar screen, then the trials
+const timeline = [];
+timeline.push(fsGate());
+timeline.push(makeTrial(practiceSpec, "practice"));
+timeline.push({ type: ScreenPlugin, data: { phase: "ready" }, key: true, html: READY_HTML, on_finish: () => { fsCounting = true; } });
+trialList.forEach((t, i) => {
+  timeline.push(fsGate());   // Holds the trial if fullscreen was left (checked after any "slow down" screen too)
+  timeline.push(makeTrial(t));
+  if (i < trialList.length - 1) timeline.push(rushCheckIn());   // None after the last trial
+});
+
+//  Navigation Helpers
+function linkNextScreen(first, next, fn) {
+    const btn = document.querySelector(first + " .button-next");
+    if (!btn) return;
+    btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        // 1) Hide current screen immediately
+        const firstEl = document.querySelector(first);
+        if (firstEl) firstEl.hidden = true;
+        // 2) Show next screen (if any)
+        if (next) {
+            const nextEl = document.querySelector(next);
+            if (nextEl) nextEl.hidden = false;
+        }
+        // 3) Fire any follow-up logic without awaiting
+        if (fn) {
+            try { fn(); } catch (err) { console.error(err); }
+        }
+    });
+}
+
+// Response keys shown on the instruction pages (so they always match KEY_LEFT / KEY_RIGHT)
+document.querySelectorAll(".keyLeft").forEach(el => el.textContent = KEY_LEFT.toUpperCase());
+document.querySelectorAll(".keyRight").forEach(el => el.textContent = KEY_RIGHT.toUpperCase());
+
+// Startup → Consent: moves on only once the page is really in fullscreen, then the fullscreen watch starts
+document.querySelector("#startupScreen .button-next").addEventListener("click", (e) => {
+    e.preventDefault();
+    const failEl = document.getElementById("fs-fail");
+    failEl.hidden = true;
+    requestFullscreen();
+    const t0 = Date.now();
+    const timer = setInterval(() => {
+        if (isFullscreen()) {
+            clearInterval(timer);
+            installFullscreenWatch();
+            fsEnforced = true;
+            document.getElementById("startupScreen").hidden = true;
+            document.getElementById("consent").hidden = false;
+        } else if (Date.now() - t0 > 5000) {
+            clearInterval(timer);
+            failEl.hidden = false;   // Browser refused fullscreen
+        }
+    }, 100);
+});
+// Consent → Instructions Chain
+linkNextScreen("#consent", "#instructions1");
+linkNextScreen("#instructions1", "#instructions2");
+linkNextScreen("#instructions2", "#instructions3");
+linkNextScreen("#instructions3", "#instructions4");
+linkNextScreen("#instructions4", "#instructions5");
+linkNextScreen("#instructions5", "#instructions6");
+linkNextScreen("#instructions6", "#instructions7");
+// Last Instruction Page → Practice trial → Trials
+linkNextScreen("#instructions7", null, () => beginOrdeal());
+
+//  Main Flow
+function beginOrdeal() {
+    // Show the task div and run the trials (jsPsych draws only inside it)
+    taskEl.hidden = false;
+    taskEl.focus();   // jsPsych listens for the Z / M keys on this div
+    fsTaskRunning = true;
+    jsPsych.run(timeline);
+}
+
+//  Data format
+const CSV_COLUMNS = [
+  "subject", "trial_num", "trial_kind",
+  // Debrief questions
+  "age", "gender", "sex_at_birth", "anything_weird",
+  // Design
+  "foil_direction", "foil_offset", "item_separation",
+  "target_slot", "nontarget_slot", "slot_gap", "target_side", "nontarget_side", "same_hemifield",
+  "target_hue", "nontarget_hue", "foil_hue", "target_hex", "nontarget_hex", "foil_hex",
+  // Response
+  "response", "correct_key", "correct", "rt", "multiple_keys_pressed", "early_presses", "rushed", "checkin_after",
+  // Checks
+  "actual_stim_duration", "time_elapsed", "fs_exits_in_trial", "fullscreen_exits", "window_w", "window_h",
+  // Session
+  "experiment", "test_mode", "start_time", "color_space", "plugin_version", "screen_w", "screen_h", "pixel_ratio", "user_agent",
+];
+
+function csvCell(v) {
+  if (v === null || v === undefined) return "";
+  if (typeof v === "boolean") return v ? "1" : "0";   // true/false saved as 1/0
+  const s = String(v);
+  return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;   // Cells with commas get quoted
+}
+
+function buildCsv(debrief) {
+  const otherKey = (k) => (k === KEY_LEFT ? KEY_RIGHT : KEY_LEFT);
+  const mains = jsPsych.data.get().filter({ phase: "main" }).values();
+  const lines = mains.map((d) => {
+    // correct_key = the key that was right on this trial (so a left/right response bias can be checked)
+    // The plugin returns the key as typed ("Z" if Caps Lock is on), so response is lowercased here
+    const resp = d.response == null ? null : String(d.response).toLowerCase();
+    const row = Object.assign({}, d, { response: resp, correct_key: resp == null ? null : (d.correct ? resp : otherKey(resp)) });
+    return CSV_COLUMNS.map((c) => csvCell(row[c])).join(",");
+  });
+  // The debrief 
+  // Answers are their own row, first after the column names. It carries the same session columns as every trial row
+  const first = mains[0] || {};
+  const debRow = Object.assign({ subject: subjectId, trial_kind: "debrief" }, debrief || {});
+  ["fullscreen_exits", "experiment", "test_mode", "start_time", "color_space", "plugin_version", "screen_w", "screen_h", "pixel_ratio", "user_agent"]
+    .forEach((k) => { debRow[k] = first[k]; });
+  lines.unshift(CSV_COLUMNS.map((c) => csvCell(debRow[c])).join(","));
+  return CSV_COLUMNS.join(",") + "\n" + lines.join("\n") + "\n";
+}
+
+// Debrief questions: shows the form and resolves with the answers when it is submitted (all optional; blank = skipped)
+function askDebrief() {
+  return new Promise((resolve) => {
+    const box = document.getElementById("debrief"), form = document.getElementById("debrief-form");
+    // One line per CSV row. Text that starts with = + - @ gets a leading ' so a spreadsheet will not run it as a formula
+    const oneLine = (s) => { const t = String(s).replace(/\s+/g, " ").trim(); return /^[=+\-@]/.test(t) ? "'" + t : t; };
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();   // (the browser only fires this when the age, if given, is a whole number from 1 to 100)
+      box.hidden = true;
+      resolve({
+        age: oneLine(document.getElementById("deb-age").value),
+        gender: document.getElementById("deb-gender").value,
+        sex_at_birth: document.getElementById("deb-sex").value,
+        anything_weird: oneLine(document.getElementById("deb-weird").value),
+      });
+    }, { once: true });
+    // Tell the participant what happens next: only when a credit link will really follow (a real run with the SONA settings and their code)
+    const redirectNote = document.getElementById("deb-redirect");
+    const sonaSet = !!(SONA_EXPERIMENT_ID && SONA_CREDIT_TOKEN);
+    if (TEST_MODE ? sonaSet : !!creditUrl()) {
+      redirectNote.textContent = "When you click Submit this page will redirect you you back to SONA so that you receive your credit. " +
+        "Please do not close the window until that happens." + (TEST_MODE ? " (Test mode: no redirect will happen.)" : "");
+      redirectNote.hidden = false;
+    }
+    box.hidden = false;
+    document.getElementById("deb-age").focus();
+  });
+}
+
+//  Saving
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function postData(csv) {
+  const dataToServer = {
+    id: subjectId,
+    experimenter: EXPERIMENTER,
+    experimentName: SAVE_NAME,
+    curData: csv,
+  };
+  const resp = await fetch(SAVE_URL, { method: "POST", body: new URLSearchParams(dataToServer) });
+  const text = await resp.text();
+  if (!resp.ok || (SAVE_SUCCESS_TEXT && text.indexOf(SAVE_SUCCESS_TEXT) < 0)) throw new Error("save.php said: HTTP " + resp.status + " " + text.slice(0, 200));
+  return true;
+}
+
+// The link that gives the participant credit in SONA. Needs the study's ID + token above and the participant's own ?code=
+function creditUrl() {
+  if (!SONA_EXPERIMENT_ID || !SONA_CREDIT_TOKEN || !sonaCode) return null;
+  return (SONA_CREDIT_URL + "?experiment_id=" + encodeURIComponent(SONA_EXPERIMENT_ID) +
+          "&credit_token=" + encodeURIComponent(SONA_CREDIT_TOKEN) + "&survey_code=" + encodeURIComponent(sonaCode)
+         ).replace(/'/g, "%27");   // encodeURIComponent leaves ' alone, and the link is written inside a quoted href below
+}
+if (!TEST_MODE && !(SONA_EXPERIMENT_ID && SONA_CREDIT_TOKEN))
+  console.warn("SONA experiment ID / credit token are not set (see SONA_EXPERIMENT_ID): participants will NOT be sent back to SONA for credit.");
+
+async function saveAndFinish() {
+  taskEl.hidden = true;
+  fsTaskRunning = false; fsCounting = false;   // The trials are over: no more exits are counted. Fullscreen itself stays on (and the overlay stays enforced) during the final questions
+  jsPsych.data.addProperties({ fullscreen_exits: fsExits });   // Total times fullscreen was left during the trials
+
+  // Final questions first, then everything is saved in one file (the server never overwrites, so it is saved once, after this)
+  const debrief = await askDebrief();
+  fsEnforced = false; hideFsOverlay();   // Fullscreen is no longer required from here on
+  try { if (document.fullscreenElement) await document.exitFullscreen(); } catch (e) { /* ignore */ }
+  doneScreen.hidden = false;
+  doneScreen.innerHTML = "<p>Saving your data. Please do not close this window...</p>";
+  const csv = buildCsv(debrief);
+  let saved = false;
+  for (let attempt = 1; attempt <= 3 && !saved; attempt++) {
+    try { saved = await postData(csv); }
+    catch (e) { console.warn("Save attempt " + attempt + " failed:", e); await sleep(1500 * attempt); }
+  }
+
+  // Test runs never go to SONA (no credit, no redirect), so the download button below stays clickable
+  const url = TEST_MODE ? null : creditUrl();
+  if (saved) {
+    doneScreen.innerHTML = "<p>Thank you for participating, we appreciate your time and effort!</p><p>Your data have been saved.</p>" +
+      (url ? "<p>You will now be taken back to SONA to receive your credit. <a href='" + url + "'>Click here if nothing happens.</a></p>"
+           : "<p>You can close this tab.</p>" +
+             (TEST_MODE ? "" : "<p>If you came from SONA and did not receive credit, please email <b>" + CONTACT_EMAIL + "</b>.</p>"));
+    if (url) setTimeout(() => { window.location.href = url; }, 2500);
+    if (TEST_MODE) {
+      // Test version only: a local copy of the CSV so it can be inspected without going to the server
+      doneScreen.insertAdjacentHTML("beforeend",
+        "<p><b>TEST MODE</b> (" + trialList.length + " trials, saved to " + SAVE_NAME + ").</p>" +
+        "<p><button id='dl' class='button-next'>Download test data (CSV)</button></p>");
+      document.getElementById("dl").addEventListener("click", () => downloadCsv(csv));
+    }
+  } else {
+    // Failsafe in case the data cannot save to server
+    doneScreen.innerHTML = "<p>Thank you for participating, we appreciate your time and effort!</p>" +
+      "<p>We could not save your data to our server. Please click the button to download your data file and " +
+      "email it to <b>" + CONTACT_EMAIL + "</b>.</p><p><button id='dl' class='button-next'>Download my data</button></p>" +
+      (url ? "<p><a href='" + url + "'>Continue to SONA to receive your credit</a></p>" : "");
+    document.getElementById("dl").addEventListener("click", () => downloadCsv(csv));
+  }
+}
+
+// Saves the CSV text to the participant's own computer (used by the save-failure failsafe and by test mode)
+function downloadCsv(csv) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+  a.download = SAVE_NAME + "_" + subjectId + ".csv";
+  a.click();
+}
+    </script>
+</body>
+</html>
