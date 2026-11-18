@@ -1,13 +1,13 @@
-# PSYC 201A Replication Project (Fall 2026)
+# PSYC 201A Replication Project (Fall 2026) by James Ashby
 
-This repository consists of an experimental replication of 'An Adaptive Perspective on Visual Working Memory Distortions' by Chunharas, Rademaker, Brady, and Serences (2022, Journal of Experimental Psychology). Data will be collected using the UC San Diego SONA platform, and a modernized version of the task code using the Brady Lab's plugins. (Vision and Memory Lab @ UC San Diego)
+This repository consists of an experimental replication of 'An Adaptive Perspective on Visual Working Memory Distortions' by Chunharas, Rademaker, Brady, and Serences (2022, Journal of Experimental Psychology). Data will be collected using the UC San Diego SONA platform, with a modernized version of the task code built using the Brady Lab's plugins (Vision and Memory Lab @ UC San Diego).
 
 File Structure:
 
-1. "data" -- Consists of the data from the original study "data_codes" which contains the MATLAB participant data and the data analysis R code taken from the original paper's OSF repository.
+1. "data" -- Consists of the data from the original study ("original_data"), which contains the MATLAB participant data (EXP1.csv, EXP1.mat, Fig1c.m) and the data analysis R code (allEXPs_in_R.R) taken from the original paper's OSF repository.
 
-2. "original_paper" -- The pdf of the original paper (Chunharas, 2022) and the original visual memory task code (WMbias_2AFC_241) taken from the original paper's OSF repository.
+2. "original_paper" -- The pdf of the original paper (chunharas2022.pdf) and the original visual memory task code ("original_task_code": WMbias_2AFC_241.html, jquery.js, vismemCC.js) taken from the original paper's OSF repository.
 
-3. "writeup" -- The Replication Report written out (pdf), which includes, methods, procedure, sample population, differences from original study, and data analysis plan for the replication experiment. This also contains the R code that includes the data analysis code, wrapped in-text with the write-up using "Quarto" to render it into a pdf.
+3. "writeup" -- The Replication Report written out (replication_report.pdf), which includes the introduction, methods, procedure, sample population, differences from the original study, and data analysis plan for the replication experiment. The report is written in Quarto (replication_report.qmd) and contains the R data analysis code, wrapped in-text with the write-up and rendered into a pdf. The original study's data (EXP1.csv) is also kept here for the power analysis.
 
-4. "task" -- Contains the updated task code (chunharas2022.html), alongisde the task code from the original paper (WMbias_2AFC_241.html), as well as the task code, along with the plugins in a folder (26TR04). The updated task code will only run within this folder, as it uses plugins with predesigned stimuli from the Brady Lab.
+4. "task" -- Contains the updated task code in the "task" subfolder (chunharas2022.html), alongside the task code from the original paper (original_WMbias_2AFC.html). The updated task code uses jsPsych 8.4.0 and the Brady Lab's plugins with predesigned stimuli (brady-color-wheel.js, brady-plugin-utils.js, jspsych-wm-forced-choice.js), and it will only run when these three plugin files are in the same folder as chunharas2022.html.
