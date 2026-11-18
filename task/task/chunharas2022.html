@@ -147,7 +147,7 @@
 
     <div id="instructions3" hidden>
         <p>
-            Two colors will appear <b>very briefly</b> at 2 of the 12 locations that will be aranged in a circle around the crosshair. <br /><br />
+            Two colors will appear <b>very briefly</b> at 2 of the 12 locations that will be arranged in a circle around the crosshair. <br /><br />
             The colors will only appear for a very brief period of time (less than a second). <br /><br />
             So make sure to keep your eyes on the screen for the entire duration of the task.
         </p>
@@ -171,7 +171,7 @@
     <div id="instructions5" hidden>
         <p>
             Two <b>very similar</b> color choices will appear on each side of the crosshair, you will have to choose between the two colors.<br /><br />
-            Remember, you are choosing the color that was <b>inside the location the black circle is surrounding.</b>. <br /><br />
+            Remember, you are choosing the color that was <b>inside the location the black circle is surrounding.</b> <br /><br />
             Please press <b>"<span class="keyLeft"></span>"</b> to choose the left circle OR <b>"<span class="keyRight"></span>"</b> to choose the right circle as your response.
         </p>
         <div class="nav-buttons">
@@ -835,7 +835,7 @@ function askDebrief() {
     const redirectNote = document.getElementById("deb-redirect");
     const sonaSet = !!(SONA_EXPERIMENT_ID && SONA_CREDIT_TOKEN);
     if (TEST_MODE ? sonaSet : !!creditUrl()) {
-      redirectNote.textContent = "When you click Submit this page will redirect you you back to SONA so that you receive your credit. " +
+      redirectNote.textContent = "When you click Submit this page will redirect you back to SONA so that you receive your credit. " +
         "Please do not close the window until that happens." + (TEST_MODE ? " (Test mode: no redirect will happen.)" : "");
       redirectNote.hidden = false;
     }
