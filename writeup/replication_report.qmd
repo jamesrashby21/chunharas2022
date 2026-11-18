@@ -158,14 +158,12 @@ t.test(datcsv[datcsv$fdirec==-1,'val']-datcsv[datcsv$fdirec==1,'val'])
 ## Results
 
 
-### Data preparation
+### Data preparation/visualization
 
-Data preparation following the analysis plan.
+Data preparation following the analysis plan, along with preliminary figures.
 	
 ```{r}
-#| eval: false
-
-#### Pre-registered Analysis Code (No data yet)
+#### Pre-registered Analysis Code (No data yet, confirmatory analysis run on pilot data)
 
 #### Import data
 files <- list.files("raw_data", pattern = "\\.txt$", full.names = TRUE)
@@ -186,7 +184,77 @@ t.test(acc[, "toward"], acc[, "away"], paired = TRUE)
 keep <- !is.na(catch_correct) & catch_correct >= 10
 t.test(acc[keep, "toward"], acc[keep, "away"], paired = TRUE)
 
+### Assert check
+library(assertthat)
+
+assert_that(length(files) == 6)
 ```
+```{r}
+### Data Visualization (First attempt)
+library(ggplot2)
+
+# Mean accuracy and standard error for each foil condition
+df <- data.frame(
+  condition = factor(c("Toward", "Away"), levels = c("Toward", "Away")),
+  accuracy  = colMeans(acc[, c("toward", "away")]),
+  se        = apply(acc[, c("toward", "away")], 2, sd) / sqrt(nrow(acc))
+)
+
+ggplot(df, aes(condition, accuracy)) +
+  geom_col(fill = c("steelblue", "tomato")) +
+  geom_errorbar(aes(ymin = accuracy - se, ymax = accuracy + se), width = .2) +
+  geom_hline(yintercept = .5, linetype = "dashed") +   # Chance
+  coord_cartesian(ylim = c(.3, .7)) +                  # Zoomed in; c(0, 1) is full scope
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "Foil direction", y = "Accuracy") +
+  theme_classic()
+```
+```{r}
+#### Preliminary Figures (Generated with pilot data)
+library(ggplot2)
+
+use <- rep(TRUE, nrow(acc))   # Entire sample
+# use <- keep                 # Sample with exclusions
+
+#### Accuracy, toward vs. away  (Error bars = +/-1 SEM across participants)
+m    <- acc[use, c("toward", "away")]
+sem  <- apply(m - rowMeans(m) + mean(m), 2, sd) / sqrt(nrow(m))
+bars <- data.frame(x = 1:2, mean = 100 * (colMeans(m) - .5), sem = 100 * sem, fill = c("tomato", "steelblue"))
+
+ggplot(bars, aes(x)) +
+  geom_rect(aes(xmin = x - .4, xmax = x + .4, ymin = -15, ymax = mean, fill = fill), colour = "black") +
+  scale_fill_identity() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_linerange(aes(ymin = mean - sem, ymax = mean + sem), linewidth = 1) +
+  scale_x_continuous(breaks = 1:2, labels = c("-6°\ntoward", "+6°\naway")) +
+  scale_y_continuous(breaks = seq(-15, 15, 5),
+                   labels = c("-15%", "-10%", "-5%", "50%\n(chance)", "+5%", "+10%", "+15%")) +
+  coord_cartesian(xlim = c(0, 2.6), ylim = c(-15, 15), expand = FALSE) +    # Axis fixed at +/-15% to accommodate noisy pilot data
+# "Prefer correct color / Prefer foil color" arrows
+  annotate("segment", x = .35, xend = .35, y = 4, yend = 12.5, colour = "#46464a", linewidth = 2.2,
+           arrow = arrow(length = unit(.13, "in"), type = "closed")) +
+  annotate("segment", x = .35, xend = .35, y = -4, yend = -12.5, colour = "#46464a", linewidth = 2.2,
+           arrow = arrow(length = unit(.13, "in"), type = "closed")) +
+  annotate("text", x = .27, y = 8,  label = "Prefer\ncorrect\ncolor", hjust = 1, fontface = "bold", size = 3.2, lineheight = .9) +
+  annotate("text", x = .27, y = -8, label = "Prefer\nfoil\ncolor",    hjust = 1, fontface = "bold", size = 3.2, lineheight = .9) +
+  labs(x = "Foil distance from correct color", y = "Accuracy") +
+  theme_classic()
+
+#### Mean RT on every trial, averaged across participants (Error bars = +/-1 SEM across participants)
+rt <- na.omit(do.call(rbind, lapply(files, function(f) read.csv(f)[, c("subject", "trial_num", "rt")])))
+rt <- rt[rt$subject %in% rownames(acc)[use], ]
+by_trial <- data.frame(trial = sort(unique(rt$trial_num)),
+                       mean  = tapply(rt$rt, rt$trial_num, mean),
+                       sem   = tapply(rt$rt, rt$trial_num, function(v) sd(v) / sqrt(length(v))))
+
+ggplot(by_trial, aes(trial, mean)) +
+  geom_linerange(aes(ymin = mean - sem, ymax = mean + sem), colour = "#6da7ec") +
+  geom_line(colour = "#2a78d6") +
+  expand_limits(y = 0) +
+  labs(x = "Trial number", y = "Mean reaction time (ms)") +
+  theme_classic()
+```
+
 
 ### Confirmatory analysis
 
