@@ -49,7 +49,7 @@ po/*~
 rsconnect/
 
 # ignore raw data file
-writeup/26TR04 Raw Data/
+writeup/raw_data/
 
 # ignore all CSVs
 *.csv
