@@ -165,7 +165,7 @@ Data preparation following the analysis plan, along with preliminary figures.
 	
 ```{r}
 #### Pre-registered Analysis Code (No data yet, confirmatory analysis run on pilot data)
-
+## in order for this to run, user needs to have access to raw_data file in /writeup
 #### Import data
 files <- list.files(here("writeup", "raw_data"), pattern = "\\.txt$", full.names = TRUE)
 need <- c("subject","trial_kind","foil_direction","correct")
@@ -173,7 +173,7 @@ dat   <- do.call(rbind, lapply(files, function(f) read.csv(f, colClasses = "char
 dat$correct <- as.numeric(dat$correct)
 
 #### Data Preparation
-main  <- subset(dat, trial_kind == "main")
+main  <- subset(dat, trial_kind == "main")  
 catch <- subset(dat, trial_kind == "catch")
 acc   <- tapply(main$correct, list(main$subject, main$foil_direction), mean)
 catch_correct <- as.numeric(tapply(catch$correct, catch$subject, sum)[rownames(acc)])
