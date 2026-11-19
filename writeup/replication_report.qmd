@@ -167,7 +167,8 @@ Data preparation following the analysis plan, along with preliminary figures.
 #### Pre-registered Analysis Code (No data yet, confirmatory analysis run on pilot data)
 
 #### Import data
-files <- list.files(here("writeup", "raw_data"), pattern = "\\.txt$", full.names = TRUE)need  <- c("subject", "trial_kind", "foil_direction", "correct")   
+files <- list.files(here("writeup", "raw_data"), pattern = "\\.txt$", full.names = TRUE)
+need <- c("subject","trial_kind","foil_direction","correct")
 dat   <- do.call(rbind, lapply(files, function(f) read.csv(f, colClasses = "character", na.strings = c("", "NA"))[, need]))
 dat$correct <- as.numeric(dat$correct)
 
