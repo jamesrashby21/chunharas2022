@@ -44,8 +44,9 @@ Effect size not displayed in the original paper, but can be extrapolated from da
 
 ```{r}
 library(pwr)
+library(here)
 
-dat <- read.csv("EXP1.csv") # Load Data
+dat <- read.csv(here("writeup", "EXP1.csv")) # Load Data
 
 acc <- tapply(dat$correct, list(dat$subjects, dat$condition), mean) # Accuracy, per participant, per condition
 
@@ -166,8 +167,7 @@ Data preparation following the analysis plan, along with preliminary figures.
 #### Pre-registered Analysis Code (No data yet, confirmatory analysis run on pilot data)
 
 #### Import data
-files <- list.files("raw_data", pattern = "\\.txt$", full.names = TRUE)
-need  <- c("subject", "trial_kind", "foil_direction", "correct")   
+files <- list.files(here("writeup", "raw_data"), pattern = "\\.txt$", full.names = TRUE)need  <- c("subject", "trial_kind", "foil_direction", "correct")   
 dat   <- do.call(rbind, lapply(files, function(f) read.csv(f, colClasses = "character", na.strings = c("", "NA"))[, need]))
 dat$correct <- as.numeric(dat$correct)
 
@@ -203,7 +203,7 @@ df <- data.frame(
 ggplot(df, aes(condition, accuracy)) +
   geom_col(fill = c("steelblue", "tomato")) +
   geom_errorbar(aes(ymin = accuracy - se, ymax = accuracy + se), width = .2) +
-  geom_hline(yintercept = .5, linetype = "dashed") +   # Chance
+  geom_hline(yintercept = .5, linetype = "dashed") +   # Dashed line at chance threshold
   coord_cartesian(ylim = c(.3, .7)) +                  # Zoomed in; c(0, 1) is full scope
   scale_y_continuous(labels = scales::percent) +
   labs(x = "Foil direction", y = "Accuracy") +

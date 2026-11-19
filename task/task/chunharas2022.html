@@ -53,7 +53,7 @@
             margin: 0 auto 16px;
         }
         .consent-box p { margin: 0 0 12px; max-width: none; line-height: 1.4; }
-        /* Final questions (scrolls if the window is short) */
+        /* Final questions */
         #debrief { width: min(760px, 92vw); max-height: calc(100vh - 40px); overflow-y: auto; }
         #debrief-form { display: flex; flex-direction: column; align-items: stretch; gap: 16px; text-align: left; }
         #debrief-form p { max-width: none; margin: 0; }
@@ -66,7 +66,7 @@
         #debrief-form button { align-self: center; }
         /* jsPsych draws only inside this div */
         #jspsych-target { margin: 0; width: 100%; height: 100vh; }
-        /* Covers whatever screen is up when fullscreen is left */
+        /* Covers whatever screen is up when someone exits fullscreen */
         #fs-overlay {
             position: fixed; inset: 0; margin: 0; z-index: 10000;
             background: #ffffff;   /* Opaque, so the memory array cannot be seen through it */
@@ -75,7 +75,7 @@
         }
         .fs-ov-title { color: #c0281f; font-size: 44px; margin: 0 0 18px; }
         .fs-ov-text { font-size: 24px; font-weight: normal; line-height: 1.35; margin: 0 0 40px; max-width: 1100px; }
-        /* Practice / ready / check-in screens drawn inside the task area */
+        /* Practice, ready, and check-in screens drawn inside the task area */
         .screen-box { max-width: 760px; margin: 0 auto; text-align: center; font-family: Arial, sans-serif; }
     </style>
 </head>
@@ -261,38 +261,37 @@ const EXPERIMENTER    = "JamesAshby";
 const SAVE_URL        = "https://ccnlab.ucsd.edu/jaashby/save.php"; 
 const SAVE_SUCCESS_TEXT = "Success";
 
-// SONA completion
+// SONA Completion
 const SONA_EXPERIMENT_ID = 3183;
 const SONA_CREDIT_TOKEN  = "13a08ab8f4ac4d6097bae9c74425136f";
 const SONA_CREDIT_URL    = "https://ucsd.sona-systems.com/webstudy_credit.aspx";
 const CONTACT_EMAIL      = "jaashby@ucsd.edu";
 
 // Experimental Design
-//      5 reps x 12 target locations x 2 foil directions = 120 main trials. Each location is the target exactly 10 times
-//      + 12 catch trials (foil 180 deg from the correct color, one per target location) = 132 trials in one random order
-const N_REPS           = 5;     // x 12 target locations x 2 foil directions = 120 main trials (60 per direction)
+const N_REPS           = 5;     // x 12 target locations x 2 foil directions = 120 main trials (60 per foil direction)
 const N_CATCH_PER_LOC  = 1;     // Catch trials per target location (12 in total)
 const FOIL_OFFSET_DEG  = 6;     // Foil is 6 deg from the correct color
-const CATCH_FOIL_DEG   = 180;   // Catch trials: the foil is 180 deg away, so it should almost never be chosen
+const CATCH_FOIL_DEG   = 180;   // Catch trials: foil 180 deg away
 const COLOR_DIST_DEG   = 45;    // The two target colors are 45 deg apart
 
-const MIN_SLOT_GAP = 3, MAX_SLOT_GAP = 3;   // Non-target is always exactly 3 slots (90 deg) from the target, leaving 2 empty placeholders between them, as in the original code's 12 fixed pairs (the paper only says ">= 2 empty")
+const MIN_SLOT_GAP = 3, MAX_SLOT_GAP = 3;   // Non-target is always exactly 3 slots (90 deg) from the target, leaving 2 empty placeholders between them
 
 // Timing (ms) 
 const STIM_DUR_MS  = 150;       // Memory array
 const DELAY_MS     = 750;       // Blank retention interval
 const PRE_ARRAY_MS = 2000;      // Fixation before each array that contains empty placeholders
+const RESPONSE_LIMIT_MS = 10000; // No-response timeout (10 sec) in main trials only
 
 // Geometry (px)
 const NUM_PLACEHOLDERS      = 12;
 const RING_RADIUS_PX        = 120; 
 const ITEM_SIZE_PX          = 40; 
-const OPTION_OFFSET_PX      = 35;    // Each response option sits this far left/right of fixation (paper: 35; original code tstDist: 30)
-const CIRC_ROT_RAD          = 5.5;   // The code rotates the ring by 5.5 rad; the plugin's equivalent is derived below
+const OPTION_OFFSET_PX      = 35;    // Each response option sits this far left/right of fixation
+const CIRC_ROT_RAD          = 5.5;   // The code rotates the ring by 5.5 rad; the plugin's equivalent is below
 // The Brady lab plugin's box is 2*RING_RADIUS_PX + 2*ITEM_SIZE_PX + 40 = 360 px (paper 500 px, original code 400 px); ring radius and item size match the paper
 const AUTO_ZOOM             = false; // false = true pixel sizes as in the original; true = scale the box to the window
 
-// Color Space (Using the code, since paper's values created hues outside of the range of normal displays)
+// Color Space (Using the code's values, since paper's values created hues outside of the range of normal displays)
 const COLOR_SPACE = { name: "code-L65-a9-b9-r50", L: 65, a0: 9, b0: 9, radius: 50 };
 
 // Keys: left / right option, by screen position
@@ -528,6 +527,7 @@ jsPsych.data.addProperties({
   task: "chunharas2022_exp1_2AFC_replication",
   color_space: COLOR_SPACE.name,
   test_mode: TEST_MODE,
+  response_limit_ms: RESPONSE_LIMIT_MS,
   screen_w: window.screen.width, screen_h: window.screen.height,
   pixel_ratio: window.devicePixelRatio,
   user_agent: navigator.userAgent,
@@ -576,10 +576,13 @@ function makeTrial(t, phase) {
     auto_zoom: AUTO_ZOOM,
 
     data: Object.assign({ phase: phase }, t),
-    on_start: () => { exitsAtStart = fsExits; earlyCount = 0; awaitingOptions = true; fsTrialActive = true; },
+    on_start: () => { exitsAtStart = fsExits; earlyCount = 0; awaitingOptions = true; fsTrialActive = true; limitActive = phase === "main" && !!RESPONSE_LIMIT_MS; lastTimedOut = false; },
     // fs_exits_in_trial > 0: fullscreen was left during this trial (the array or options may not have been seen)
     on_finish: (d) => {
       fsTrialActive = false;   // From here the overlay may appear; fsGate holds the next trial until fullscreen is back
+      clearTimeout(limitTimer); limitTimer = null; limitActive = false;
+      d.timed_out = d.timed_out ? 1 : 0;
+      if (d.timed_out) { lastTimedOut = true; d.trial_kind = "timeout"; }   // Saved as its own kind, so the analysis (trial_kind == "main" / "catch") leaves it out
       d.window_w = window.innerWidth; d.window_h = window.innerHeight; d.fs_exits_in_trial = fsExits - exitsAtStart;
       d.early_presses = earlyCount; awaitingOptions = false;
       if (phase === "main") noteRush(d);   // The practice trial does not count towards the rushing check
@@ -590,15 +593,21 @@ function makeTrial(t, phase) {
 //  Rushing safeguard
 const RUSH = { early_presses: 3, fast_rt_ms: 200, of_last: 5, trials: 3, recent: [] };
 let earlyCount = 0, awaitingOptions = false;
+let limitTimer = null, limitActive = false, lastTimedOut = false;   // Response time limit (see RESPONSE_LIMIT_MS)
 // Counts Z / M presses from the start of a trial until the options appear (the plugin only listens once they are up)
 window.addEventListener("keydown", (e) => {
   if (awaitingOptions && !e.repeat && [KEY_LEFT, KEY_RIGHT].includes((e.key || "").toLowerCase())) earlyCount += 1;
 }, true);
 new MutationObserver(() => {
-  if (awaitingOptions && taskEl.querySelectorAll("canvas[data-pos]").length >= 2) awaitingOptions = false;
+  if (awaitingOptions && taskEl.querySelectorAll("canvas[data-pos]").length >= 2) {
+    awaitingOptions = false;   // The options are up
+    // Start the response clock. If it runs out, end the trial with no response (the plugin has no time limit of its own)
+    if (limitActive) limitTimer = setTimeout(() => jsPsych.finishTrial({ timed_out: 1, rt: null, response: null, correct: null }), RESPONSE_LIMIT_MS);
+  }
 }).observe(taskEl, { childList: true, subtree: true });
 
 function noteRush(d) {
+  if (d.timed_out) return;   // A trial with no response is neither rushed nor not rushed
   d.rushed = (d.early_presses >= RUSH.early_presses || (d.rt != null && d.rt < RUSH.fast_rt_ms)) ? 1 : 0;
   d.checkin_after = "";
   RUSH.recent.push(d.rushed);
@@ -659,6 +668,23 @@ function fsGate() {
   };
 }
 
+// "Are you still here?" screen, shown after a trial that ran out of time (no response within RESPONSE_LIMIT_MS)
+function stillHereCheck() {
+  return {
+    timeline: [{
+      type: ScreenPlugin, data: { phase: "timeout_screen" }, key: true,   // Only the spacebar continues (no button)
+      html: "<h2>Are you still here?</h2>" +
+        "<p>You took a long time to respond, so that trial was skipped. Please respond within " + Math.round(RESPONSE_LIMIT_MS / 1000) + " seconds.</p>" +
+        "<p>Press the <b>spacebar</b> to return to the task. The next trial starts right away.</p>",
+      on_finish: () => {
+        const last = jsPsych.data.get().filter({ phase: "main" }).last(1).values()[0];
+        if (last) last.checkin_after = "timeout";   // Marks the trial the pause came after
+      },
+    }],
+    conditional_function: () => lastTimedOut,
+  };
+}
+
 // "Please slow down" screen, shown after a trial when enough of the recent trials were rushed
 function rushCheckIn() {
   return {
@@ -674,7 +700,7 @@ function rushCheckIn() {
         RUSH.recent = [];
       },
     }],
-    conditional_function: () => RUSH.recent.reduce((a, b) => a + b, 0) >= RUSH.trials,
+    conditional_function: () => !lastTimedOut && RUSH.recent.reduce((a, b) => a + b, 0) >= RUSH.trials,   // (not right after the "Are you still here?" screen)
   };
 }
 
@@ -703,7 +729,7 @@ timeline.push({ type: ScreenPlugin, data: { phase: "ready" }, key: true, html: R
 trialList.forEach((t, i) => {
   timeline.push(fsGate());   // Holds the trial if fullscreen was left (checked after any "slow down" screen too)
   timeline.push(makeTrial(t));
-  if (i < trialList.length - 1) timeline.push(rushCheckIn());   // None after the last trial
+  if (i < trialList.length - 1) { timeline.push(stillHereCheck()); timeline.push(rushCheckIn()); }   // None after the last trial
 });
 
 //  Navigation Helpers
@@ -781,11 +807,11 @@ const CSV_COLUMNS = [
   "target_slot", "nontarget_slot", "slot_gap", "target_side", "nontarget_side", "same_hemifield",
   "target_hue", "nontarget_hue", "foil_hue", "target_hex", "nontarget_hex", "foil_hex",
   // Response
-  "response", "correct_key", "correct", "rt", "multiple_keys_pressed", "early_presses", "rushed", "checkin_after",
+  "response", "correct_key", "correct", "rt", "multiple_keys_pressed", "early_presses", "rushed", "timed_out", "checkin_after",
   // Checks
   "actual_stim_duration", "time_elapsed", "fs_exits_in_trial", "fullscreen_exits", "window_w", "window_h",
   // Session
-  "experiment", "test_mode", "start_time", "color_space", "plugin_version", "screen_w", "screen_h", "pixel_ratio", "user_agent",
+  "experiment", "test_mode", "response_limit_ms", "start_time", "color_space", "plugin_version", "screen_w", "screen_h", "pixel_ratio", "user_agent",
 ];
 
 function csvCell(v) {
@@ -809,7 +835,7 @@ function buildCsv(debrief) {
   // Answers are their own row, first after the column names. It carries the same session columns as every trial row
   const first = mains[0] || {};
   const debRow = Object.assign({ subject: subjectId, trial_kind: "debrief" }, debrief || {});
-  ["fullscreen_exits", "experiment", "test_mode", "start_time", "color_space", "plugin_version", "screen_w", "screen_h", "pixel_ratio", "user_agent"]
+  ["fullscreen_exits", "experiment", "test_mode", "response_limit_ms", "start_time", "color_space", "plugin_version", "screen_w", "screen_h", "pixel_ratio", "user_agent"]
     .forEach((k) => { debRow[k] = first[k]; });
   lines.unshift(CSV_COLUMNS.map((c) => csvCell(debRow[c])).join(","));
   return CSV_COLUMNS.join(",") + "\n" + lines.join("\n") + "\n";
