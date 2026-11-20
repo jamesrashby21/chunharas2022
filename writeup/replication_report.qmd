@@ -21,15 +21,17 @@ For this replication, the experiment will consist of the same 2-AFC VWM task fro
 Small note on a possible type in the original paper: The caption for Figure 1c in the text reports the test of toward-foil accuracy against chance as t(44) = 3.73, p = .006. However, a two-sided p-value for t(44) = 3.73 is approximately .0006, and after recomputing the test from original Experiment 1 data file found on OSF gives t(44) = 3.73, p = .00055. Only a small typo, but I thought it was worth noting, since I report .0006 as the p-value in this write-up.
 
 
-Link to Paradigm: https://ccnlab.ucsd.edu/jaashby/26TR04/chunharas2022.html?subjectId=ME
-Link for Beta Test Paradigm: https://ccnlab.ucsd.edu/jaashby/26TR04/chunharas2022.html?test=1&subjectId=M
+[Link to Paradigm](https://ccnlab.ucsd.edu/jaashby/26TR04/chunharas2022.html?subjectId=ME)
+
+[Link for Beta Test Paradigm](https://ccnlab.ucsd.edu/jaashby/26TR04/chunharas2022.html?test=1&subjectId=M)
+
 Link for SONA Participants: https://ccnlab.ucsd.edu/jaashby/26TR04/chunharas2022.html?subjectId=%SURVEY_CODE%
 
-Replication Repository: https://github.com/jamesrashby21/chunharas2022
+[Replication Repository](https://github.com/jamesrashby21/chunharas2022)
 
-OSF Link: https://osf.io/qp6xk/files/osfstorage?view_only=0559769c587c4c8294288451e8af239e
+[Original Paper](https://dx.doi.org/10.1037/xlm0001014)
 
-Replication Paper: https://dx.doi.org/10.1037/xlm0001014
+[Data from Original Paper](https://osf.io/qp6xk/files/osfstorage?view_only=0559769c587c4c8294288451e8af239e)
 
 -------------------------------------------------------------------------------
 
@@ -104,7 +106,7 @@ All materials consist of the code needed to recreate the task, jsPsych plugins f
 
 ### Procedure	
 
-The task was coded in HTML and Javascript, using jsPsych plugins made by the UCSD Vision and Memory lab. The task display will consist of a 360x360 pixel white background with a 1 pixel wide, with a fixation cross in the center, surrounded by 12 small circular placeholders each centered at a distance of 120 pixels. Each placeholder should have a radius of 20 pixels, and will be 62 pixels apart when measuring center-to-center. There will be 6 placeholders on the left side of the screen, and 6 on the right. There are also two empty placeholders for the response options for the 2-AFC, 35 pixels to the left and right of the fixation cross. Finally, the location probe on screen will be a black circle surrounding where the target color was during the initial exposure. Participants will choose between the two presented colors, using Z to select the left color, and M to select the right color.
+The task was coded in HTML and Javascript, using jsPsych plugins made by the UCSD Vision and Memory lab. The task display will consist of a 360x360 pixel white background with a 1 pixel wide border, with a fixation cross in the center, surrounded by 12 small circular placeholders each centered at a distance of 120 pixels. Each placeholder should have a radius of 20 pixels, and will be 62 pixels apart when measuring center-to-center. There will be 6 placeholders on the left side of the screen, and 6 on the right. There are also two empty placeholders for the response options for the 2-AFC, 35 pixels to the left and right of the fixation cross. Finally, the location probe on screen will be a black circle surrounding where the target color was during the initial exposure. Participants will choose between the two presented colors, using Z to select the left color, and M to select the right color.
 
 The task consisted of showing participants two colors on the color wheel, one "correct" color, and one non-target color, which will always be 45º away in color space from the correct color. There were also 2 empty placeholders between each of the two memory items. Following a 750ms delay, a location cue appears on screen identifying the correct color. This was followed by the two placeholders next to the fixation cross presenting two response options. One response was always the correct color, while the other was always a foil, which differed either by 6º toward the non-target color, or 6º away totaling 132 trials (60 trials each, balanced across conditions, plus 12 catch trials). The position of the correct color on either the left or right of the fixation cross was randomized. The participants were asked to select one of the two color choices on screen on either the left (Z key) or on the right (M key), before advancing.
 
@@ -139,9 +141,9 @@ t.test(datcsv[datcsv$fdirec==-1,'val']-datcsv[datcsv$fdirec==1,'val'])
 
 (3) Shuffling Bug -- The original task code found on OSF contained a small shuffling error: shuffle() reorders an array in place and returns that same array, so the assignment of target and non-target for each location pair fixed for the whole session. This is to say, before the colors are filled, a pair of locations for initial display (say 0 and 3) are chosen and then randomly assigned to be the target or the non-target color. The shuffling error caused the same location to be assigned to contain the target color for each pair of locations (For location pair 0 and 3, location 3 always contained the target color, it wasn't randomized). In simulations of the original code, on average 3 of the 12 locations were never the target, 6 were the target on 10 of the 120 main trials, and 3 were the target on 20. Our version redraws the locations on every trial, thus the location of the target color is balanced across the 12 locations (10 times for each location).
 
-(4) Miscellaneous -- This new task also included 12 catch trials where the foil is 180° away from the target color, in order to catch online participants who are not engaged with the task. Participants also completed one practice trial at the beginning of the task as a part of the instructions, and moved on whether they answered correctly or not. As well as completing an additional briefing form at the end of the task which included age, gender, and sex assigned at birth. 
+(4) Miscellaneous -- This new task also included 12 catch trials where the foil is 180° away from the target color, in order to catch online participants who are not engaged with the task. Another added feature was participants only had 10 seconds to respond, while the original study does not mention any limit on trial response duration. Participants also completed one practice trial at the beginning of the task as a part of the instructions, and moved on whether they answered correctly or not. As well as completing an additional briefing form at the end of the task which included age, gender, and sex assigned at birth. 
 
-(5) Exclusion Criteria -- The original paper didn't list any participant exclusions, as the task itself is made to be difficult (in the original data, mean accuracy was .536 for toward foils and .483 for away foils, about .51 overall). However with our addition of the catch trials (where the correct choice is abundantly clear), we are able to set an exclusion criteria to deal with an online sample where we cannot control for distractions. During data analysis, tests will be conducted on the total population, as well as on a sub-population who answered at least 10 of the 12 catch trials correctly. Since a participant guessing at random would meet this criterion according to a probability of .019.
+(5) Exclusion Criteria -- The original paper didn't list any participant exclusions, as the task itself is made to be difficult, as average accuracy is usually around chance. However with our addition of the catch trials (where the correct choice is abundantly clear), we are able to set an exclusion criteria to deal with an online sample where we cannot control for distractions. For trials where the participant did not respond within 10 seconds, the individual trial will not be included during data analysis. Confirmatory tests will be conducted on the total population, as well as on a sub-population who answered at least 10 of the 12 catch trials correctly. Since a participant guessing at random would meet this criterion according to a probability of .019.
 
 ### Methods Addendum (Post Data Collection)
 

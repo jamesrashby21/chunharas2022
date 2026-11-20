@@ -34,7 +34,7 @@
         .nav-buttons { display: flex; justify-content: center; align-items: center; gap: 10px; }
         /* Startup screen */
         #startupScreen {
-            display: flex; /* Visible on load */
+            display: flex; 
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -171,7 +171,7 @@
     <div id="instructions5" hidden>
         <p>
             Two <b>very similar</b> color choices will appear on each side of the crosshair, you will have to choose between the two colors.<br /><br />
-            Remember, you are choosing the color that was <b>inside the location the black circle is surrounding.</b> <br /><br />
+            Remember, you are <b>choosing the color that was inside the location the black circle is surrounding.</b> <br /><br />
             Please press <b>"<span class="keyLeft"></span>"</b> to choose the left circle OR <b>"<span class="keyRight"></span>"</b> to choose the right circle as your response.
         </p>
         <div class="nav-buttons">
@@ -182,6 +182,7 @@
 
     <div id="instructions6" hidden>
         <p>
+            When the two color choices appear, you will have <b>10 seconds</b> to make your response. <br /><br />
             After you make a response, the next trial will begin. So please keep your focus on the screen the entire time <br /><br />
             Please choose your response as <b>quickly and accurately</b> as possible.
         </p>
@@ -217,7 +218,7 @@
     <!-- Final questions, shown after the last trial (see askDebrief). Every question can be skipped -->
     <div id="debrief" hidden>
         <form id="debrief-form" autocomplete="off">
-            <p>You have finished the task. Please answer a few questions before your data are saved. You may skip any question you prefer not to answer.</p>
+            <p>You have finished the task. Please answer a few questions, you will be redirected to SONA for credit after submitting.</p>
             <label>Age
                 <input type="number" id="deb-age" min="1" max="100" step="1" inputmode="numeric" />
             </label>
@@ -228,7 +229,6 @@
                     <option value="man">Man</option>
                     <option value="non-binary">Non-binary</option>
                     <option value="other">Other</option>
-                    <option value="prefer_not_to_say">Prefer not to say</option>
                 </select>
             </label>
             <label>Sex assigned at birth
@@ -237,14 +237,13 @@
                     <option value="female">Female</option>
                     <option value="male">Male</option>
                     <option value="intersex">Intersex</option>
-                    <option value="prefer_not_to_say">Prefer not to say</option>
                 </select>
             </label>
             <label>Did anything weird or unexpected happen during the experiment? (for example a technical problem, an interruption, or something that confused you)
                 <textarea id="deb-weird" rows="4" maxlength="1000"></textarea>
             </label>
             <p class="deb-note">Please do not write your name or any other identifying information.</p>
-            <p class="deb-note" id="deb-redirect" hidden></p>   <!-- filled in by askDebrief when a SONA redirect will follow -->
+            <p class="deb-note" id="deb-redirect" hidden></p>
             <button type="submit" class="button-next">Submit and finish</button>
         </form>
     </div>
@@ -298,7 +297,6 @@ const COLOR_SPACE = { name: "code-L65-a9-b9-r50", L: 65, a0: 9, b0: 9, radius: 5
 const KEY_LEFT = "z", KEY_RIGHT = "m";
 
 // Device check (phones and tablets are turned away)
-// Set to false to allow every device. Nothing is saved for a blocked device
 const BLOCK_MOBILE_DEVICES = true;
 
 function isPhoneOrTablet() {
@@ -380,7 +378,7 @@ const STUDY_WHEEL = (function () {
   return window.BradyColorWheel.make(colors, COLOR_SPACE.name);
 })();
 
-//  Geometry: the plugin's slot i <-> the original code's position i
+//  Geometry Adjustment: the plugin's slot i -> the original code's position i
 //  Original: x = cx - R*cos(theta_i + rot), y = cy + R*sin(theta_i + rot), theta_i = 2*pi*i/12
 //  Plugin:   x = cx + R*sin(2*pi*i/12 + offset), y = cy + R*cos(2*pi*i/12 + offset)
 //  These agree when offset = rot - pi/2 (verified numerically in the test run)
@@ -417,7 +415,7 @@ function makeTrialSpec(cell, num, rng) {
     foil_direction: isCatch ? "none" : cell.foilDir,         // A 180 deg foil is neither toward nor away
     target_slot: targetSlot, nontarget_slot: nontargetSlot,
     slot_gap: slotGap(targetSlot, nontargetSlot),
-    target_side: slotSide(targetSlot), nontarget_side: slotSide(nontargetSlot),
+    target_side: slotSide(targetSlot),
     same_hemifield: slotSide(targetSlot) === slotSide(nontargetSlot),
     target_hue: T, nontarget_hue: N, foil_hue: F,
     item_separation: separation, foil_offset: foilOffset,
@@ -460,9 +458,10 @@ function requestFullscreen() {
 let fsEnforced = false;      // Overlay on/off
 let fsTrialActive = false;   // A trial is on screen: the overlay waits until it ends (see fsGate), so a trial is never interrupted and no pause adds to the RT
 let fsTaskRunning = false;   // Overlay and key blocking cover the practice trial too
-let fsCounting = false;      // Exits are only counted from the first real trial (not during the practice trial)
+let fsCounting = false;      // Exits are counted from the first real trial to the last, but not during practice, instructions, or debrief
 let fsExits = 0;
 let fsWatching = false;
+let fsHoldPending = null;    // How long the fullscreen gate held up the next trial (ms); saved on that trial as fs_hold_ms
 
 function showFsOverlay() {
   if (document.getElementById("fs-overlay")) return;
@@ -490,7 +489,7 @@ function installFullscreenWatch() {
     const fs = isFullscreen();
     if (fs) hideFsOverlay();
     else {
-      if (wasFs && fsCounting) fsExits += 1;                  // Counted (and flagged in fs_exits_in_trial) even if a trial is running
+      if (wasFs && fsCounting) fsExits += 1;                  // Every exit from the first real trial to the last is counted, whether or not a trial is on screen
       if (fsEnforced && !fsTrialActive) showFsOverlay();     // Mid-trial: no overlay, the pause comes before the next trial
     }
     wasFs = fs;
@@ -517,7 +516,7 @@ const jsPsych = jsPsychModule.initJsPsych({
   on_finish: () => saveAndFinish(),
 });
 
-// The ID saved with the data is a random ID made for each participant
+// The ID saved with the data is a random ID made for each participant, SONA ID is not saved
 const subjectId = "CH22" + Math.round(Math.random() * 100000000) + "55";   // Wide range so two participants are very unlikely to share an ID
 const sonaCode  = params.get("code") || params.get("sona_id") || params.get("subjectId") || params.get("id");
 
@@ -530,14 +529,12 @@ jsPsych.data.addProperties({
   response_limit_ms: RESPONSE_LIMIT_MS,
   screen_w: window.screen.width, screen_h: window.screen.height,
   pixel_ratio: window.devicePixelRatio,
-  user_agent: navigator.userAgent,
   start_time: new Date().toISOString(),
 });
 
 //  Trial Logic
 function makeTrial(t, phase) {
   phase = phase || "main";
-  let exitsAtStart = 0;
   return {
     type: jsPsychWmForcedChoice,
 
@@ -550,7 +547,7 @@ function makeTrial(t, phase) {
     num_placeholders: NUM_PLACEHOLDERS,
     radius: RING_RADIUS_PX,
     item_size: ITEM_SIZE_PX,
-    position_angle_offset: POSITION_ANGLE_OFFSET_DEG, // Keeps the original's ring orientation
+    position_angle_offset: POSITION_ANGLE_OFFSET_DEG, // Keeps the original study's ring orientation
 
     // Timing (original: 2000 ms fixation, 150 ms array, 750 ms delay, no click-to-start)
     click_to_start: false,
@@ -576,14 +573,15 @@ function makeTrial(t, phase) {
     auto_zoom: AUTO_ZOOM,
 
     data: Object.assign({ phase: phase }, t),
-    on_start: () => { exitsAtStart = fsExits; earlyCount = 0; awaitingOptions = true; fsTrialActive = true; limitActive = phase === "main" && !!RESPONSE_LIMIT_MS; lastTimedOut = false; },
-    // fs_exits_in_trial > 0: fullscreen was left during this trial (the array or options may not have been seen)
+    on_start: () => { earlyCount = 0; awaitingOptions = true; fsTrialActive = true; limitActive = phase === "main" && !!RESPONSE_LIMIT_MS; lastTimedOut = false; },
     on_finish: (d) => {
       fsTrialActive = false;   // From here the overlay may appear; fsGate holds the next trial until fullscreen is back
       clearTimeout(limitTimer); limitTimer = null; limitActive = false;
       d.timed_out = d.timed_out ? 1 : 0;
+      d.rushed = 0;   // Becomes 1 only if the "Please slow down" screen appears after this trial (set in rushCheckIn)
       if (d.timed_out) { lastTimedOut = true; d.trial_kind = "timeout"; }   // Saved as its own kind, so the analysis (trial_kind == "main" / "catch") leaves it out
-      d.window_w = window.innerWidth; d.window_h = window.innerHeight; d.fs_exits_in_trial = fsExits - exitsAtStart;
+      d.window_w = window.innerWidth; d.window_h = window.innerHeight;
+      d.fs_hold_ms = fsHoldPending; fsHoldPending = null;   // Only filled when the fullscreen gate held this trial up
       d.early_presses = earlyCount; awaitingOptions = false;
       if (phase === "main") noteRush(d);   // The practice trial does not count towards the rushing check
     },
@@ -608,9 +606,8 @@ new MutationObserver(() => {
 
 function noteRush(d) {
   if (d.timed_out) return;   // A trial with no response is neither rushed nor not rushed
-  d.rushed = (d.early_presses >= RUSH.early_presses || (d.rt != null && d.rt < RUSH.fast_rt_ms)) ? 1 : 0;
-  d.checkin_after = "";
-  RUSH.recent.push(d.rushed);
+  d.rushed_count = (d.early_presses >= RUSH.early_presses || (d.rt != null && d.rt < RUSH.fast_rt_ms)) ? 1 : 0;   // 1 = this trial itself was rushed
+  RUSH.recent.push(d.rushed_count);
   if (RUSH.recent.length > RUSH.of_last) RUSH.recent.shift();
 }
 
@@ -652,7 +649,8 @@ class FsGatePlugin {
       if (!isFullscreen()) return;
       clearInterval(timer);
       hideFsOverlay();
-      this.jsPsych.finishTrial({ rt: Math.round(performance.now() - t0) });   // How long the next trial was held up
+      fsHoldPending = Math.round(performance.now() - t0);   // How long the next trial was held up
+      this.jsPsych.finishTrial({ rt: fsHoldPending });
     }, 50);
   }
 }
@@ -676,9 +674,9 @@ function stillHereCheck() {
       html: "<h2>Are you still here?</h2>" +
         "<p>You took a long time to respond, so that trial was skipped. Please respond within " + Math.round(RESPONSE_LIMIT_MS / 1000) + " seconds.</p>" +
         "<p>Press the <b>spacebar</b> to return to the task. The next trial starts right away.</p>",
-      on_finish: () => {
+      on_finish: (data) => {
         const last = jsPsych.data.get().filter({ phase: "main" }).last(1).values()[0];
-        if (last) last.checkin_after = "timeout";   // Marks the trial the pause came after
+        if (last) last.checkin_ms = data.rt;   // Saved on the trial the pause came after: how long the screen stayed up
       },
     }],
     conditional_function: () => lastTimedOut,
@@ -694,13 +692,13 @@ function rushCheckIn() {
         "<p>It looks like <b>" + KEY_LEFT.toUpperCase() + "</b> or <b>" + KEY_RIGHT.toUpperCase() + "</b> was pressed before the two circles appeared, or very quickly after they appeared.</p>" +
         "<p>Wait until the two circles appear. Then press <b>" + KEY_LEFT.toUpperCase() + "</b> for the left circle or <b>" + KEY_RIGHT.toUpperCase() + "</b> for the right circle. Answer as accurately as you can.</p>" +
         "<p>Press the <b>spacebar</b> when you are ready to continue.</p>",
-      on_finish: () => {
+      on_finish: (data) => {
         const last = jsPsych.data.get().filter({ phase: "main" }).last(1).values()[0];
-        if (last) last.checkin_after = "rushed";   // Marks the trial the pause came after
+        if (last) { last.rushed = 1; last.checkin_ms = data.rt; }   // Saved on the trial the pause came after: whether or not this screen appeared, and how long it stayed up
         RUSH.recent = [];
       },
     }],
-    conditional_function: () => !lastTimedOut && RUSH.recent.reduce((a, b) => a + b, 0) >= RUSH.trials,   // (not right after the "Are you still here?" screen)
+    conditional_function: () => !lastTimedOut && RUSH.recent.reduce((a, b) => a + b, 0) >= RUSH.trials,   // Not right after the "Are you still here?" screen
   };
 }
 
@@ -757,7 +755,7 @@ function linkNextScreen(first, next, fn) {
 document.querySelectorAll(".keyLeft").forEach(el => el.textContent = KEY_LEFT.toUpperCase());
 document.querySelectorAll(".keyRight").forEach(el => el.textContent = KEY_RIGHT.toUpperCase());
 
-// Startup → Consent: moves on only once the page is really in fullscreen, then the fullscreen watch starts
+// Startup → Consent: Moves on only once the page is really in fullscreen, then the fullscreen watch starts
 document.querySelector("#startupScreen .button-next").addEventListener("click", (e) => {
     e.preventDefault();
     const failEl = document.getElementById("fs-fail");
@@ -800,18 +798,18 @@ function beginOrdeal() {
 //  Data format
 const CSV_COLUMNS = [
   "subject", "trial_num", "trial_kind",
-  // Debrief questions
-  "age", "gender", "sex_at_birth", "anything_weird",
+  // Debrief questions (user_agent is the browser's own description, saved once on the debrief row)
+  "age", "gender", "sex_at_birth", "anything_weird", "user_agent",
   // Design
   "foil_direction", "foil_offset", "item_separation",
-  "target_slot", "nontarget_slot", "slot_gap", "target_side", "nontarget_side", "same_hemifield",
+  "target_slot", "nontarget_slot", "slot_gap", "target_side", "same_hemifield",
   "target_hue", "nontarget_hue", "foil_hue", "target_hex", "nontarget_hex", "foil_hex",
   // Response
-  "response", "correct_key", "correct", "rt", "multiple_keys_pressed", "early_presses", "rushed", "timed_out", "checkin_after",
+  "response", "correct_key", "correct", "rt", "multiple_keys_pressed", "early_presses", "rushed_count", "rushed", "timed_out", "checkin_ms",
   // Checks
-  "actual_stim_duration", "time_elapsed", "fs_exits_in_trial", "fullscreen_exits", "window_w", "window_h",
+  "actual_stim_duration", "time_elapsed", "fullscreen_exits", "fs_hold_ms", "window_w", "window_h",
   // Session
-  "experiment", "test_mode", "response_limit_ms", "start_time", "color_space", "plugin_version", "screen_w", "screen_h", "pixel_ratio", "user_agent",
+  "experiment", "test_mode", "response_limit_ms", "start_time", "color_space", "plugin_version", "screen_w", "screen_h", "pixel_ratio",
 ];
 
 function csvCell(v) {
@@ -831,33 +829,33 @@ function buildCsv(debrief) {
     const row = Object.assign({}, d, { response: resp, correct_key: resp == null ? null : (d.correct ? resp : otherKey(resp)) });
     return CSV_COLUMNS.map((c) => csvCell(row[c])).join(",");
   });
-  // The debrief 
-  // Answers are their own row, first after the column names. It carries the same session columns as every trial row
+  // The debrief: Answers are their own row, first after the column names. It carries the same session columns as every trial row
   const first = mains[0] || {};
   const debRow = Object.assign({ subject: subjectId, trial_kind: "debrief" }, debrief || {});
-  ["fullscreen_exits", "experiment", "test_mode", "response_limit_ms", "start_time", "color_space", "plugin_version", "screen_w", "screen_h", "pixel_ratio", "user_agent"]
+  ["fullscreen_exits", "experiment", "test_mode", "response_limit_ms", "start_time", "color_space", "plugin_version", "screen_w", "screen_h", "pixel_ratio"]
     .forEach((k) => { debRow[k] = first[k]; });
   lines.unshift(CSV_COLUMNS.map((c) => csvCell(debRow[c])).join(","));
   return CSV_COLUMNS.join(",") + "\n" + lines.join("\n") + "\n";
 }
 
-// Debrief questions: shows the form and resolves with the answers when it is submitted (all optional; blank = skipped)
+// Debrief questions: Shows the form and resolves with the answers when it is submitted (all optional; blank = skipped)
 function askDebrief() {
   return new Promise((resolve) => {
     const box = document.getElementById("debrief"), form = document.getElementById("debrief-form");
     // One line per CSV row. Text that starts with = + - @ gets a leading ' so a spreadsheet will not run it as a formula
     const oneLine = (s) => { const t = String(s).replace(/\s+/g, " ").trim(); return /^[=+\-@]/.test(t) ? "'" + t : t; };
     form.addEventListener("submit", (e) => {
-      e.preventDefault();   // (the browser only fires this when the age, if given, is a whole number from 1 to 100)
+      e.preventDefault();   // The browser only fires this when the age, if given, is a whole number from 1 to 100
       box.hidden = true;
       resolve({
         age: oneLine(document.getElementById("deb-age").value),
         gender: document.getElementById("deb-gender").value,
         sex_at_birth: document.getElementById("deb-sex").value,
         anything_weird: oneLine(document.getElementById("deb-weird").value),
+        user_agent: navigator.userAgent,   // Browser type and version
       });
     }, { once: true });
-    // Tell the participant what happens next: only when a credit link will really follow (a real run with the SONA settings and their code)
+    // Tell the participant what happens next
     const redirectNote = document.getElementById("deb-redirect");
     const sonaSet = !!(SONA_EXPERIMENT_ID && SONA_CREDIT_TOKEN);
     if (TEST_MODE ? sonaSet : !!creditUrl()) {
@@ -898,10 +896,10 @@ if (!TEST_MODE && !(SONA_EXPERIMENT_ID && SONA_CREDIT_TOKEN))
 
 async function saveAndFinish() {
   taskEl.hidden = true;
-  fsTaskRunning = false; fsCounting = false;   // The trials are over: no more exits are counted. Fullscreen itself stays on (and the overlay stays enforced) during the final questions
+  fsTaskRunning = false; fsCounting = false;   // The trials are over: no more exits are counted. 
   jsPsych.data.addProperties({ fullscreen_exits: fsExits });   // Total times fullscreen was left during the trials
 
-  // Final questions first, then everything is saved in one file (the server never overwrites, so it is saved once, after this)
+  // Final questions first, then everything is saved in one file
   const debrief = await askDebrief();
   fsEnforced = false; hideFsOverlay();   // Fullscreen is no longer required from here on
   try { if (document.fullscreenElement) await document.exitFullscreen(); } catch (e) { /* ignore */ }
@@ -939,7 +937,7 @@ async function saveAndFinish() {
   }
 }
 
-// Saves the CSV text to the participant's own computer (used by the save-failure failsafe and by test mode)
+// Saves the CSV text to the participant's own computer (used by the save failure failsafe and by test mode)
 function downloadCsv(csv) {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));

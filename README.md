@@ -11,3 +11,5 @@ File Structure:
 3. "writeup" -- The Replication Report written out (replication_report.pdf), which includes the introduction, methods, procedure, sample population, differences from the original study, and data analysis plan for the replication experiment. The report is written in Quarto (replication_report.qmd) and contains the R data analysis code, wrapped in-text with the write-up and rendered into a pdf. The original study's data (EXP1.csv) is also kept here for the power analysis.
 
 4. "task" -- Contains the updated task code in the "task" subfolder (chunharas2022.html), alongside the task code from the original paper (original_WMbias_2AFC.html). The updated task code uses jsPsych 8.4.0 and the Brady Lab's plugins with predesigned stimuli (brady-color-wheel.js, brady-plugin-utils.js, jspsych-wm-forced-choice.js), and it will only run when these three plugin files are in the same folder as chunharas2022.html.
+
+5. "renv" -- A folder created by the R package "renv" that creates isolated, portable, and reproducible package environments for individual R projects. This allows for full reproducibility within "replication_report.qmd".
